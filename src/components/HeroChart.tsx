@@ -5,6 +5,7 @@ import { twMerge } from 'tailwind-merge'
 import { motion, AnimatePresence } from 'motion/react'
 import { Check, ZoomOut, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useState, useMemo } from 'react'
+import { ALL_DATA_SETS, PORTFOLIOS, SERIES, TIME_RANGES, type TimeRange } from '../lib/chartData'
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
@@ -12,163 +13,113 @@ function cn(...inputs: ClassValue[]) {
 
 const getAxisTicks = (min: number, max: number) => {
     const ticks: number[] = []
-    const start = new Date(min)
     const diff = max - min
-    const ONE_DAY = 24 * 60 * 60 * 1000
-
-    // Safety check
     if (diff <= 0) return [min]
 
-    if (diff > ONE_DAY * 365 * 5) {
-        // > 5 Years: Show Years (Jan 1)
-        let d = new Date(start.getFullYear(), 0, 1)
-        if (d.getTime() < min) d.setFullYear(d.getFullYear() + 1)
-        while (d.getTime() <= max) {
-            ticks.push(d.getTime())
-            d.setFullYear(d.getFullYear() + 1)
-        }
-    } else if (diff > ONE_DAY * 180) {
-        // > 6 Months: Show Quarters (Jan, Apr, Jul, Oct)
-        let y = start.getFullYear()
-        // 0->0, 1->0, 2->0 (Q1); 3->3 (Q2)...
-        let m = Math.floor(start.getMonth() / 3) * 3
-        let d = new Date(y, m, 1)
-        // If before min, move to next quarter
-        if (d.getTime() < min) d.setMonth(d.getMonth() + 3)
-        while (d.getTime() <= max) {
-            ticks.push(d.getTime())
-            d.setMonth(d.getMonth() + 3)
-        }
-    } else if (diff > ONE_DAY * 60) {
-        // > 2 Months: Show Months
-        let d = new Date(start.getFullYear(), start.getMonth(), 1)
-        if (d.getTime() < min) d.setMonth(d.getMonth() + 1)
-        while (d.getTime() <= max) {
-            ticks.push(d.getTime())
-            d.setMonth(d.getMonth() + 1)
-        }
+    const ONE_DAY = 24 * 60 * 60 * 1000
+    // Target roughly 6-8 ticks
+    const targetCount = 6
+
+    // Define candidate intervals in ms (approx)
+    const candidates = [
+        { label: 'day', ms: ONE_DAY },
+        { label: 'week', ms: ONE_DAY * 7 },
+        { label: '2weeks', ms: ONE_DAY * 14 },
+        { label: 'month', ms: ONE_DAY * 30 },
+        { label: '2months', ms: ONE_DAY * 60 },
+        { label: 'quarter', ms: ONE_DAY * 90 },
+        { label: '6months', ms: ONE_DAY * 180 },
+        { label: 'year', ms: ONE_DAY * 365 },
+        { label: '2years', ms: ONE_DAY * 365 * 2 },
+    ]
+
+    // Find closest interval
+    const rawInterval = diff / targetCount
+    let bestInterval = candidates[0]
+    for (const cand of candidates) {
+        if (rawInterval > cand.ms) bestInterval = cand
+    }
+
+    // Generate ticks based on bestInterval type
+    let d = new Date(min)
+    const end = new Date(max)
+
+    // Normalize start date based on interval type
+    if (bestInterval.label.includes('year')) {
+        d.setMonth(0, 1)
+        d.setHours(0, 0, 0, 0)
+        while (d.getTime() < min) d.setFullYear(d.getFullYear() + 1)
+    } else if (bestInterval.label.includes('month') || bestInterval.label === 'quarter' || bestInterval.label === '6months') {
+        d.setDate(1)
+        d.setHours(0, 0, 0, 0)
+        // For quarters/6m, maybe align to Jan/Apr etc?
+        // Let's stick to simple month boundaries for now, but skipping months
+        while (d.getTime() < min) d.setMonth(d.getMonth() + 1)
     } else {
-        // Days
-        // If range is large (e.g. 60 days), 60 ticks is okay for 1800px width.
-        let d = new Date(start.getFullYear(), start.getMonth(), start.getDate())
-        if (d.getTime() < min) d.setDate(d.getDate() + 1)
-        while (d.getTime() <= max) {
-            ticks.push(d.getTime())
-            d.setDate(d.getDate() + 1)
+        d.setHours(0, 0, 0, 0)
+        while (d.getTime() < min) d.setDate(d.getDate() + 1)
+    }
+
+    // Loop and push
+    while (d.getTime() <= max) {
+        if (d.getTime() >= min) ticks.push(d.getTime())
+
+        // Increment
+        switch (bestInterval.label) {
+            case 'day': d.setDate(d.getDate() + 1); break;
+            case 'week': d.setDate(d.getDate() + 7); break;
+            case '2weeks': d.setDate(d.getDate() + 14); break;
+            case 'month': d.setMonth(d.getMonth() + 1); break;
+            case '2months': d.setMonth(d.getMonth() + 2); break;
+            case 'quarter': d.setMonth(d.getMonth() + 3); break;
+            case '6months': d.setMonth(d.getMonth() + 6); break;
+            case 'year': d.setFullYear(d.getFullYear() + 1); break;
+            case '2years': d.setFullYear(d.getFullYear() + 2); break;
+            default: d.setDate(d.getDate() + 1);
         }
     }
 
-    // If no semantic ticks found (e.g. range smaller than a day?), just showing start/end
-    if (ticks.length === 0) return [min, max]
+    // If we have too few ticks (e.g. alignment skipped them all), just give min/max
+    if (ticks.length < 2) return [min, max]
 
     return ticks
 }
 
 
-// --- Data Generation & Config ---
 
-const TIME_RANGES = ['1M', '3M', '6M', 'YTD', '1Y', '3Y'] as const
-type TimeRange = typeof TIME_RANGES[number]
 
-type SeriesConfig = {
-    id: string
-    label: string
-    color: string
-    type: 'area' | 'line' | 'dashed'
-    isBenchmark?: boolean
+export interface HeroChartProps {
+    portfolioId?: string
+    minimal?: boolean
+    className?: string
+    onClick?: () => void
+    forcedActiveSeries?: string[] // IDs of series that MUST be shown
+    data?: any[] // Explicit data passed from parent
 }
 
-const SERIES: SeriesConfig[] = [
-    { id: 'portfolio', label: 'Thesivest', color: 'var(--color-primary)', type: 'area' },
-    { id: 'sp500', label: 'S&P 500', color: 'var(--color-foreground)', type: 'line', isBenchmark: true },
-    { id: 'nasdaq', label: 'NASDAQ', color: '#a855f7', type: 'dashed', isBenchmark: true }, // Purple-500
-    { id: 'russell', label: 'Russell 2000', color: '#eab308', type: 'dashed', isBenchmark: true }, // Yellow-500
-    { id: 'nvda', label: 'NVDA', color: '#22c55e', type: 'line' }, // Green-500
-    { id: 'tsla', label: 'TSLA', color: '#ef4444', type: 'line' }, // Red-500
-    { id: 'pltr', label: 'PLTR', color: '#3b82f6', type: 'line' }, // Blue-500
-]
+export function HeroChart({ portfolioId = 'thesivest', minimal = false, className, onClick, forcedActiveSeries, data }: HeroChartProps) {
+    // Get current portfolio config
+    const activePortfolio = PORTFOLIOS.find(p => p.id === portfolioId)
+    const portfolioLabel = activePortfolio?.name || 'Your Portfolio'
+    const portfolioColor = activePortfolio?.color || 'var(--color-primary)'
 
-const GENERATE_OHLC = (points: number, _daysBack: number, intervalMinutes: number = 1440) => {
-    let portfolio = 100
-    // Benchmarks (Simple line data for now)
-    let sp500 = 100
-    let nasdaq = 100
-    let russell = 100
-    let nvda = 100
-    let tsla = 100
-    let pltr = 100
+    const [timeRange, setTimeRange] = useState<TimeRange | null>('3Y')
+    const [activeSeries, setActiveSeries] = useState<Set<string>>(() => {
+        if (forcedActiveSeries) return new Set(forcedActiveSeries)
+        return new Set(['portfolio', 'sp500'])
+    })
 
-    // Create data points ending today
-    const now = new Date()
-    const result = []
+    // Update active series if forcedActiveSeries changes (e.g. for mini charts)
+    useMemo(() => {
+        if (forcedActiveSeries) {
+            setActiveSeries(new Set(forcedActiveSeries))
+        }
+    }, [forcedActiveSeries])
 
-    // Volatility Scaling
-    // Daily (1440m) = Base Vol (~1-2%)
-    // Hourly (60m) = Vol / sqrt(24)
-    const volScale = Math.sqrt(intervalMinutes / 1440)
-
-    for (let i = 0; i < points; i++) {
-        // OHLC for Portfolio
-        const open = portfolio
-        // Random walk
-        const drift = 0.0005 * volScale // Slight upward drift
-        const shock = (Math.random() - 0.5) * 0.04 * volScale
-        const close = open * (1 + drift + shock)
-
-        const high = Math.max(open, close) * (1 + Math.random() * 0.01 * volScale)
-        const low = Math.min(open, close) * (1 - Math.random() * 0.01 * volScale)
-
-        portfolio = close
-
-        // Others (drift only)
-        sp500 *= 1 + (Math.random() * 0.02 - 0.008) * volScale
-        nasdaq *= 1 + (Math.random() * 0.025 - 0.01) * volScale
-        russell *= 1 + (Math.random() * 0.03 - 0.014) * volScale
-        nvda *= 1 + (Math.random() * 0.05 - 0.02) * volScale
-        tsla *= 1 + (Math.random() * 0.06 - 0.03) * volScale
-        pltr *= 1 + (Math.random() * 0.04 - 0.018) * volScale
-
-        // Calculate date
-        const date = new Date(now)
-        // Adjust time based on interval
-        const minutesOffset = (i - points) * intervalMinutes
-        date.setMinutes(date.getMinutes() + minutesOffset)
-
-        result.push({
-            date: date.getTime(),
-            open: Number(open.toFixed(2)),
-            high: Number(high.toFixed(2)),
-            low: Number(low.toFixed(2)),
-            close: Number(close.toFixed(2)),
-            portfolio: Math.round(close), // Legacy field for Area Chart
-            sp500: Math.round(sp500),
-            nasdaq: Math.round(nasdaq),
-            russell: Math.round(russell),
-            nvda: Math.round(nvda),
-            tsla: Math.round(tsla),
-            pltr: Math.round(pltr),
-        })
-    }
-    return result
-}
-
-// Prefetch/Generate data for ranges
-// Prefetch/Generate data for ranges
-const DATA_SETS: Record<TimeRange, any[]> = {
-    '1M': GENERATE_OHLC(180, 30, 240), // 4h candles -> 30 days
-    '3M': GENERATE_OHLC(90, 90, 1440), // Daily -> 90 days
-    '6M': GENERATE_OHLC(180, 180, 1440),
-    'YTD': GENERATE_OHLC(250, 200, 1440),
-    '1Y': GENERATE_OHLC(365, 365, 1440),
-    '3Y': GENERATE_OHLC(550, 365 * 3, 1440 * 2), // 2-Day candles -> ~3 Years
-}
-
-export function HeroChart() {
-    const [timeRange, setTimeRange] = useState<TimeRange | null>('1Y')
-    const [activeSeries, setActiveSeries] = useState<Set<string>>(new Set(['portfolio', 'sp500']))
-
-    // Master Data Source (Max history available) used for all views
-    const currentData = DATA_SETS['3Y']
+    // Master Data Source
+    // If explicit data provided, use it. Otherwise lookup.
+    const DATA_SETS = ALL_DATA_SETS[portfolioId] || ALL_DATA_SETS['thesivest']
+    const currentData = data || DATA_SETS['3Y'] // Fallback to 3Y master if no data passed
 
     // Helper to calculate start date for ranges
     const getStartDateForRange = (range: TimeRange, endDate: number) => {
@@ -185,12 +136,14 @@ export function HeroChart() {
         return start.getTime()
     }
 
-    // Zoom State - Initialize to 1Y view
+    // Zoom State - Initialize to 3Y view
     const [left, setLeft] = useState<string | number>(() => {
+        if (currentData.length === 0) return 'dataMin'
         const lastDate = currentData[currentData.length - 1].date
-        return getStartDateForRange('1Y', lastDate)
+        return getStartDateForRange('3Y', lastDate)
     })
     const [right, setRight] = useState<string | number>('dataMax') // Always pin to right initially
+
 
     // ... refs ...
     const [refAreaLeft, setRefAreaLeft] = useState<string | number | null>(null)
@@ -350,70 +303,86 @@ export function HeroChart() {
     }
 
     return (
-        <Card className="w-full h-[600px] bg-card/50 backdrop-blur-sm border-primary/20 p-0 flex flex-col relative overflow-hidden group transition-colors select-none [&_.recharts-wrapper]:!outline-none shadow-2xl shadow-primary/5">
+        <Card
+            className={cn(
+                "w-full bg-card/50 backdrop-blur-sm border-primary/20 p-0 flex flex-col relative overflow-hidden group transition-all select-none [&_.recharts-wrapper]:!outline-none shadow-2xl shadow-primary/5",
+                minimal ? "h-full border-0 bg-transparent shadow-none" : "h-[600px]",
+                onClick && "cursor-pointer hover:border-primary/50 hover:shadow-primary/10",
+                className
+            )}
+            onClick={onClick}
+        >
             {/* Background Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50 pointer-events-none" />
+            <div className={cn("absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none", minimal ? "opacity-0" : "opacity-50")} />
 
             {/* Header / Controls */}
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 border-b border-border/50 bg-card/30 z-20 gap-4">
-                <div>
-                    <div className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">Portfolio Performance</div>
-                    <div className="flex items-baseline gap-3">
-                        <span className={cn("text-4xl font-extrabold tracking-tight", percentageReturn >= 0 ? "text-primary" : "text-destructive")}>
-                            {percentageReturn >= 0 ? '+' : ''}{percentageReturn.toFixed(1)}%
-                        </span>
-                        <span className="text-sm text-foreground/60 font-medium">
-                            {timeRange === null ? 'Zoomed View' : `Past ${timeRange === '3Y' ? '3 Years' : timeRange}`}
-                        </span>
-                        {timeRange === null && (
-                            <button onClick={zoomOut} className="ml-2 flex items-center gap-1 text-xs px-2 py-1 bg-secondary text-secondary-foreground rounded shadow-sm hover:bg-secondary/80 transition-colors">
-                                <ZoomOut className="w-3 h-3" />
-                                Reset
+            {!minimal && (
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 border-b border-border/50 bg-card/30 z-20 gap-4">
+                    <div>
+                        <div className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">Portfolio Performance</div>
+                        <div className="flex items-baseline gap-3">
+                            <span className={cn("text-4xl font-extrabold tracking-tight", percentageReturn >= 0 ? "text-primary" : "text-destructive")}>
+                                {percentageReturn >= 0 ? '+' : ''}{percentageReturn.toFixed(1)}%
+                            </span>
+                            <span className="text-sm text-foreground/60 font-medium">
+                                {timeRange === null ? 'Zoomed View' : `Past ${timeRange === '3Y' ? '3 Years' : timeRange}`}
+                            </span>
+                            {timeRange === null && (
+                                <button onClick={zoomOut} className="ml-2 flex items-center gap-1 text-xs px-2 py-1 bg-secondary text-secondary-foreground rounded shadow-sm hover:bg-secondary/80 transition-colors">
+                                    <ZoomOut className="w-3 h-3" />
+                                    Reset
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Time Range Tabs */}
+                    <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border border-border/50">
+                        {TIME_RANGES.map(range => (
+                            <button
+                                key={range}
+                                onClick={() => {
+                                    setTimeRange(range);
+                                    setRefAreaLeft(null);
+                                    setRefAreaRight(null);
+                                    // Set window
+                                    const lastDate = currentData[currentData.length - 1].date;
+                                    setRight('dataMax'); // Pin to live
+                                    setLeft(getStartDateForRange(range, lastDate));
+                                }}
+                                className={cn(
+                                    "px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200",
+                                    timeRange === range
+                                        ? "bg-background text-foreground shadow-sm ring-1 ring-border"
+                                        : "text-muted-foreground hover:text-foreground hover:bg-background/50"
+                                )}
+                            >
+                                {range}
                             </button>
-                        )}
+                        ))}
                     </div>
                 </div>
-
-                {/* Time Range Tabs */}
-                <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border border-border/50">
-                    {TIME_RANGES.map(range => (
-                        <button
-                            key={range}
-                            onClick={() => {
-                                setTimeRange(range);
-                                setRefAreaLeft(null);
-                                setRefAreaRight(null);
-                                // Set window
-                                const lastDate = currentData[currentData.length - 1].date;
-                                setRight('dataMax'); // Pin to live
-                                setLeft(getStartDateForRange(range, lastDate));
-                            }}
-                            className={cn(
-                                "px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200",
-                                timeRange === range
-                                    ? "bg-background text-foreground shadow-sm ring-1 ring-border"
-                                    : "text-muted-foreground hover:text-foreground hover:bg-background/50"
-                            )}
-                        >
-                            {range}
-                        </button>
-                    ))}
-                </div>
-            </div>
+            )}
 
             {/* Main Chart Area */}
-            <div className="flex-1 w-full relative z-10 min-h-0 pb-4 flex items-center gap-2">
+            <div className="flex-1 w-full relative z-10 min-h-0 pb-4 flex items-center gap-6 px-4">
 
                 {/* Left Navigation Button */}
-                {timeRange !== '3Y' && left !== 'dataMin' && (typeof left !== 'number' || left > currentData[0].date) && (
-                    <button
-                        onClick={() => moveTimePeriod('back')}
-                        className="p-2 rounded-full hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-colors shrink-0 z-20 focus:outline-none focus:ring-1 focus:ring-ring opacity-50 hover:opacity-100"
-                        aria-label="Previous Period"
-                    >
-                        <ChevronLeft className="w-8 h-8" />
-                    </button>
-                )}
+                <AnimatePresence>
+                    {timeRange !== '3Y' && left !== 'dataMin' && (typeof left !== 'number' || left > currentData[0].date) && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.8, x: -10 }}
+                            animate={{ opacity: 0.5, scale: 1, x: 0 }}
+                            whileHover={{ opacity: 1, scale: 1.1 }}
+                            exit={{ opacity: 0, scale: 0.8, x: -10 }}
+                            onClick={() => moveTimePeriod('back')}
+                            className="p-2 rounded-full hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-colors shrink-0 z-20 focus:outline-none focus:ring-1 focus:ring-ring"
+                            aria-label="Previous Period"
+                        >
+                            <ChevronLeft className="w-8 h-8" />
+                        </motion.button>
+                    )}
+                </AnimatePresence>
 
                 <div className="flex-1 h-full min-w-0">
                     <ResponsiveContainer width="100%" height="100%">
@@ -429,9 +398,9 @@ export function HeroChart() {
                             onMouseUp={zoom}
                         >
                             <defs>
-                                <linearGradient id="colorThesivestPrimary" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.2} />
-                                    <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
+                                <linearGradient id="color-portfolio" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="5%" stopColor={portfolioColor} stopOpacity={0.2} />
+                                    <stop offset="95%" stopColor={portfolioColor} stopOpacity={0} />
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="var(--color-border)" strokeOpacity={0.1} />
@@ -515,6 +484,10 @@ export function HeroChart() {
                                 const isActive = activeSeries.has(s.id)
                                 const isThesivest = s.id === 'portfolio'
 
+                                // Override label for the main portfolio
+                                const label = isThesivest ? portfolioLabel : s.label
+                                const color = isThesivest ? portfolioColor : s.color
+
                                 // Opacity Logic
                                 let opacity = 0
                                 if (isActive) {
@@ -530,11 +503,11 @@ export function HeroChart() {
                                             key={s.id}
                                             type="monotone"
                                             dataKey={s.id}
-                                            stroke={s.color}
+                                            stroke={color}
                                             strokeWidth={3}
                                             fillOpacity={1}
-                                            fill="url(#colorThesivestPrimary)"
-                                            name={s.label}
+                                            fill={`url(#color-${s.id})`}
+                                            name={label}
                                             strokeOpacity={opacity}
                                             style={{ opacity }}
                                             animationDuration={1000}
@@ -547,11 +520,11 @@ export function HeroChart() {
                                         key={s.id}
                                         type="monotone"
                                         dataKey={s.id}
-                                        stroke={s.color}
+                                        stroke={color}
                                         strokeWidth={s.isBenchmark ? 2 : 2}
                                         strokeDasharray={s.type === 'dashed' ? '5 5' : ''}
                                         dot={false}
-                                        name={s.label}
+                                        name={label}
                                         strokeOpacity={opacity}
                                         style={{ transition: 'opacity 0.3s' }}
                                         animationDuration={1000}
@@ -574,15 +547,21 @@ export function HeroChart() {
                 </div>
 
                 {/* Right Navigation Button */}
-                {timeRange !== '3Y' && (right !== 'dataMax' && (typeof right !== 'number' || right < currentData[currentData.length - 1].date)) && (
-                    <button
-                        onClick={() => moveTimePeriod('forward')}
-                        className="p-2 rounded-full hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-colors shrink-0 z-20 focus:outline-none focus:ring-1 focus:ring-ring opacity-50 hover:opacity-100"
-                        aria-label="Next Period"
-                    >
-                        <ChevronRight className="w-8 h-8" />
-                    </button>
-                )}
+                <AnimatePresence>
+                    {timeRange !== '3Y' && (right !== 'dataMax' && (typeof right !== 'number' || right < currentData[currentData.length - 1].date)) && (
+                        <motion.button
+                            initial={{ opacity: 0, scale: 0.8, x: 10 }}
+                            animate={{ opacity: 0.5, scale: 1, x: 0 }}
+                            whileHover={{ opacity: 1, scale: 1.1 }}
+                            exit={{ opacity: 0, scale: 0.8, x: 10 }}
+                            onClick={() => moveTimePeriod('forward')}
+                            className="p-2 rounded-full hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-colors shrink-0 z-20 focus:outline-none focus:ring-1 focus:ring-ring"
+                            aria-label="Next Period"
+                        >
+                            <ChevronRight className="w-8 h-8" />
+                        </motion.button>
+                    )}
+                </AnimatePresence>
             </div>
 
             {/* Legend / Toggles */}
@@ -590,6 +569,10 @@ export function HeroChart() {
                 <div className="flex items-center gap-3">
                     {SERIES.map(s => {
                         const isActive = activeSeries.has(s.id)
+                        const isThesivest = s.id === 'portfolio'
+                        const label = isThesivest ? portfolioLabel : s.label
+                        const color = isThesivest ? portfolioColor : s.color
+
                         return (
                             <button
                                 key={s.id}
@@ -603,9 +586,9 @@ export function HeroChart() {
                             >
                                 <div
                                     className={cn("w-2 h-2 rounded-full transition-transform duration-200", isActive ? "scale-100" : "scale-75")}
-                                    style={{ backgroundColor: isActive ? s.color : 'var(--color-muted-foreground)' }}
+                                    style={{ backgroundColor: isActive ? color : 'var(--color-muted-foreground)' }}
                                 />
-                                {s.label}
+                                {label}
                                 {isActive && <Check className="w-3 h-3 text-muted-foreground ml-1" />}
                             </button>
                         )

@@ -2,11 +2,10 @@ import { createFileRoute } from '@tanstack/react-router'
 import { createServerFn } from '@tanstack/react-start'
 import { getUnderRadarTheses } from '../server/features/theses'
 import { useLoaderData } from '@tanstack/react-router'
-import { Link } from '@tanstack/react-router'
 import { motion } from 'motion/react'
-import { Button } from '../components/ui/button'
-import { TrendingUp, ShieldCheck, Zap } from 'lucide-react'
-import { HeroChart } from '../components/HeroChart'
+import { TrendingUp, ShieldCheck } from 'lucide-react'
+import { PortfolioDeck } from '../components/PortfolioDeck'
+import { useState } from 'react'
 
 // Server Function calling Shared Logic
 const getThesesFn = createServerFn({ method: "GET" }).handler(async () => {
@@ -20,6 +19,7 @@ export const Route = createFileRoute('/')({
 
 function Home() {
   const theses = useLoaderData({ from: '/' })
+  const [isDeckFanned, setIsDeckFanned] = useState(false)
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-x-hidden">
@@ -35,53 +35,59 @@ function Home() {
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 items-center min-h-[60vh] w-full">
           {/* Left Column: Text & Animation */}
           <div className="flex flex-col items-center justify-center w-full">
-            {/* Logo Animation */}
-            <div className="relative h-24 md:h-40 text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter flex items-center justify-center overflow-hidden w-full m-auto">
-              <motion.div
-                className="flex items-center"
-                initial={{ x: -250 }}
-                animate={{ x: 0 }}
-                transition={{ duration: 0.8, ease: "backOut" }}
+            {/* Logo Animation - HOVER TRIGGER */}
+            <div className="relative h-20 md:h-32 text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter flex items-center justify-center overflow-hidden w-full m-auto select-none">
+              <div
+                className="inline-flex items-center cursor-pointer hover:text-primary/80 transition-colors relative z-10"
+                onMouseEnter={() => setIsDeckFanned(true)}
+                onMouseLeave={() => setIsDeckFanned(false)}
               >
-                <span className="text-foreground">Thesi</span>
+                <motion.div
+                  className="flex items-center"
+                  initial={{ x: -250 }}
+                  animate={{ x: 0 }}
+                  transition={{ duration: 0.8, ease: "backOut" }}
+                >
+                  <span className="text-foreground">Thesi</span>
+                  <motion.span
+                    className="text-foreground"
+                    initial={{ opacity: 1, width: "auto" }}
+                    animate={{ opacity: 0, width: 0 }}
+                    transition={{ delay: 1.2, duration: 0.5 }}
+                    style={{ display: 'inline-block', overflow: 'hidden' }}
+                  >
+                    s
+                  </motion.span>
+                </motion.div>
+
                 <motion.span
-                  className="text-foreground"
-                  initial={{ opacity: 1, width: "auto" }}
-                  animate={{ opacity: 0, width: 0 }}
-                  transition={{ delay: 1.2, duration: 0.5 }}
+                  className="text-muted-foreground mx-4"
+                  initial={{ opacity: 1, width: "auto", scale: 1, marginLeft: 0, marginRight: 0 }}
+                  animate={{ opacity: 0, width: 0, scale: 0, marginLeft: 0, marginRight: 0 }}
+                  transition={{ duration: 0.4, delay: 0.2 }} // Disappear quickly as they collide
                   style={{ display: 'inline-block', overflow: 'hidden' }}
                 >
-                  s
+                  +
                 </motion.span>
-              </motion.div>
 
-              <motion.span
-                className="text-muted-foreground mx-4"
-                initial={{ opacity: 1, width: "auto", scale: 1, marginLeft: "1rem", marginRight: "1rem" }}
-                animate={{ opacity: 0, width: 0, scale: 0, marginLeft: 0, marginRight: 0 }}
-                transition={{ duration: 0.4, delay: 0.2 }} // Disappear quickly as they collide
-                style={{ display: 'inline-block', overflow: 'hidden' }}
-              >
-                +
-              </motion.span>
-
-              <motion.div
-                className="flex items-center"
-                initial={{ x: 250 }}
-                animate={{ x: 0 }}
-                transition={{ duration: 0.8, ease: "backOut" }}
-              >
-                <motion.span
-                  className="text-primary"
-                  initial={{ opacity: 1, width: "auto" }}
-                  animate={{ opacity: 0, width: 0 }}
-                  transition={{ delay: 1.2, duration: 0.5 }}
-                  style={{ display: 'inline-block', overflow: 'hidden' }}
+                <motion.div
+                  className="flex items-center"
+                  initial={{ x: 250 }}
+                  animate={{ x: 0 }}
+                  transition={{ duration: 0.8, ease: "backOut" }}
                 >
-                  In
-                </motion.span>
-                <span className="text-primary">vest</span>
-              </motion.div>
+                  <motion.span
+                    className="text-primary"
+                    initial={{ opacity: 1, width: "auto" }}
+                    animate={{ opacity: 0, width: 0 }}
+                    transition={{ delay: 1.2, duration: 0.5 }}
+                    style={{ display: 'inline-block', overflow: 'hidden' }}
+                  >
+                    In
+                  </motion.span>
+                  <span className="text-primary">vest</span>
+                </motion.div>
+              </div>
             </div>
 
             {/* Tagline */}
@@ -91,7 +97,7 @@ function Home() {
               transition={{ delay: 3, duration: 0.8 }}
               className="space-y-6 text-center text-center mt-4"
             >
-              <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold leading-tight">
+              <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight">
                 Thesis + Invest. <br />
                 <span className="text-muted-foreground">The symmetry involved in high conviction plays.</span>
               </h1>
@@ -108,7 +114,7 @@ function Home() {
             transition={{ delay: 3.5, duration: 0.8 }}
             className="flex items-center justify-center w-full relative z-20"
           >
-            <HeroChart />
+            <PortfolioDeck isFanned={isDeckFanned} />
           </motion.div>
         </div>
 

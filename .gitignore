@@ -11,6 +11,5 @@ count.txt
 .output
 .vinxi
 todos.json
-sst.config.ts
 .sst
 sst-env.d.ts
