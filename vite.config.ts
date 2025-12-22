@@ -10,7 +10,6 @@ import dbPlugin from "vite-plugin-db";
 const config = defineConfig({
   plugins: [
     devtools(),
-    dbPlugin(),
     viteTsConfigPaths({
       projects: ["./tsconfig.json"],
     }),
