@@ -36,23 +36,6 @@ export function SignIn() {
         })
     }
 
-    const handleSignUp = async () => {
-        setLoading(true)
-        setError("")
-        await authClient.signUp.email({
-            email,
-            password,
-            name: email.split("@")[0], // Default name
-        }, {
-            onSuccess: () => {
-                window.location.href = "/"
-            },
-            onError: (ctx) => {
-                setError(ctx.error.message)
-                setLoading(false)
-            }
-        })
-    }
 
     return (
         <motion.div
@@ -94,6 +77,7 @@ export function SignIn() {
                             <Input
                                 id="password"
                                 type="password"
+                                showPasswordToggle
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20"
@@ -142,13 +126,12 @@ export function SignIn() {
                 </CardContent>
                 <CardFooter className="flex justify-center text-sm text-muted-foreground gap-1">
                     Don't have an account?
-                    <button
-                        type="button"
-                        onClick={handleSignUp}
+                    <Link
+                        to="/signup"
                         className="text-primary hover:text-primary/80 font-semibold transition-colors hover:underline"
                     >
                         Sign Up
-                    </button>
+                    </Link>
                 </CardFooter>
             </Card>
         </motion.div>

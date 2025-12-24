@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'motion/react'
+import { X } from 'lucide-react'
 import { HeroChart } from './HeroChart'
 import { PORTFOLIOS, ALL_DATA_SETS } from '../lib/chartData'
 import { MiniChart } from './MiniChart'
@@ -39,13 +40,13 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                     const step = spreadAngle / totalItems
 
                     const angle = startAngle + (index * step)
-                    const radius = 260
+                    const radius = 180
                     const fannedX = Math.cos(angle) * radius
                     const fannedY = Math.sin(angle) * radius // Circular (no squash)
 
                     // Stack Geometry (Peeking Cards)
-                    const stackX = (index + 1) * 15
-                    const stackY = (index + 1) * 10
+                    const stackX = (index + 1) * 10
+                    const stackY = (index + 1) * 5
                     const stackRotate = (index + 1) * 5
 
                     // Hero Logic
@@ -146,6 +147,17 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                                                         data={ALL_DATA_SETS[portfolio.id]['3Y']}
                                                         className="rounded-none border-0 shadow-none h-full"
                                                     />
+
+                                                    {/* Close Button */}
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation()
+                                                            setActiveId(null)
+                                                        }}
+                                                        className="absolute top-4 right-4 z-50 p-2 rounded-full bg-background/50 backdrop-blur hover:bg-muted/80 transition-colors border border-border/50 text-foreground cursor-pointer"
+                                                    >
+                                                        <X className="w-5 h-5" />
+                                                    </button>
                                                 </motion.div>
                                                 <motion.div
                                                     key="hero-loading"

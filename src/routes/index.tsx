@@ -117,63 +117,6 @@ function Home() {
             <PortfolioDeck isFanned={isDeckFanned} />
           </motion.div>
         </div>
-
-        {/* Theses Grid (Below Fold) */}
-        <div className="mt-24 space-y-8">
-          <h2 className="text-2xl font-bold flex items-center gap-2">
-            <TrendingUp className="text-primary" />
-            Recent Findings
-          </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {theses.map((thesis) => (
-              <div
-                key={thesis.id}
-                className="group relative bg-card border border-border rounded-2xl p-6 hover:border-primary/30 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1"
-              >
-                <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl pointer-events-none" />
-
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <h3 className="text-2xl font-bold text-foreground mb-1 group-hover:text-primary transition-colors">
-                      {thesis.symbol}
-                    </h3>
-                    <p className="text-muted-foreground text-sm">{thesis.title}</p>
-                  </div>
-                  <div className={`px-3 py-1 rounded-full text-xs font-bold border ${thesis.conviction === 'High'
-                    ? 'bg-primary/10 border-primary/20 text-primary'
-                    : thesis.conviction === 'Medium'
-                      ? 'bg-amber-500/10 border-amber-500/20 text-amber-500'
-                      : 'bg-muted border-border text-muted-foreground'
-                    }`}>
-                    {thesis.conviction} Conviction
-                  </div>
-                </div>
-
-                <div className="space-y-4 mb-6">
-                  <div>
-                    <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Price</span>
-                    <div className="text-lg font-mono">${thesis.price.toFixed(2)}</div>
-                  </div>
-                  <div>
-                    <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Catalyst</span>
-                    <div className="text-sm text-foreground/80 leading-snug">
-                      {thesis.catalyst}
-                    </div>
-                  </div>
-                </div>
-
-                <p className="text-muted-foreground text-sm leading-relaxed border-t border-border pt-4">
-                  {thesis.description}
-                </p>
-
-                <div className="flex items-center gap-2 mt-6 text-xs text-muted-foreground">
-                  <ShieldCheck className="w-3 h-3" />
-                  <span>Verified • {thesis.postedAt}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     </div>
   )

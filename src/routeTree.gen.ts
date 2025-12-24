@@ -9,11 +9,18 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ApiThesesRouteImport } from './routes/api/theses'
+import { Route as ApiUsersUpdateNameRouteImport } from './routes/api/users/update-name'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -29,6 +36,11 @@ const ApiThesesRoute = ApiThesesRouteImport.update({
   path: '/api/theses',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiUsersUpdateNameRoute = ApiUsersUpdateNameRouteImport.update({
+  id: '/api/users/update-name',
+  path: '/api/users/update-name',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -38,39 +50,73 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/api/theses': typeof ApiThesesRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/users/update-name': typeof ApiUsersUpdateNameRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/api/theses': typeof ApiThesesRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/users/update-name': typeof ApiUsersUpdateNameRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/signup': typeof SignupRoute
   '/api/theses': typeof ApiThesesRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/users/update-name': typeof ApiUsersUpdateNameRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/api/theses' | '/api/auth/$'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/api/theses'
+    | '/api/auth/$'
+    | '/api/users/update-name'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/api/theses' | '/api/auth/$'
-  id: '__root__' | '/' | '/login' | '/api/theses' | '/api/auth/$'
+  to:
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/api/theses'
+    | '/api/auth/$'
+    | '/api/users/update-name'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/signup'
+    | '/api/theses'
+    | '/api/auth/$'
+    | '/api/users/update-name'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  SignupRoute: typeof SignupRoute
   ApiThesesRoute: typeof ApiThesesRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiUsersUpdateNameRoute: typeof ApiUsersUpdateNameRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -92,6 +138,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiThesesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/users/update-name': {
+      id: '/api/users/update-name'
+      path: '/api/users/update-name'
+      fullPath: '/api/users/update-name'
+      preLoaderRoute: typeof ApiUsersUpdateNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -105,8 +158,10 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  SignupRoute: SignupRoute,
   ApiThesesRoute: ApiThesesRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiUsersUpdateNameRoute: ApiUsersUpdateNameRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
