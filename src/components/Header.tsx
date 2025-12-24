@@ -17,8 +17,8 @@ export default function Header() {
       </div>
       <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
         <Link to="/" className="hover:text-primary transition-colors">Discover</Link>
-        <Link to="/" className="hover:text-primary transition-colors">Analysis</Link>
-        <Link to="/" className="hover:text-primary transition-colors">About</Link>
+        <Link to="/tournaments" className="hover:text-primary transition-colors">Tournaments</Link>
+        <Link to="/" className="hover:text-primary transition-colors">Contributors</Link>
       </nav>
       <Link to="/login">
         <Button className="bg-muted hover:bg-muted/80 text-foreground border-border" variant="outline">

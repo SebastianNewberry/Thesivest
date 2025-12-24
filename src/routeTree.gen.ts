@@ -9,13 +9,21 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TournamentsRouteImport } from './routes/tournaments'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiTournamentsRouteImport } from './routes/api/tournaments'
 import { Route as ApiThesesRouteImport } from './routes/api/theses'
+import { Route as ApiContributorsRouteImport } from './routes/api/contributors'
 import { Route as ApiUsersUpdateNameRouteImport } from './routes/api/users/update-name'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 
+const TournamentsRoute = TournamentsRouteImport.update({
+  id: '/tournaments',
+  path: '/tournaments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -31,9 +39,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTournamentsRoute = ApiTournamentsRouteImport.update({
+  id: '/api/tournaments',
+  path: '/api/tournaments',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiThesesRoute = ApiThesesRouteImport.update({
   id: '/api/theses',
   path: '/api/theses',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiContributorsRoute = ApiContributorsRouteImport.update({
+  id: '/api/contributors',
+  path: '/api/contributors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiUsersUpdateNameRoute = ApiUsersUpdateNameRouteImport.update({
@@ -51,7 +69,10 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/tournaments': typeof TournamentsRoute
+  '/api/contributors': typeof ApiContributorsRoute
   '/api/theses': typeof ApiThesesRoute
+  '/api/tournaments': typeof ApiTournamentsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
 }
@@ -59,7 +80,10 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/tournaments': typeof TournamentsRoute
+  '/api/contributors': typeof ApiContributorsRoute
   '/api/theses': typeof ApiThesesRoute
+  '/api/tournaments': typeof ApiTournamentsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
 }
@@ -68,7 +92,10 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
+  '/tournaments': typeof TournamentsRoute
+  '/api/contributors': typeof ApiContributorsRoute
   '/api/theses': typeof ApiThesesRoute
+  '/api/tournaments': typeof ApiTournamentsRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
 }
@@ -78,7 +105,10 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/signup'
+    | '/tournaments'
+    | '/api/contributors'
     | '/api/theses'
+    | '/api/tournaments'
     | '/api/auth/$'
     | '/api/users/update-name'
   fileRoutesByTo: FileRoutesByTo
@@ -86,7 +116,10 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/signup'
+    | '/tournaments'
+    | '/api/contributors'
     | '/api/theses'
+    | '/api/tournaments'
     | '/api/auth/$'
     | '/api/users/update-name'
   id:
@@ -94,7 +127,10 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/signup'
+    | '/tournaments'
+    | '/api/contributors'
     | '/api/theses'
+    | '/api/tournaments'
     | '/api/auth/$'
     | '/api/users/update-name'
   fileRoutesById: FileRoutesById
@@ -103,13 +139,23 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
+  TournamentsRoute: typeof TournamentsRoute
+  ApiContributorsRoute: typeof ApiContributorsRoute
   ApiThesesRoute: typeof ApiThesesRoute
+  ApiTournamentsRoute: typeof ApiTournamentsRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiUsersUpdateNameRoute: typeof ApiUsersUpdateNameRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/tournaments': {
+      id: '/tournaments'
+      path: '/tournaments'
+      fullPath: '/tournaments'
+      preLoaderRoute: typeof TournamentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -131,11 +177,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/tournaments': {
+      id: '/api/tournaments'
+      path: '/api/tournaments'
+      fullPath: '/api/tournaments'
+      preLoaderRoute: typeof ApiTournamentsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/theses': {
       id: '/api/theses'
       path: '/api/theses'
       fullPath: '/api/theses'
       preLoaderRoute: typeof ApiThesesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/contributors': {
+      id: '/api/contributors'
+      path: '/api/contributors'
+      fullPath: '/api/contributors'
+      preLoaderRoute: typeof ApiContributorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/users/update-name': {
@@ -159,7 +219,10 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
+  TournamentsRoute: TournamentsRoute,
+  ApiContributorsRoute: ApiContributorsRoute,
   ApiThesesRoute: ApiThesesRoute,
+  ApiTournamentsRoute: ApiTournamentsRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiUsersUpdateNameRoute: ApiUsersUpdateNameRoute,
 }
