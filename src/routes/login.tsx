@@ -31,7 +31,7 @@ function LoginPage() {
                         transition={{ delay: 0.2 }}
                         className="text-5xl font-extrabold tracking-tight leading-tight"
                     >
-                        The symmetry involved in high conviction plays.
+                        Where Research Becomes Conviction.
                     </motion.h1>
                     <motion.p
                         initial={{ opacity: 0, y: 20 }}

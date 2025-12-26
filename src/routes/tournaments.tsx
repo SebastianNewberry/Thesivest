@@ -1,5 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { createServerFn } from '@tanstack/react-start';
+import { authClient } from '../lib/auth-client';
+import { useNavigate } from '@tanstack/react-router';
 import { getTournaments, type Tournament } from '../server/features/tournaments';
 import { useLoaderData } from '@tanstack/react-router';
 import { motion } from 'motion/react';
@@ -43,6 +45,8 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 
 function TournamentsPage() {
   const tournaments = useLoaderData({ from: '/tournaments' });
+  const { data: session } = authClient.useSession();
+  const navigate = useNavigate();
 
   const getStatusColor = (status: Tournament['status']) => {
     switch (status) {
@@ -167,6 +171,16 @@ function TournamentsPage() {
                     className="w-full group"
                     variant={tournament.status === 'Active' ? 'default' : 'outline'}
                     disabled={tournament.status === 'Completed'}
+                    onClick={() => {
+                      if (!session) {
+                        navigate({ to: '/login' });
+                        return;
+                      }
+                      if (tournament.status === 'Active') {
+                        // TODO: Implement join logic
+                        alert("Successfully joined tournament!");
+                      }
+                    }}
                   >
                     {tournament.status === 'Active' ? 'Join Tournament' : tournament.status === 'Upcoming' ? 'Notify Me' : 'View Results'}
                     <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
