@@ -1,12 +1,15 @@
 import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts'
 import { ALL_DATA_SETS, PORTFOLIOS } from '../lib/chartData' // Importing data and config
 import { useMemo } from 'react'
+import { useMobile } from '../hooks/use-mobile'
 
 interface MiniChartProps {
     portfolioId: string
 }
 
 export function MiniChart({ portfolioId }: MiniChartProps) {
+    const isMobile = useMobile()
+    
     const data = useMemo(() => {
         // Default to a safe fallback if ID not found, though it should be
         const sets = ALL_DATA_SETS[portfolioId] || ALL_DATA_SETS['thesivest']
@@ -50,10 +53,10 @@ export function MiniChart({ portfolioId }: MiniChartProps) {
                         type="monotone"
                         dataKey="portfolio" // The data structure has 'portfolio' key for the main series
                         stroke={color}
-                        strokeWidth={2.5}
+                        strokeWidth={isMobile ? 2 : 2.5}
                         dot={false}
-                        isAnimationActive={true}
-                        animationDuration={1500}
+                        isAnimationActive={!isMobile}
+                        animationDuration={isMobile ? 0 : 1500}
                     />
                 </LineChart>
             </ResponsiveContainer>

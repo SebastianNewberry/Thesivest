@@ -13,6 +13,7 @@ import { Route as TournamentsRouteImport } from './routes/tournaments'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PostsIdRouteImport } from './routes/posts.$id'
 import { Route as ApiTournamentsRouteImport } from './routes/api/tournaments'
 import { Route as ApiThesesRouteImport } from './routes/api/theses'
 import { Route as ApiContributorsRouteImport } from './routes/api/contributors'
@@ -37,6 +38,11 @@ const LoginRoute = LoginRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PostsIdRoute = PostsIdRouteImport.update({
+  id: '/posts/$id',
+  path: '/posts/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTournamentsRoute = ApiTournamentsRouteImport.update({
@@ -73,6 +79,7 @@ export interface FileRoutesByFullPath {
   '/api/contributors': typeof ApiContributorsRoute
   '/api/theses': typeof ApiThesesRoute
   '/api/tournaments': typeof ApiTournamentsRoute
+  '/posts/$id': typeof PostsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
 }
@@ -84,6 +91,7 @@ export interface FileRoutesByTo {
   '/api/contributors': typeof ApiContributorsRoute
   '/api/theses': typeof ApiThesesRoute
   '/api/tournaments': typeof ApiTournamentsRoute
+  '/posts/$id': typeof PostsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
 }
@@ -96,6 +104,7 @@ export interface FileRoutesById {
   '/api/contributors': typeof ApiContributorsRoute
   '/api/theses': typeof ApiThesesRoute
   '/api/tournaments': typeof ApiTournamentsRoute
+  '/posts/$id': typeof PostsIdRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
 }
@@ -109,6 +118,7 @@ export interface FileRouteTypes {
     | '/api/contributors'
     | '/api/theses'
     | '/api/tournaments'
+    | '/posts/$id'
     | '/api/auth/$'
     | '/api/users/update-name'
   fileRoutesByTo: FileRoutesByTo
@@ -120,6 +130,7 @@ export interface FileRouteTypes {
     | '/api/contributors'
     | '/api/theses'
     | '/api/tournaments'
+    | '/posts/$id'
     | '/api/auth/$'
     | '/api/users/update-name'
   id:
@@ -131,6 +142,7 @@ export interface FileRouteTypes {
     | '/api/contributors'
     | '/api/theses'
     | '/api/tournaments'
+    | '/posts/$id'
     | '/api/auth/$'
     | '/api/users/update-name'
   fileRoutesById: FileRoutesById
@@ -143,6 +155,7 @@ export interface RootRouteChildren {
   ApiContributorsRoute: typeof ApiContributorsRoute
   ApiThesesRoute: typeof ApiThesesRoute
   ApiTournamentsRoute: typeof ApiTournamentsRoute
+  PostsIdRoute: typeof PostsIdRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiUsersUpdateNameRoute: typeof ApiUsersUpdateNameRoute
 }
@@ -175,6 +188,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/posts/$id': {
+      id: '/posts/$id'
+      path: '/posts/$id'
+      fullPath: '/posts/$id'
+      preLoaderRoute: typeof PostsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/tournaments': {
@@ -223,6 +243,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiContributorsRoute: ApiContributorsRoute,
   ApiThesesRoute: ApiThesesRoute,
   ApiTournamentsRoute: ApiTournamentsRoute,
+  PostsIdRoute: PostsIdRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiUsersUpdateNameRoute: ApiUsersUpdateNameRoute,
 }

@@ -100,23 +100,25 @@ const MOCK_POSTS: UserPost[] = [
     id: "a1",
     userId: "1",
     type: "trade",
-    symbol: "RGNB",
-    title: "Bought RGNB at $12.45",
-    content: "Regional bank trading at 0.6x book value. I think the market is overreacting to rate concerns. Balance sheet looks solid. Entry at $12.45, target $18, stop at $11.",
+    symbol: "PACW",
+    title: "Bought PACW at $7.85",
+    content:
+      "Regional bank trading at 0.6x book value. I think the market is overreacting to rate concerns. Balance sheet looks solid. Entry at $12.45, target $18, stop at $11.",
     buyPrice: 12.45,
     buyDate: "2024-01-15",
-    currentPrice: 13.20,
+    currentPrice: 13.2,
     targetPrice: 18,
     stopLoss: 11,
-    entryThoughts: "Strong fundamentals, trading below intrinsic value. Deposit base is sticky despite rate volatility.",
+    entryThoughts:
+      "Strong fundamentals, trading below intrinsic value. Deposit base is sticky despite rate volatility.",
     publishedAt: "3h ago",
     views: 1240,
     likes: 89,
     comments: 12,
     tags: ["Banking", "Value", "Financials"],
     performance: {
-      returnPercent: 6.02,
-      returnAmount: 75.50,
+      returnPercent: 7.26,
+      returnAmount: 67.5,
       status: "active",
     },
   },
@@ -124,21 +126,23 @@ const MOCK_POSTS: UserPost[] = [
     id: "a2",
     userId: "2",
     type: "trade",
-    symbol: "AIINF",
-    title: "UW Finance Club: AI Infrastructure Play",
-    content: "As a club, we decided to enter AIINF at $45.20. Thesis: data center expansion will drive infrastructure needs. This is a long-term position for our portfolio.",
-    buyPrice: 45.20,
+    symbol: "VST",
+    title: "UW Finance Club: Data Center Infrastructure Play",
+    content:
+      "As a club, we decided to enter VST at $112.40. Thesis: AI data center expansion will drive power infrastructure needs. This is a long-term position for our portfolio.",
+    buyPrice: 112.4,
     buyDate: "2024-02-01",
-    currentPrice: 48.50,
-    targetPrice: 65,
-    entryThoughts: "Club discussion led us to believe infrastructure is undervalued vs pure AI plays. Lower risk, still good exposure.",
+    currentPrice: 124.8,
+    targetPrice: 150,
+    entryThoughts:
+      "Club discussion led us to believe infrastructure is undervalued vs pure AI plays. Lower risk, still good exposure.",
     publishedAt: "1d ago",
     views: 3200,
     likes: 245,
     comments: 34,
     tags: ["AI", "Technology", "Infrastructure"],
     performance: {
-      returnPercent: 7.30,
+      returnPercent: 11.04,
       status: "active",
     },
   },
@@ -147,20 +151,22 @@ const MOCK_POSTS: UserPost[] = [
     userId: "3",
     type: "thought",
     title: "Learning from my mistakes",
-    content: "Took a loss on NEURO today. Entered too early before Phase 3 data was solid. Lesson: wait for confirmation even if the story seems compelling. Down 15% but learned a lot.",
+    content:
+      "Took a loss on ARWR today. Entered too early before FAA certification was confirmed. Lesson: wait for catalyst confirmation even if the story seems compelling. Down 12% but learned a lot.",
     publishedAt: "5h ago",
     views: 1890,
     likes: 156,
     comments: 28,
-    tags: ["Learning", "Biotech", "Lessons"],
+    tags: ["Learning", "Aerospace", "Lessons"],
   },
   {
     id: "a4",
     userId: "4",
     type: "update",
-    symbol: "LITH",
-    title: "Update on LITH position",
-    content: "Our LITH position is up 22% since entry. Taking partial profits at current levels. Still holding 60% for the long-term EV thesis. Updated target.",
+    symbol: "ALB",
+    title: "Update on ALB position",
+    content:
+      "Our LITH position is up 22% since entry. Taking partial profits at current levels. Still holding 60% for the long-term EV thesis. Updated target.",
     publishedAt: "2d ago",
     views: 2100,
     likes: 178,
@@ -175,21 +181,23 @@ const MOCK_POSTS: UserPost[] = [
     id: "a5",
     userId: "1",
     type: "trade",
-    symbol: "MFG",
-    title: "New position: MFG",
-    content: "Small industrial play at $8.90. Trading at distressed multiples but fundamentals improving. Reshoring tailwinds could benefit this company significantly.",
-    buyPrice: 8.90,
+    symbol: "TWNK",
+    title: "New position: TWNK",
+    content:
+      "Small industrial play at $15.20. Trading at distressed multiples but fundamentals improving. Reshoring tailwinds could benefit this company significantly.",
+    buyPrice: 15.2,
     buyDate: "2024-01-20",
-    currentPrice: 9.15,
-    targetPrice: 12,
-    entryThoughts: "Distressed valuation doesn't match improving fundamentals. Risk/reward looks favorable.",
+    currentPrice: 15.8,
+    targetPrice: 22,
+    entryThoughts:
+      "Distressed valuation doesn't match improving fundamentals. Risk/reward looks favorable.",
     publishedAt: "8h ago",
     views: 980,
     likes: 67,
     comments: 8,
     tags: ["Industrials", "Value", "Manufacturing"],
     performance: {
-      returnPercent: 2.81,
+      returnPercent: 3.95,
       status: "active",
     },
   },
@@ -198,7 +206,8 @@ const MOCK_POSTS: UserPost[] = [
     userId: "2",
     type: "thought",
     title: "Our investment process",
-    content: "We document our process: 1) Research 2) Club discussion/vote 3) Entry 4) Regular updates. Transparency helps us learn and holds us accountable.",
+    content:
+      "We document our process: 1) Research 2) Club discussion/vote 3) Entry 4) Regular updates. Transparency helps us learn and holds us accountable.",
     publishedAt: "1d ago",
     views: 2450,
     likes: 198,
@@ -213,21 +222,25 @@ export async function getContributors(): Promise<CommunityMember[]> {
 }
 
 // Keep for backward compatibility but use new interface
-export async function getContributorAnalyses(limit?: number): Promise<UserPost[]> {
+export async function getContributorAnalyses(
+  limit?: number
+): Promise<UserPost[]> {
   await new Promise((resolve) => setTimeout(resolve, 300));
-  const posts = [...MOCK_POSTS].sort((a, b) => {
-    // Sort by recency (you could implement actual date sorting)
-    return 0;
-  });
+  // TODO: Implement actual date sorting
+  const posts = [...MOCK_POSTS];
   return limit ? posts.slice(0, limit) : posts;
 }
 
-export async function getContributorById(id: string): Promise<CommunityMember | null> {
+export async function getContributorById(
+  id: string
+): Promise<CommunityMember | null> {
   await new Promise((resolve) => setTimeout(resolve, 200));
   return MOCK_MEMBERS.find((c) => c.id === id) || null;
 }
 
-export async function getAnalysesByContributor(userId: string): Promise<UserPost[]> {
+export async function getAnalysesByContributor(
+  userId: string
+): Promise<UserPost[]> {
   await new Promise((resolve) => setTimeout(resolve, 200));
   return MOCK_POSTS.filter((p) => p.userId === userId);
 }
@@ -244,3 +257,7 @@ export async function getPostsByUser(userId: string): Promise<UserPost[]> {
   return MOCK_POSTS.filter((p) => p.userId === userId);
 }
 
+export async function getPostById(id: string): Promise<UserPost | null> {
+  await new Promise((resolve) => setTimeout(resolve, 200));
+  return MOCK_POSTS.find((p) => p.id === id) || null;
+}

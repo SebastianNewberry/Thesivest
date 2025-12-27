@@ -5,6 +5,7 @@ import { HeroChart } from './HeroChart'
 import { PORTFOLIOS, ALL_DATA_SETS } from '../lib/chartData'
 import { MiniChart } from './MiniChart'
 import { cn } from '../lib/utils'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 
 interface PortfolioDeckProps {
     isFanned?: boolean
@@ -13,6 +14,7 @@ interface PortfolioDeckProps {
 export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
     // Default to null so it stays fanned until a chart is selected
     const [activeId, setActiveId] = useState<string | null>(null)
+    const isMobile = useMediaQuery('(max-width: 768px)')
 
     // If the logo is hovered (isFanned=true), we reset to the "Menu" state (activeId=null).
     // This allows the fan to persist even after the user stops hovering the logo.
@@ -26,7 +28,7 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
     const showFan = isFanned || activeId === null
 
     return (
-        <div className="relative w-full h-[550px] flex items-center justify-center perspective-1000">
+        <div className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center perspective-1000">
             <AnimatePresence>
                 {PORTFOLIOS.map((portfolio, index) => {
                     const isActive = portfolio.id === activeId
@@ -34,13 +36,14 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                     // --- Geometry Config ---
                     const totalItems = PORTFOLIOS.length
 
-                    // Fan Geometry: Full 360 Circle
+                    // Fan Geometry: Full 360 Circle (desktop) / Reduced for mobile
                     const spreadAngle = 2 * Math.PI
                     const startAngle = -Math.PI / 2 // Start at top
                     const step = spreadAngle / totalItems
 
                     const angle = startAngle + (index * step)
-                    const radius = 180
+                    // Responsive radius: smaller on mobile to prevent overflow
+                    const radius = isMobile ? 90 : 140
                     const fannedX = Math.cos(angle) * radius
                     const fannedY = Math.sin(angle) * radius // Circular (no squash)
 
@@ -89,9 +92,9 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                                 // Position
                                 x: isHero ? 0 : (showFan ? fannedX : stackX),
                                 y: isHero ? 0 : (showFan ? fannedY : stackY),
-                                // Dimension
-                                width: isHero ? "calc(100% - 60px)" : 340,
-                                height: isHero ? "calc(100% - 40px)" : 220,
+                                // Dimension - smaller on mobile
+                                width: isHero ? "calc(100% - 32px)" : (isMobile ? 280 : 310),
+                                height: isHero ? "calc(100% - 32px)" : (isMobile ? 180 : 200),
                                 // Scale & Rotate
                                 scale: 1,
                                 rotate: isHero ? 0 : (showFan ? 0 : stackRotate),
@@ -102,8 +105,8 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                                 type: "spring",
                                 stiffness: isHero ? 120 : 160,
                                 damping: isHero ? 20 : 25,
-                                mass: 1,
-                                delay: delay
+                                mass: isMobile ? 0.8 : 1, // Lighter mass for faster animations on mobile
+                                delay: isMobile ? Math.min(delay as number, 0.1) : delay // Reduce stagger on mobile
                             }}
                             onClick={(e) => {
                                 if (isHero) return
@@ -131,6 +134,17 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                                 )}
 
                                 <div className="flex-1 w-full relative min-h-0">
+                                    {/* Context Label - Shown in mini charts only */}
+                                    {!isHero && (
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-md border border-border/50 text-[10px] text-muted-foreground z-20 pointer-events-none"
+                                        >
+                                            Real User Portfolios
+                                        </motion.div>
+                                    )}
+
                                     <AnimatePresence mode="popLayout">
                                         {isHero ? (
                                             <>

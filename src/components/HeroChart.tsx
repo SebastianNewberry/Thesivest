@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'motion/react'
 import { Check, ZoomOut, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useState, useMemo } from 'react'
 import { ALL_DATA_SETS, PORTFOLIOS, SERIES, TIME_RANGES, type TimeRange } from '../lib/chartData'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs))
@@ -102,6 +103,7 @@ export function HeroChart({ portfolioId = 'thesivest', minimal = false, classNam
     const activePortfolio = PORTFOLIOS.find(p => p.id === portfolioId)
     const portfolioLabel = activePortfolio?.name || 'Your Portfolio'
     const portfolioColor = activePortfolio?.color || 'var(--color-primary)'
+    const isMobile = useMediaQuery('(max-width: 768px)')
 
     const [timeRange, setTimeRange] = useState<TimeRange | null>('3Y')
     const [activeSeries, setActiveSeries] = useState<Set<string>>(() => {
@@ -306,7 +308,7 @@ export function HeroChart({ portfolioId = 'thesivest', minimal = false, classNam
         <Card
             className={cn(
                 "w-full bg-card/50 backdrop-blur-sm border-primary/20 p-0 flex flex-col relative overflow-hidden group transition-all select-none [&_.recharts-wrapper]:!outline-none shadow-2xl shadow-primary/5",
-                minimal ? "h-full border-0 bg-transparent shadow-none" : "h-[600px]",
+                minimal ? "h-full border-0 bg-transparent shadow-none" : (isMobile ? "h-[500px]" : "h-[560px]"),
                 onClick && "cursor-pointer hover:border-primary/50 hover:shadow-primary/10",
                 className
             )}
@@ -317,27 +319,27 @@ export function HeroChart({ portfolioId = 'thesivest', minimal = false, classNam
 
             {/* Header / Controls */}
             {!minimal && (
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-6 border-b border-border/50 bg-card/30 z-20 gap-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center p-4 md:p-6 border-b border-border/50 bg-card/30 z-20 gap-3 md:gap-4">
                     <div>
-                        <div className="text-muted-foreground text-xs font-bold uppercase tracking-wider mb-1">Portfolio Performance</div>
-                        <div className="flex items-baseline gap-3">
-                            <span className={cn("text-4xl font-extrabold tracking-tight", percentageReturn >= 0 ? "text-primary" : "text-destructive")}>
+                        <div className="text-muted-foreground text-[10px] md:text-xs font-bold uppercase tracking-wider mb-0.5 md:mb-1">Portfolio Performance</div>
+                        <div className="flex items-baseline gap-2 md:gap-3 flex-wrap">
+                            <span className={cn("text-2xl md:text-4xl font-extrabold tracking-tight", percentageReturn >= 0 ? "text-primary" : "text-destructive")}>
                                 {percentageReturn >= 0 ? '+' : ''}{percentageReturn.toFixed(1)}%
                             </span>
-                            <span className="text-sm text-foreground/60 font-medium">
-                                {timeRange === null ? 'Zoomed View' : `Past ${timeRange === '3Y' ? '3 Years' : timeRange}`}
+                            <span className="text-xs md:text-sm text-foreground/60 font-medium">
+                                {timeRange === null ? 'Zoomed' : `${timeRange === '3Y' ? '3Y' : timeRange}`}
                             </span>
                             {timeRange === null && (
-                                <button onClick={zoomOut} className="ml-2 flex items-center gap-1 text-xs px-2 py-1 bg-secondary text-secondary-foreground rounded shadow-sm hover:bg-secondary/80 transition-colors">
+                                <button onClick={zoomOut} className="ml-0 md:ml-2 flex items-center gap-1 text-[10px] md:text-xs px-1.5 md:px-2 py-1 bg-secondary text-secondary-foreground rounded shadow-sm hover:bg-secondary/80 transition-colors">
                                     <ZoomOut className="w-3 h-3" />
-                                    Reset
+                                    <span className="hidden md:inline">Reset</span>
                                 </button>
                             )}
                         </div>
                     </div>
 
                     {/* Time Range Tabs */}
-                    <div className="flex items-center gap-1 bg-muted/50 p-1 rounded-lg border border-border/50">
+                    <div className="flex items-center gap-0.5 md:gap-1 bg-muted/50 p-0.5 md:p-1 rounded-lg border border-border/50">
                         {TIME_RANGES.map(range => (
                             <button
                                 key={range}
@@ -351,7 +353,7 @@ export function HeroChart({ portfolioId = 'thesivest', minimal = false, classNam
                                     setLeft(getStartDateForRange(range, lastDate));
                                 }}
                                 className={cn(
-                                    "px-3 py-1.5 rounded-md text-xs font-semibold transition-all duration-200",
+                                    "px-1.5 md:px-3 py-1 md:py-1.5 rounded-md text-[10px] md:text-xs font-semibold transition-all duration-200",
                                     timeRange === range
                                         ? "bg-background text-foreground shadow-sm ring-1 ring-border"
                                         : "text-muted-foreground hover:text-foreground hover:bg-background/50"
@@ -365,11 +367,11 @@ export function HeroChart({ portfolioId = 'thesivest', minimal = false, classNam
             )}
 
             {/* Main Chart Area */}
-            <div className="flex-1 w-full relative z-10 min-h-0 pb-4 flex items-center gap-6 px-4">
+            <div className="flex-1 w-full relative z-10 min-h-0 pb-2 md:pb-4 flex items-center gap-4 md:gap-6 px-2 md:px-4">
 
                 {/* Left Navigation Button */}
                 <AnimatePresence>
-                    {timeRange !== '3Y' && left !== 'dataMin' && (typeof left !== 'number' || left > currentData[0].date) && (
+                    {!isMobile && timeRange !== '3Y' && left !== 'dataMin' && (typeof left !== 'number' || left > currentData[0].date) && (
                         <motion.button
                             initial={{ opacity: 0, scale: 0.8, x: -10 }}
                             animate={{ opacity: 0.5, scale: 1, x: 0 }}
@@ -388,7 +390,7 @@ export function HeroChart({ portfolioId = 'thesivest', minimal = false, classNam
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart
                             data={currentData}
-                            margin={{ top: 20, right: 0, left: 0, bottom: 0 }}
+                            margin={{ top: isMobile ? 10 : 20, right: 0, left: 0, bottom: 0 }}
                             onMouseDown={(e) => {
                                 if (e && e.activeLabel) setRefAreaLeft(e.activeLabel)
                             }}
@@ -504,13 +506,13 @@ export function HeroChart({ portfolioId = 'thesivest', minimal = false, classNam
                                             type="monotone"
                                             dataKey={s.id}
                                             stroke={color}
-                                            strokeWidth={3}
+                                            strokeWidth={isMobile ? 2 : 3}
                                             fillOpacity={1}
                                             fill={`url(#color-${s.id})`}
                                             name={label}
                                             strokeOpacity={opacity}
                                             style={{ opacity }}
-                                            animationDuration={1000}
+                                            animationDuration={isMobile ? 500 : 1000}
                                         />
                                     )
                                 }
@@ -521,13 +523,13 @@ export function HeroChart({ portfolioId = 'thesivest', minimal = false, classNam
                                         type="monotone"
                                         dataKey={s.id}
                                         stroke={color}
-                                        strokeWidth={s.isBenchmark ? 2 : 2}
+                                        strokeWidth={isMobile ? 1.5 : (s.isBenchmark ? 2 : 2)}
                                         strokeDasharray={s.type === 'dashed' ? '5 5' : ''}
                                         dot={false}
                                         name={label}
                                         strokeOpacity={opacity}
                                         style={{ transition: 'opacity 0.3s' }}
-                                        animationDuration={1000}
+                                        animationDuration={isMobile ? 500 : 1000}
                                     />
                                 )
                             })}
@@ -548,7 +550,7 @@ export function HeroChart({ portfolioId = 'thesivest', minimal = false, classNam
 
                 {/* Right Navigation Button */}
                 <AnimatePresence>
-                    {timeRange !== '3Y' && (right !== 'dataMax' && (typeof right !== 'number' || right < currentData[currentData.length - 1].date)) && (
+                    {!isMobile && timeRange !== '3Y' && (right !== 'dataMax' && (typeof right !== 'number' || right < currentData[currentData.length - 1].date)) && (
                         <motion.button
                             initial={{ opacity: 0, scale: 0.8, x: 10 }}
                             animate={{ opacity: 0.5, scale: 1, x: 0 }}
@@ -565,8 +567,8 @@ export function HeroChart({ portfolioId = 'thesivest', minimal = false, classNam
             </div>
 
             {/* Legend / Toggles */}
-            <div className="p-4 bg-card/30 border-t border-border/50 z-20 overflow-x-auto">
-                <div className="flex items-center gap-3">
+            <div className="p-2 md:p-4 bg-card/30 border-t border-border/50 z-20 overflow-x-auto">
+                <div className="flex items-center gap-2 md:gap-3">
                     {SERIES.map(s => {
                         const isActive = activeSeries.has(s.id)
                         const isThesivest = s.id === 'portfolio'
@@ -578,18 +580,19 @@ export function HeroChart({ portfolioId = 'thesivest', minimal = false, classNam
                                 key={s.id}
                                 onClick={() => toggleSeries(s.id)}
                                 className={cn(
-                                    "flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all duration-200 whitespace-nowrap",
+                                    "flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs font-medium border transition-all duration-200 whitespace-nowrap",
                                     isActive
                                         ? "bg-background shadow-sm border-border text-foreground"
                                         : "bg-muted/50 border-transparent text-muted-foreground opacity-60 hover:opacity-100"
                                 )}
                             >
                                 <div
-                                    className={cn("w-2 h-2 rounded-full transition-transform duration-200", isActive ? "scale-100" : "scale-75")}
+                                    className={cn("w-1.5 md:w-2 h-1.5 md:h-2 rounded-full transition-transform duration-200", isActive ? "scale-100" : "scale-75")}
                                     style={{ backgroundColor: isActive ? color : 'var(--color-muted-foreground)' }}
                                 />
-                                {label}
-                                {isActive && <Check className="w-3 h-3 text-muted-foreground ml-1" />}
+                                <span className="hidden sm:inline">{label}</span>
+                                <span className="inline sm:hidden">{label.split(' ')[0]}</span>
+                                {isActive && <Check className="w-2.5 h-2.5 md:w-3 md:h-3 text-muted-foreground" />}
                             </button>
                         )
                     })}
