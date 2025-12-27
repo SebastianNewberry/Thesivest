@@ -84,8 +84,8 @@ function Home() {
       status === "win"
         ? "text-green-600"
         : status === "loss"
-        ? "text-red-600"
-        : "text-muted-foreground";
+          ? "text-red-600"
+          : "text-muted-foreground";
     return (
       <span className={color}>
         {sign}
@@ -184,7 +184,7 @@ function Home() {
               <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight">
                 Thesis + Invest. <br />
                 <span className="text-muted-foreground">
-                  The symmetry involved in high conviction plays.
+                  Where Research Becomes Conviction.
                 </span>
               </h1>
               <p className="text-lg text-muted-foreground max-w-xl mx-auto">
@@ -325,8 +325,8 @@ function Home() {
                         {post.type === "trade"
                           ? "Trade"
                           : post.type === "thought"
-                          ? "Thought"
-                          : "Update"}
+                            ? "Thought"
+                            : "Update"}
                       </Badge>
                       <span className="text-xs text-muted-foreground">
                         {post.publishedAt}
