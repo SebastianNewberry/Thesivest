@@ -8,6 +8,20 @@
       "when": 1766558230543,
       "tag": "0000_new_lucky_pierre",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1766811774140,
+      "tag": "0001_small_warbird",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1766814289077,
+      "tag": "0002_silly_groot",
+      "breakpoints": true
     }
   ]
 }

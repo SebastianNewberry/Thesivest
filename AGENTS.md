@@ -314,6 +314,113 @@ When transitioning to real data:
 5. **Follow theme colors** - Use Tailwind variables, not custom colors
 6. **Test all features** - Use Vitest and Testing Library
 
+## TypeScript Typing Rules
+
+### Strict Type Safety
+
+1. **No `any` types allowed**:
+
+   - Never use `any` in the codebase
+   - Use proper types from the database schema
+   - If a type doesn't exist, define it properly using the schema types
+
+2. **No `as any` assertions**:
+
+   - Never use `as any` to bypass type checking
+   - If you need to cast, use proper type guards or schema types
+   - Trust the schema - it defines your types
+
+3. **Let TypeScript infer return types from Drizzle**:
+   - **Do not explicitly define return types** on functions that return data from Drizzle queries
+   - Let TypeScript infer the return type automatically from the database operations
+   - Only manually type return values when complex data manipulation makes the return value significantly different from the schema
+   - This reduces verbosity and maintains type safety
+
+### Examples
+
+**BAD - Using `any`**:
+
+```typescript
+export async function getPosts(): Promise<any[]> {
+  return db.select().from(post);
+}
+```
+
+**BAD - Explicitly typing simple Drizzle queries**:
+
+```typescript
+export async function getPosts(): Promise<(typeof post.$inferSelect)[]> {
+  return db.select().from(post);
+}
+```
+
+**GOOD - Let TypeScript infer from Drizzle**:
+
+```typescript
+export async function getPosts() {
+  return db.select().from(post);
+}
+```
+
+**BAD - Using `as any`**:
+
+```typescript
+const tournaments = await db.select().from(tournament);
+return tournaments.map((t: any) => ({
+  id: t.id,
+  name: t.name,
+}));
+```
+
+**GOOD - Using schema types**:
+
+```typescript
+const tournaments = await db.select().from(tournament);
+return tournaments.map((t) => ({
+  id: t.id,
+  name: t.name,
+}));
+```
+
+**BAD - Manual type definitions**:
+
+```typescript
+export interface Tournament {
+  id: string;
+  name: string;
+  description: string;
+  category: string;
+  // ... duplicated from schema
+}
+```
+
+**GOOD - Let TypeScript infer**:
+
+```typescript
+// TypeScript automatically infers the type from db.select().from(tournament)
+export async function getTournaments() {
+  return db.select().from(tournament);
+}
+```
+
+**OKAY - Manual typing for complex transformations**:
+
+```typescript
+// Only when the return structure is significantly different
+export interface TournamentWithStats {
+  participantCount: number;
+  averageScore: number;
+  topPerformers: User[];
+  tournament: typeof tournament.$inferSelect;
+}
+
+export async function getTournamentWithStats(
+  id: string
+): Promise<TournamentWithStats> {
+  // ... complex query with joins and aggregations
+}
+```
+
 ## Key Architecture Patterns
 
 ### API Route Pattern

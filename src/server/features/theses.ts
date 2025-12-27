@@ -1,7 +1,10 @@
 /**
  * Shared Logic for Thesivest (Under the Radar Stacks)
  * This lives on the server and is called by both the Public API and the App Loader.
+ * Uses the data access layer to fetch data from the database.
  */
+
+import { getAllPosts, getPostsByType } from "../data-access/posts";
 
 export interface Thesis {
     id: string;
@@ -15,57 +18,37 @@ export interface Thesis {
     postedAt: string;
 }
 
-// Mock data for now - in a real app this would query the DB
-const MOCK_THESES: Thesis[] = [
-    {
-        id: "1",
-        title: "Next-Gen Bio-Plastics",
-        symbol: "PLST",
-        price: 12.45,
-        marketCap: "150M",
-        catalyst: "EU Regulation 2025 banning single-use",
-        conviction: "High",
-        description: "Small cap chemical firm with patented biodegradable polymer receiving major OEM interest.",
-        postedAt: "2h ago",
-    },
-    {
-        id: "2",
-        title: "AI Infrastructure Power",
-        symbol: "GRID",
-        price: 45.20,
-        marketCap: "800M",
-        catalyst: "Data center expansion in Nordic region",
-        conviction: "Medium",
-        description: "Utility provider with exclusive renewable contracts for new hyperscale data centers.",
-        postedAt: "5h ago",
-    },
-    {
-        id: "3",
-        title: "Cobalt-Free Batteries",
-        symbol: "IONZ",
-        price: 8.90,
-        marketCap: "95M",
-        catalyst: "Breakthrough lab results published",
-        conviction: "High",
-        description: "Deep-tech startup identifying new cathode material that eliminates cobalt dependency.",
-        postedAt: "1d ago",
-    },
-    {
-        id: "4",
-        title: "Space Debris Removal",
-        symbol: "CLNR",
-        price: 15.60,
-        marketCap: "220M",
-        catalyst: "NASA Contract Award",
-        conviction: "Low",
-        description: "Early stage aerospace play securing first gov contracts for LEO cleanup.",
-        postedAt: "2d ago",
-    },
-];
+// Helper function to format date for display
+function formatDate(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const now = new Date();
+  const diffInHours = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60));
 
+  if (diffInHours < 1) return "Just now";
+  if (diffInHours < 24) return `${diffInHours}h ago`;
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays < 7) return `${diffInDays}d ago`;
+  return d.toLocaleDateString();
+}
+
+/**
+ * Get under the radar theses (trade posts from the database)
+ * Returns trade posts formatted as Thesis interface
+ */
 export async function getUnderRadarTheses(): Promise<Thesis[]> {
-    // Simulate DB Delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    // Fetch trade posts from database
+    const tradePosts = await getPostsByType("trade");
 
-    return MOCK_THESES;
+    // Convert trade posts to Thesis format
+    return tradePosts.map((post) => ({
+        id: post.id,
+        title: post.title,
+        symbol: post.symbol || "UNKNOWN",
+        price: post.buyPrice ? Number(post.buyPrice) : 0,
+        marketCap: "N/A", // Market cap would need to be fetched from external data source
+        catalyst: post.targetPrice ? `Target: $${post.targetPrice}` : "Investment opportunity",
+        conviction: post.stopLoss ? "High" : "Medium",
+        description: post.content,
+        postedAt: formatDate(post.publishedAt),
+    }));
 }
