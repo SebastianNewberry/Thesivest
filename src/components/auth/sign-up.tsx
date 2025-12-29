@@ -12,15 +12,128 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight, Check, X } from "lucide-react";
 import { motion } from "motion/react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+// Password field component with requirements list
+function PasswordField({
+  field,
+  everMet,
+  onEverMetChange,
+}: {
+  field: any;
+  everMet: Set<string>;
+  onEverMetChange: (newSet: Set<string>) => void;
+}) {
+  const password = field.state.value;
+
+  // Password requirements
+  const requirements = [
+    {
+      key: "length",
+      text: "At least 8 characters",
+      check: (pwd: string) => pwd.length >= 8,
+    },
+    {
+      key: "uppercase",
+      text: "Contains uppercase letter",
+      check: (pwd: string) => /[A-Z]/.test(pwd),
+    },
+    {
+      key: "lowercase",
+      text: "Contains lowercase letter",
+      check: (pwd: string) => /[a-z]/.test(pwd),
+    },
+    {
+      key: "number",
+      text: "Contains a number",
+      check: (pwd: string) => /\d/.test(pwd),
+    },
+  ];
+
+  useEffect(() => {
+    if (password) {
+      // Accumulate requirements that have been met (don't remove if they become invalid)
+      const met = requirements
+        .filter((r) => r.check(password))
+        .map((r) => r.key);
+
+      const newSet = new Set(everMet);
+      met.forEach((key) => newSet.add(key));
+      onEverMetChange(newSet);
+    }
+    // Don't reset when password is cleared - keep everMet state
+  }, [password, everMet, onEverMetChange]);
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={field.name}>Password</Label>
+      <Input
+        id={field.name}
+        type="password"
+        showPasswordToggle
+        value={field.state.value}
+        onBlur={field.handleBlur}
+        onChange={(e) => field.handleChange(e.target.value)}
+        className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
+          field.state.meta.errors.length > 0
+            ? "border-destructive focus:ring-destructive/20"
+            : ""
+        }`}
+      />
+      {field.state.meta.errors.length > 0 && (
+        <p className="text-sm text-destructive font-medium">
+          {typeof field.state.meta.errors[0] === "string"
+            ? field.state.meta.errors[0]
+            : field.state.meta.errors[0]?.message || "Invalid value"}
+        </p>
+      )}
+
+      {/* Password Requirements List */}
+      <ul className="space-y-1.5 mt-3">
+        {requirements.map((req) => {
+          const isMet = req.check(password);
+          const hasEverBeenMet = everMet.has(req.key);
+
+          // Color logic:
+          // - Green if requirement is currently met
+          // - Red if requirement has ever been met but is now not met (user is typing incorrectly)
+          // - Black if requirement has never been met yet
+          const getColor = () => {
+            if (isMet) return "text-green-600";
+            if (hasEverBeenMet) return "text-red-600";
+            return "text-foreground";
+          };
+
+          const getIcon = () => {
+            if (isMet) return <Check className="h-4 w-4 text-green-600" />;
+            if (hasEverBeenMet) return <X className="h-4 w-4 text-red-600" />;
+            return null;
+          };
+
+          return (
+            <li
+              key={req.key}
+              className={`flex items-center gap-2 text-sm ${getColor()}`}
+            >
+              {getIcon()}
+              <span>{req.text}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
 
 export function SignUp() {
   const navigate = useNavigate();
   const [authError, setAuthError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [passwordEverMet, setPasswordEverMet] = useState<Set<string>>(
+    new Set()
+  );
 
   const form = useForm({
     defaultValues: {
@@ -33,51 +146,46 @@ export function SignUp() {
       onChange: signUpSchema,
     },
     onSubmit: async ({ value }) => {
-      console.log("=== SIGN UP STARTED ===");
-      console.log("Form values:", value);
       setAuthError("");
-      setIsSubmitting(true);
 
       // Combine firstName and lastName for Better Auth's name field
       const fullName = `${value.firstName} ${value.lastName}`.trim();
-      console.log("Full name to send:", fullName);
 
-      try {
-        console.log("Calling authClient.signUp.email...");
-        const result = await authClient.signUp.email(
-          {
-            email: value.email,
-            password: value.password,
-            name: fullName,
+      await authClient.signUp.email(
+        {
+          email: value.email,
+          password: value.password,
+          name: fullName,
+        },
+        {
+          onSuccess: async () => {
+            // Update firstName and lastName separately
+            try {
+              const response = await fetch("/api/users/update-name", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  firstName: value.firstName,
+                  lastName: value.lastName,
+                }),
+              });
+
+              if (!response.ok) {
+                console.error("Failed to update user name fields");
+              }
+            } catch (error) {
+              console.error("Error updating user name fields:", error);
+            }
+
+            navigate({ to: "/" });
           },
-          {
-            onRequest: () => {
-              console.log("authClient: onRequest - Setting submitting to true");
-              setIsSubmitting(true);
-            },
-            onSuccess: async () => {
-              console.log("✅ authClient: onSuccess - Sign up successful!");
-              console.log("Result:", result);
-              setIsSubmitting(false);
-              // Avatar is generated automatically in auth hook
-              console.log("Navigating to home...");
-              navigate({ to: "/" });
-            },
-            onError: (ctx) => {
-              console.error("❌ authClient: onError - Sign up failed");
-              console.error("Error context:", ctx);
-              console.error("Error message:", ctx.error.message);
-              setAuthError(ctx.error.message || "Failed to create account");
-              setIsSubmitting(false);
-            },
-          }
-        );
-        console.log("authClient.signUp.email completed");
-      } catch (error) {
-        console.error("❌ SIGN UP CATCH - Unexpected error:", error);
-        setAuthError("An unexpected error occurred. Please try again.");
-        setIsSubmitting(false);
-      }
+          onError: (ctx) => {
+            setAuthError(ctx.error.message);
+          },
+        }
+      );
     },
   });
 
@@ -101,7 +209,6 @@ export function SignUp() {
             onSubmit={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log("=== FORM SUBMIT ===");
               form.handleSubmit();
             }}
             className="space-y-4"
@@ -195,34 +302,11 @@ export function SignUp() {
 
             <form.Field name="password">
               {(field) => (
-                <div className="space-y-2">
-                  <Label htmlFor={field.name}>Password</Label>
-                  <Input
-                    id={field.name}
-                    type="password"
-                    showPasswordToggle
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
-                      field.state.meta.errors.length > 0
-                        ? "border-destructive focus:ring-destructive/20"
-                        : ""
-                    }`}
-                  />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-sm text-destructive font-medium">
-                      {typeof field.state.meta.errors[0] === "string"
-                        ? field.state.meta.errors[0]
-                        : field.state.meta.errors[0]?.message ||
-                          "Invalid value"}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Password must be at least 8 characters with uppercase,
-                    lowercase, and a number
-                  </p>
-                </div>
+                <PasswordField
+                  field={field}
+                  everMet={passwordEverMet}
+                  onEverMetChange={setPasswordEverMet}
+                />
               )}
             </form.Field>
 
@@ -233,18 +317,18 @@ export function SignUp() {
             )}
 
             <form.Subscribe
-              selector={(state) => [state.isSubmitting, state.canSubmit, isSubmitting]}
-              children={([formIsSubmitting, canSubmit, submitting]) => (
+              selector={(state) => [state.isSubmitting, state.canSubmit]}
+              children={([isSubmitting, canSubmit]) => (
                 <Button
                   type="submit"
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]"
-                  disabled={submitting || !canSubmit}
+                  disabled={isSubmitting || !canSubmit}
                 >
-                  {submitting && (
+                  {isSubmitting && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
                   Sign Up
-                  {!submitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                  {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
               )}
             />
@@ -263,19 +347,19 @@ export function SignUp() {
 
           <form.Subscribe
             selector={(state) => state.isSubmitting}
-            children={(formIsSubmitting) => (
+            children={(isSubmitting) => (
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant="outline"
                   className="bg-background/50 hover:bg-muted"
-                  disabled={formIsSubmitting}
+                  disabled={isSubmitting}
                 >
                   Google
                 </Button>
                 <Button
                   variant="outline"
                   className="bg-background/50 hover:bg-muted"
-                  disabled={formIsSubmitting}
+                  disabled={isSubmitting}
                 >
                   Github
                 </Button>
