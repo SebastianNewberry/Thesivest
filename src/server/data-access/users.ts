@@ -438,7 +438,7 @@ export async function getFollowing(userId: string, limit?: number) {
       id: user.id,
       name: user.name,
       displayName: user.displayName,
-      username: user,
+      username: user.name,
       email: user.email,
       emailVerified: user.emailVerified,
       image: user.image,
@@ -541,7 +541,7 @@ export async function usernameExists(username: string): Promise<boolean> {
   const users = await db
     .select({ id: user.id })
     .from(user)
-    .where(eq(user, username))
+    .where(eq(user.name, username))
     .limit(1);
   return users.length > 0;
 }

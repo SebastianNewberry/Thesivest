@@ -90,12 +90,12 @@ function dbPostToUserPost(dbPost: any): UserPost {
     comments: dbPost.comments,
     performance: dbPost.performance
       ? {
-          returnPercent: Number(dbPost.performance.returnPercent),
-          returnAmount: dbPost.performance.returnAmount
-            ? Number(dbPost.performance.returnAmount)
-            : undefined,
-          status: dbPost.performance.status,
-        }
+        returnPercent: Number(dbPost.performance.returnPercent),
+        returnAmount: dbPost.performance.returnAmount
+          ? Number(dbPost.performance.returnAmount)
+          : undefined,
+        status: dbPost.performance.status,
+      }
       : undefined,
   };
 }
@@ -119,8 +119,15 @@ function dbUserToCommunityMember(dbUser: any): CommunityMember {
 }
 
 export async function getContributors(): Promise<CommunityMember[]> {
-  const users = await getAllUsers();
-  return users.map(dbUserToCommunityMember);
+  console.log("Starting getContributors...");
+  try {
+    const users = await getAllUsers();
+    console.log("getAllUsers result count:", users.length);
+    return users.map(dbUserToCommunityMember);
+  } catch (error) {
+    console.error("Error in getContributors:", error);
+    throw error;
+  }
 }
 
 // Keep for backward compatibility but use new interface

@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { getClient } from "../db";
+import { getClient } from "../db/client";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "../db/schema";
 

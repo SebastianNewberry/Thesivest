@@ -12,6 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as TournamentsRouteImport } from './routes/tournaments'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as DebugSimpleRouteImport } from './routes/debug-simple'
+import { Route as DebugDbRouteImport } from './routes/debug-db'
+import { Route as ContributorsRouteImport } from './routes/contributors'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ProfilesIdRouteImport } from './routes/profiles.$id'
 import { Route as PostsIdRouteImport } from './routes/posts.$id'
@@ -39,6 +42,21 @@ const SignupRoute = SignupRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DebugSimpleRoute = DebugSimpleRouteImport.update({
+  id: '/debug-simple',
+  path: '/debug-simple',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DebugDbRoute = DebugDbRouteImport.update({
+  id: '/debug-db',
+  path: '/debug-db',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContributorsRoute = ContributorsRouteImport.update({
+  id: '/contributors',
+  path: '/contributors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -111,6 +129,9 @@ const ApiProfilesIdPerformanceRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/contributors': typeof ContributorsRoute
+  '/debug-db': typeof DebugDbRoute
+  '/debug-simple': typeof DebugSimpleRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/tournaments': typeof TournamentsRoute
@@ -129,6 +150,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/contributors': typeof ContributorsRoute
+  '/debug-db': typeof DebugDbRoute
+  '/debug-simple': typeof DebugSimpleRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/tournaments': typeof TournamentsRoute
@@ -148,6 +172,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/contributors': typeof ContributorsRoute
+  '/debug-db': typeof DebugDbRoute
+  '/debug-simple': typeof DebugSimpleRoute
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/tournaments': typeof TournamentsRoute
@@ -168,6 +195,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/contributors'
+    | '/debug-db'
+    | '/debug-simple'
     | '/login'
     | '/signup'
     | '/tournaments'
@@ -186,6 +216,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/contributors'
+    | '/debug-db'
+    | '/debug-simple'
     | '/login'
     | '/signup'
     | '/tournaments'
@@ -204,6 +237,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/contributors'
+    | '/debug-db'
+    | '/debug-simple'
     | '/login'
     | '/signup'
     | '/tournaments'
@@ -223,6 +259,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ContributorsRoute: typeof ContributorsRoute
+  DebugDbRoute: typeof DebugDbRoute
+  DebugSimpleRoute: typeof DebugSimpleRoute
   LoginRoute: typeof LoginRoute
   SignupRoute: typeof SignupRoute
   TournamentsRoute: typeof TournamentsRoute
@@ -257,6 +296,27 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/debug-simple': {
+      id: '/debug-simple'
+      path: '/debug-simple'
+      fullPath: '/debug-simple'
+      preLoaderRoute: typeof DebugSimpleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/debug-db': {
+      id: '/debug-db'
+      path: '/debug-db'
+      fullPath: '/debug-db'
+      preLoaderRoute: typeof DebugDbRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contributors': {
+      id: '/contributors'
+      path: '/contributors'
+      fullPath: '/contributors'
+      preLoaderRoute: typeof ContributorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -383,6 +443,9 @@ const ApiProfilesIdRouteWithChildren = ApiProfilesIdRoute._addFileChildren(
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ContributorsRoute: ContributorsRoute,
+  DebugDbRoute: DebugDbRoute,
+  DebugSimpleRoute: DebugSimpleRoute,
   LoginRoute: LoginRoute,
   SignupRoute: SignupRoute,
   TournamentsRoute: TournamentsRoute,

@@ -15,11 +15,11 @@ const config = defineConfig({
     }),
     tailwindcss(),
     tanstackStart(),
-    nitro({
-      preset: "aws-lambda",
-      // Force these "missing" packages to be bundled into the server code
-      noExternals: true
-    }),
+    // nitro({
+    //   preset: "aws-lambda",
+    //   // Force these "missing" packages to be bundled into the server code
+    //   noExternals: true
+    // }),
     viteReact(),
   ],
 });
