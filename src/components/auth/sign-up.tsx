@@ -60,12 +60,15 @@ function PasswordField({
         .filter((r) => r.check(password))
         .map((r) => r.key);
 
+      // Use functional update to access the latest everMet state
+      // This prevents the infinite loop by not depending on everMet
       const newSet = new Set(everMet);
       met.forEach((key) => newSet.add(key));
       onEverMetChange(newSet);
     }
     // Don't reset when password is cleared - keep everMet state
-  }, [password, everMet, onEverMetChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [password]);
 
   return (
     <div className="space-y-2">
@@ -78,12 +81,12 @@ function PasswordField({
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
         className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
-          field.state.meta.errors.length > 0
+          field.state.meta.isTouched && field.state.meta.errors.length > 0
             ? "border-destructive focus:ring-destructive/20"
             : ""
         }`}
       />
-      {field.state.meta.errors.length > 0 && (
+      {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
         <p className="text-sm text-destructive font-medium">
           {typeof field.state.meta.errors[0] === "string"
             ? field.state.meta.errors[0]
@@ -137,8 +140,7 @@ export function SignUp() {
 
   const form = useForm({
     defaultValues: {
-      firstName: "",
-      lastName: "",
+      name: "",
       email: "",
       password: "",
     },
@@ -148,37 +150,15 @@ export function SignUp() {
     onSubmit: async ({ value }) => {
       setAuthError("");
 
-      // Combine firstName and lastName for Better Auth's name field
-      const fullName = `${value.firstName} ${value.lastName}`.trim();
-
       await authClient.signUp.email(
         {
           email: value.email,
           password: value.password,
-          name: fullName,
+          name: value.name,
+          displayName: value.name,
         },
         {
           onSuccess: async () => {
-            // Update firstName and lastName separately
-            try {
-              const response = await fetch("/api/users/update-name", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  firstName: value.firstName,
-                  lastName: value.lastName,
-                }),
-              });
-
-              if (!response.ok) {
-                console.error("Failed to update user name fields");
-              }
-            } catch (error) {
-              console.error("Error updating user name fields:", error);
-            }
-
             navigate({ to: "/" });
           },
           onError: (ctx) => {
@@ -213,60 +193,36 @@ export function SignUp() {
             }}
             className="space-y-4"
           >
-            <form.Field name="firstName">
+            <form.Field name="name">
               {(field) => (
                 <div className="space-y-2">
-                  <Label htmlFor={field.name}>First Name</Label>
+                  <Label htmlFor={field.name}>Name</Label>
                   <Input
                     id={field.name}
                     type="text"
-                    placeholder="John"
+                    placeholder="John Doe"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
+                      field.state.meta.isTouched &&
                       field.state.meta.errors.length > 0
                         ? "border-destructive focus:ring-destructive/20"
                         : ""
                     }`}
                   />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-sm text-destructive font-medium">
-                      {typeof field.state.meta.errors[0] === "string"
-                        ? field.state.meta.errors[0]
-                        : field.state.meta.errors[0]?.message ||
-                          "Invalid value"}
-                    </p>
-                  )}
-                </div>
-              )}
-            </form.Field>
-
-            <form.Field name="lastName">
-              {(field) => (
-                <div className="space-y-2">
-                  <Label htmlFor={field.name}>Last Name</Label>
-                  <Input
-                    id={field.name}
-                    type="text"
-                    placeholder="Doe"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
-                      field.state.meta.errors.length > 0
-                        ? "border-destructive focus:ring-destructive/20"
-                        : ""
-                    }`}
-                  />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-sm text-destructive font-medium">
-                      {typeof field.state.meta.errors[0] === "string"
-                        ? field.state.meta.errors[0]
-                        : field.state.meta.errors[0]?.message ||
-                          "Invalid value"}
-                    </p>
-                  )}
+                  {field.state.meta.isTouched &&
+                    field.state.meta.errors.length > 0 && (
+                      <p className="text-sm text-destructive font-medium">
+                        {typeof field.state.meta.errors[0] === "string"
+                          ? field.state.meta.errors[0]
+                          : field.state.meta.errors[0]?.message ||
+                            "Invalid value"}
+                      </p>
+                    )}
+                  <p className="text-xs text-muted-foreground">
+                    This will be your display name. You can change it later.
+                  </p>
                 </div>
               )}
             </form.Field>
@@ -283,19 +239,21 @@ export function SignUp() {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
+                      field.state.meta.isTouched &&
                       field.state.meta.errors.length > 0
                         ? "border-destructive focus:ring-destructive/20"
                         : ""
                     }`}
                   />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-sm text-destructive font-medium">
-                      {typeof field.state.meta.errors[0] === "string"
-                        ? field.state.meta.errors[0]
-                        : field.state.meta.errors[0]?.message ||
-                          "Invalid value"}
-                    </p>
-                  )}
+                  {field.state.meta.isTouched &&
+                    field.state.meta.errors.length > 0 && (
+                      <p className="text-sm text-destructive font-medium">
+                        {typeof field.state.meta.errors[0] === "string"
+                          ? field.state.meta.errors[0]
+                          : field.state.meta.errors[0]?.message ||
+                            "Invalid value"}
+                      </p>
+                    )}
                 </div>
               )}
             </form.Field>
@@ -317,20 +275,31 @@ export function SignUp() {
             )}
 
             <form.Subscribe
-              selector={(state) => [state.isSubmitting, state.canSubmit]}
-              children={([isSubmitting, canSubmit]) => (
-                <Button
-                  type="submit"
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]"
-                  disabled={isSubmitting || !canSubmit}
-                >
-                  {isSubmitting && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Sign Up
-                  {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
-                </Button>
-              )}
+              selector={(state) => ({
+                isSubmitting: state.isSubmitting,
+                canSubmit: state.canSubmit,
+                values: state.values,
+              })}
+              children={({ isSubmitting, canSubmit, values }) => {
+                const hasStartedTyping =
+                  values.name !== "" ||
+                  values.email !== "" ||
+                  values.password !== "";
+
+                return (
+                  <Button
+                    type="submit"
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]"
+                    disabled={isSubmitting || !canSubmit || !hasStartedTyping}
+                  >
+                    {isSubmitting && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Sign Up
+                    {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                  </Button>
+                );
+              }}
             />
           </form>
 

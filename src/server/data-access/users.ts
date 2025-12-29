@@ -11,6 +11,7 @@ import { eq, desc, sql } from "drizzle-orm";
 export type UserWithStats = {
   id: string;
   name: string;
+  displayName: string;
   username?: string;
   email: string;
   emailVerified: boolean;
@@ -63,7 +64,8 @@ export async function getUserById(id: string) {
   return {
     id: userData.id,
     name: userData.name,
-    username: userData.username || undefined,
+    displayName: userData.displayName,
+    username: userData.name || undefined,
     email: userData.email,
     emailVerified: userData.emailVerified,
     image: userData.image || undefined,
@@ -119,19 +121,19 @@ export async function getUserByEmail(email: string) {
 
   return {
     ...userData,
-    image: userData.image || undefined,
-    name: userData.name || undefined,
-    username: userData.username || undefined,
-    bio: userData.bio || undefined,
-    location: userData.location || undefined,
-    website: userData.website || undefined,
-    linkedin: userData.linkedin || undefined,
-    twitter: userData.twitter || undefined,
-    isClub: userData.isClub || undefined,
-    clubName: userData.clubName || undefined,
-    verified: userData.verified || undefined,
-    seekingEmployment: userData.seekingEmployment || undefined,
-    availableForHire: userData.availableForHire || undefined,
+    image: userData.image,
+    username: userData.name,
+    displayName: userData.displayName,
+    bio: userData.bio,
+    location: userData.location,
+    website: userData.website,
+    linkedin: userData.linkedin,
+    twitter: userData.twitter,
+    isClub: userData.isClub,
+    clubName: userData.clubName,
+    verified: userData.verified,
+    seekingEmployment: userData.seekingEmployment,
+    availableForHire: userData.availableForHire,
     totalPosts: Number(posts[0]?.count || 0),
     followersCount: Number(followers[0]?.count || 0),
     followingCount: Number(following[0]?.count || 0),
@@ -145,7 +147,7 @@ export async function getUserByUsername(username: string) {
   const users = await db
     .select()
     .from(user)
-    .where(eq(user.username, username))
+    .where(eq(user.name, username))
     .limit(1);
 
   if (users.length === 0) return null;
@@ -174,7 +176,8 @@ export async function getUserByUsername(username: string) {
     ...userData,
     image: userData.image || undefined,
     name: userData.name || undefined,
-    username: userData.username || undefined,
+    displayName: userData.displayName,
+    username: userData.name || undefined,
     bio: userData.bio || undefined,
     location: userData.location || undefined,
     website: userData.website || undefined,
@@ -227,7 +230,8 @@ export async function getUserByname(name: string) {
     ...userData,
     image: userData.image || undefined,
     name: userData.name || undefined,
-    username: userData.username || undefined,
+    displayName: userData.displayName,
+    username: userData.name || undefined,
     bio: userData.bio || undefined,
     location: userData.location || undefined,
     website: userData.website || undefined,
@@ -278,7 +282,7 @@ export async function getAllUsers(limit?: number) {
         ...u,
         image: u.image || undefined,
         name: u.name || undefined,
-        username: u.username || undefined,
+        username: u.name || undefined,
         bio: u.bio || undefined,
         location: u.location || undefined,
         website: u.website || undefined,
@@ -353,7 +357,8 @@ export async function getFollowers(userId: string, limit?: number) {
     .select({
       id: user.id,
       name: user.name,
-      username: user.username,
+      displayName: user.displayName,
+      username: user.name,
       email: user.email,
       emailVerified: user.emailVerified,
       image: user.image,
@@ -432,7 +437,8 @@ export async function getFollowing(userId: string, limit?: number) {
     .select({
       id: user.id,
       name: user.name,
-      username: user.username,
+      displayName: user.displayName,
+      username: user,
       email: user.email,
       emailVerified: user.emailVerified,
       image: user.image,
@@ -514,4 +520,28 @@ export async function updateUser(id: string, data: Partial<User>) {
       updatedAt: new Date(),
     })
     .where(eq(user.id, id));
+}
+
+/**
+ * Check if a display name exists
+ */
+export async function displayNameExists(displayName: string): Promise<boolean> {
+  const users = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(eq(user.displayName, displayName))
+    .limit(1);
+  return users.length > 0;
+}
+
+/**
+ * Check if a username exists
+ */
+export async function usernameExists(username: string): Promise<boolean> {
+  const users = await db
+    .select({ id: user.id })
+    .from(user)
+    .where(eq(user, username))
+    .limit(1);
+  return users.length > 0;
 }
