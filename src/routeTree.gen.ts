@@ -13,12 +13,18 @@ import { Route as TournamentsRouteImport } from './routes/tournaments'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProfilesIdRouteImport } from './routes/profiles.$id'
 import { Route as PostsIdRouteImport } from './routes/posts.$id'
 import { Route as ApiTournamentsRouteImport } from './routes/api/tournaments'
 import { Route as ApiThesesRouteImport } from './routes/api/theses'
 import { Route as ApiContributorsRouteImport } from './routes/api/contributors'
+import { Route as ProfilesIdTradesRouteImport } from './routes/profiles.$id.trades'
+import { Route as ProfilesIdPerformanceRouteImport } from './routes/profiles.$id.performance'
 import { Route as ApiUsersUpdateNameRouteImport } from './routes/api/users/update-name'
+import { Route as ApiProfilesIdRouteImport } from './routes/api/profiles/$id'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
+import { Route as ApiProfilesIdTradeHistoryRouteImport } from './routes/api/profiles/$id/trade-history'
+import { Route as ApiProfilesIdPerformanceRouteImport } from './routes/api/profiles/$id/performance'
 
 const TournamentsRoute = TournamentsRouteImport.update({
   id: '/tournaments',
@@ -38,6 +44,11 @@ const LoginRoute = LoginRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilesIdRoute = ProfilesIdRouteImport.update({
+  id: '/profiles/$id',
+  path: '/profiles/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PostsIdRoute = PostsIdRouteImport.update({
@@ -60,9 +71,24 @@ const ApiContributorsRoute = ApiContributorsRouteImport.update({
   path: '/api/contributors',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProfilesIdTradesRoute = ProfilesIdTradesRouteImport.update({
+  id: '/trades',
+  path: '/trades',
+  getParentRoute: () => ProfilesIdRoute,
+} as any)
+const ProfilesIdPerformanceRoute = ProfilesIdPerformanceRouteImport.update({
+  id: '/performance',
+  path: '/performance',
+  getParentRoute: () => ProfilesIdRoute,
+} as any)
 const ApiUsersUpdateNameRoute = ApiUsersUpdateNameRouteImport.update({
   id: '/api/users/update-name',
   path: '/api/users/update-name',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProfilesIdRoute = ApiProfilesIdRouteImport.update({
+  id: '/api/profiles/$id',
+  path: '/api/profiles/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
@@ -70,6 +96,18 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   path: '/api/auth/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiProfilesIdTradeHistoryRoute =
+  ApiProfilesIdTradeHistoryRouteImport.update({
+    id: '/trade-history',
+    path: '/trade-history',
+    getParentRoute: () => ApiProfilesIdRoute,
+  } as any)
+const ApiProfilesIdPerformanceRoute =
+  ApiProfilesIdPerformanceRouteImport.update({
+    id: '/performance',
+    path: '/performance',
+    getParentRoute: () => ApiProfilesIdRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -80,8 +118,14 @@ export interface FileRoutesByFullPath {
   '/api/theses': typeof ApiThesesRoute
   '/api/tournaments': typeof ApiTournamentsRoute
   '/posts/$id': typeof PostsIdRoute
+  '/profiles/$id': typeof ProfilesIdRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
+  '/profiles/$id/performance': typeof ProfilesIdPerformanceRoute
+  '/profiles/$id/trades': typeof ProfilesIdTradesRoute
+  '/api/profiles/$id/performance': typeof ApiProfilesIdPerformanceRoute
+  '/api/profiles/$id/trade-history': typeof ApiProfilesIdTradeHistoryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -92,8 +136,14 @@ export interface FileRoutesByTo {
   '/api/theses': typeof ApiThesesRoute
   '/api/tournaments': typeof ApiTournamentsRoute
   '/posts/$id': typeof PostsIdRoute
+  '/profiles/$id': typeof ProfilesIdRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
+  '/profiles/$id/performance': typeof ProfilesIdPerformanceRoute
+  '/profiles/$id/trades': typeof ProfilesIdTradesRoute
+  '/api/profiles/$id/performance': typeof ApiProfilesIdPerformanceRoute
+  '/api/profiles/$id/trade-history': typeof ApiProfilesIdTradeHistoryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -105,8 +155,14 @@ export interface FileRoutesById {
   '/api/theses': typeof ApiThesesRoute
   '/api/tournaments': typeof ApiTournamentsRoute
   '/posts/$id': typeof PostsIdRoute
+  '/profiles/$id': typeof ProfilesIdRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/profiles/$id': typeof ApiProfilesIdRouteWithChildren
   '/api/users/update-name': typeof ApiUsersUpdateNameRoute
+  '/profiles/$id/performance': typeof ProfilesIdPerformanceRoute
+  '/profiles/$id/trades': typeof ProfilesIdTradesRoute
+  '/api/profiles/$id/performance': typeof ApiProfilesIdPerformanceRoute
+  '/api/profiles/$id/trade-history': typeof ApiProfilesIdTradeHistoryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -119,8 +175,14 @@ export interface FileRouteTypes {
     | '/api/theses'
     | '/api/tournaments'
     | '/posts/$id'
+    | '/profiles/$id'
     | '/api/auth/$'
+    | '/api/profiles/$id'
     | '/api/users/update-name'
+    | '/profiles/$id/performance'
+    | '/profiles/$id/trades'
+    | '/api/profiles/$id/performance'
+    | '/api/profiles/$id/trade-history'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -131,8 +193,14 @@ export interface FileRouteTypes {
     | '/api/theses'
     | '/api/tournaments'
     | '/posts/$id'
+    | '/profiles/$id'
     | '/api/auth/$'
+    | '/api/profiles/$id'
     | '/api/users/update-name'
+    | '/profiles/$id/performance'
+    | '/profiles/$id/trades'
+    | '/api/profiles/$id/performance'
+    | '/api/profiles/$id/trade-history'
   id:
     | '__root__'
     | '/'
@@ -143,8 +211,14 @@ export interface FileRouteTypes {
     | '/api/theses'
     | '/api/tournaments'
     | '/posts/$id'
+    | '/profiles/$id'
     | '/api/auth/$'
+    | '/api/profiles/$id'
     | '/api/users/update-name'
+    | '/profiles/$id/performance'
+    | '/profiles/$id/trades'
+    | '/api/profiles/$id/performance'
+    | '/api/profiles/$id/trade-history'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -156,7 +230,9 @@ export interface RootRouteChildren {
   ApiThesesRoute: typeof ApiThesesRoute
   ApiTournamentsRoute: typeof ApiTournamentsRoute
   PostsIdRoute: typeof PostsIdRoute
+  ProfilesIdRoute: typeof ProfilesIdRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiProfilesIdRoute: typeof ApiProfilesIdRouteWithChildren
   ApiUsersUpdateNameRoute: typeof ApiUsersUpdateNameRoute
 }
 
@@ -190,6 +266,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profiles/$id': {
+      id: '/profiles/$id'
+      path: '/profiles/$id'
+      fullPath: '/profiles/$id'
+      preLoaderRoute: typeof ProfilesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/posts/$id': {
       id: '/posts/$id'
       path: '/posts/$id'
@@ -218,11 +301,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiContributorsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profiles/$id/trades': {
+      id: '/profiles/$id/trades'
+      path: '/trades'
+      fullPath: '/profiles/$id/trades'
+      preLoaderRoute: typeof ProfilesIdTradesRouteImport
+      parentRoute: typeof ProfilesIdRoute
+    }
+    '/profiles/$id/performance': {
+      id: '/profiles/$id/performance'
+      path: '/performance'
+      fullPath: '/profiles/$id/performance'
+      preLoaderRoute: typeof ProfilesIdPerformanceRouteImport
+      parentRoute: typeof ProfilesIdRoute
+    }
     '/api/users/update-name': {
       id: '/api/users/update-name'
       path: '/api/users/update-name'
       fullPath: '/api/users/update-name'
       preLoaderRoute: typeof ApiUsersUpdateNameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/profiles/$id': {
+      id: '/api/profiles/$id'
+      path: '/api/profiles/$id'
+      fullPath: '/api/profiles/$id'
+      preLoaderRoute: typeof ApiProfilesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
@@ -232,8 +336,50 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/profiles/$id/trade-history': {
+      id: '/api/profiles/$id/trade-history'
+      path: '/trade-history'
+      fullPath: '/api/profiles/$id/trade-history'
+      preLoaderRoute: typeof ApiProfilesIdTradeHistoryRouteImport
+      parentRoute: typeof ApiProfilesIdRoute
+    }
+    '/api/profiles/$id/performance': {
+      id: '/api/profiles/$id/performance'
+      path: '/performance'
+      fullPath: '/api/profiles/$id/performance'
+      preLoaderRoute: typeof ApiProfilesIdPerformanceRouteImport
+      parentRoute: typeof ApiProfilesIdRoute
+    }
   }
 }
+
+interface ProfilesIdRouteChildren {
+  ProfilesIdPerformanceRoute: typeof ProfilesIdPerformanceRoute
+  ProfilesIdTradesRoute: typeof ProfilesIdTradesRoute
+}
+
+const ProfilesIdRouteChildren: ProfilesIdRouteChildren = {
+  ProfilesIdPerformanceRoute: ProfilesIdPerformanceRoute,
+  ProfilesIdTradesRoute: ProfilesIdTradesRoute,
+}
+
+const ProfilesIdRouteWithChildren = ProfilesIdRoute._addFileChildren(
+  ProfilesIdRouteChildren,
+)
+
+interface ApiProfilesIdRouteChildren {
+  ApiProfilesIdPerformanceRoute: typeof ApiProfilesIdPerformanceRoute
+  ApiProfilesIdTradeHistoryRoute: typeof ApiProfilesIdTradeHistoryRoute
+}
+
+const ApiProfilesIdRouteChildren: ApiProfilesIdRouteChildren = {
+  ApiProfilesIdPerformanceRoute: ApiProfilesIdPerformanceRoute,
+  ApiProfilesIdTradeHistoryRoute: ApiProfilesIdTradeHistoryRoute,
+}
+
+const ApiProfilesIdRouteWithChildren = ApiProfilesIdRoute._addFileChildren(
+  ApiProfilesIdRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -244,7 +390,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiThesesRoute: ApiThesesRoute,
   ApiTournamentsRoute: ApiTournamentsRoute,
   PostsIdRoute: PostsIdRoute,
+  ProfilesIdRoute: ProfilesIdRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiProfilesIdRoute: ApiProfilesIdRouteWithChildren,
   ApiUsersUpdateNameRoute: ApiUsersUpdateNameRoute,
 }
 export const routeTree = rootRouteImport

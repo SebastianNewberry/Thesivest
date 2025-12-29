@@ -20,6 +20,7 @@ import { useState } from "react";
 export function SignUp() {
   const navigate = useNavigate();
   const [authError, setAuthError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -32,46 +33,51 @@ export function SignUp() {
       onChange: signUpSchema,
     },
     onSubmit: async ({ value }) => {
+      console.log("=== SIGN UP STARTED ===");
+      console.log("Form values:", value);
       setAuthError("");
+      setIsSubmitting(true);
 
       // Combine firstName and lastName for Better Auth's name field
       const fullName = `${value.firstName} ${value.lastName}`.trim();
+      console.log("Full name to send:", fullName);
 
-      await authClient.signUp.email(
-        {
-          email: value.email,
-          password: value.password,
-          name: fullName,
-        },
-        {
-          onSuccess: async () => {
-            // Update firstName and lastName separately
-            try {
-              const response = await fetch("/api/users/update-name", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  firstName: value.firstName,
-                  lastName: value.lastName,
-                }),
-              });
-
-              if (!response.ok) {
-                console.error("Failed to update user name fields");
-              }
-            } catch (error) {
-              console.error("Error updating user name fields:", error);
-            }
-
-            navigate({ to: "/" });
+      try {
+        console.log("Calling authClient.signUp.email...");
+        const result = await authClient.signUp.email(
+          {
+            email: value.email,
+            password: value.password,
+            name: fullName,
           },
-          onError: (ctx) => {
-            setAuthError(ctx.error.message);
-          },
-        }
-      );
+          {
+            onRequest: () => {
+              console.log("authClient: onRequest - Setting submitting to true");
+              setIsSubmitting(true);
+            },
+            onSuccess: async () => {
+              console.log("✅ authClient: onSuccess - Sign up successful!");
+              console.log("Result:", result);
+              setIsSubmitting(false);
+              // Avatar is generated automatically in auth hook
+              console.log("Navigating to home...");
+              navigate({ to: "/" });
+            },
+            onError: (ctx) => {
+              console.error("❌ authClient: onError - Sign up failed");
+              console.error("Error context:", ctx);
+              console.error("Error message:", ctx.error.message);
+              setAuthError(ctx.error.message || "Failed to create account");
+              setIsSubmitting(false);
+            },
+          }
+        );
+        console.log("authClient.signUp.email completed");
+      } catch (error) {
+        console.error("❌ SIGN UP CATCH - Unexpected error:", error);
+        setAuthError("An unexpected error occurred. Please try again.");
+        setIsSubmitting(false);
+      }
     },
   });
 
@@ -95,6 +101,7 @@ export function SignUp() {
             onSubmit={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              console.log("=== FORM SUBMIT ===");
               form.handleSubmit();
             }}
             className="space-y-4"
@@ -226,18 +233,18 @@ export function SignUp() {
             )}
 
             <form.Subscribe
-              selector={(state) => [state.isSubmitting, state.canSubmit]}
-              children={([isSubmitting, canSubmit]) => (
+              selector={(state) => [state.isSubmitting, state.canSubmit, isSubmitting]}
+              children={([formIsSubmitting, canSubmit, submitting]) => (
                 <Button
                   type="submit"
                   className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]"
-                  disabled={isSubmitting || !canSubmit}
+                  disabled={submitting || !canSubmit}
                 >
-                  {isSubmitting && (
+                  {submitting && (
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   )}
                   Sign Up
-                  {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                  {!submitting && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
               )}
             />
@@ -256,19 +263,19 @@ export function SignUp() {
 
           <form.Subscribe
             selector={(state) => state.isSubmitting}
-            children={(isSubmitting) => (
+            children={(formIsSubmitting) => (
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant="outline"
                   className="bg-background/50 hover:bg-muted"
-                  disabled={isSubmitting}
+                  disabled={formIsSubmitting}
                 >
                   Google
                 </Button>
                 <Button
                   variant="outline"
                   className="bg-background/50 hover:bg-muted"
-                  disabled={isSubmitting}
+                  disabled={formIsSubmitting}
                 >
                   Github
                 </Button>

@@ -21,13 +21,20 @@ export type TournamentStatus = "Upcoming" | "Active" | "Completed";
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
+  username: text("username").unique(),
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").notNull(),
   image: text("image"),
   bio: text("bio"),
+  location: text("location"),
+  website: text("website"),
+  linkedin: text("linkedin"),
+  twitter: text("twitter"),
   isClub: boolean("is_club").default(false),
   clubName: text("club_name"),
   verified: boolean("verified").default(false),
+  seekingEmployment: boolean("seeking_employment").default(false),
+  availableForHire: boolean("available_for_hire").default(false),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
@@ -43,6 +50,8 @@ export const userRelations = relations(user, ({ many }) => ({
   postLikes: many(postLike),
   comments: many(comment),
   tournamentParticipants: many(tournamentParticipant),
+  educations: many(education),
+  certifications: many(certification),
 }));
 
 export const session = pgTable("session", {
@@ -97,10 +106,13 @@ export const post = pgTable("post", {
   content: text("content").notNull(),
   buyPrice: numeric("buy_price"),
   buyDate: timestamp("buy_date"),
+  sellPrice: numeric("sell_price"),
+  sellDate: timestamp("sell_date"),
   currentPrice: numeric("current_price"),
   targetPrice: numeric("target_price"),
   stopLoss: numeric("stop_loss"),
   entryThoughts: text("entry_thoughts"),
+  exitThoughts: text("exit_thoughts"),
   publishedAt: timestamp("published_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
   views: integer("views").default(0),
@@ -303,3 +315,50 @@ export const tournamentParticipantRelations = relations(
     }),
   })
 );
+
+// Education Table
+export const education = pgTable("education", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  school: text("school").notNull(),
+  degree: text("degree").notNull(),
+  field: text("field"),
+  startDate: timestamp("start_date").notNull(),
+  endDate: timestamp("end_date"),
+  current: boolean("current").default(false),
+  gpa: text("gpa"),
+  honors: text("honors"),
+  activities: text("activities"),
+  createdAt: timestamp("created_at").notNull(),
+});
+
+export const educationRelations = relations(education, ({ one }) => ({
+  user: one(user, {
+    fields: [education.userId],
+    references: [user.id],
+  }),
+}));
+
+// Certification Table
+export const certification = pgTable("certification", {
+  id: text("id").primaryKey(),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  organization: text("organization").notNull(),
+  issueDate: timestamp("issue_date").notNull(),
+  expirationDate: timestamp("expiration_date"),
+  credentialId: text("credential_id"),
+  credentialUrl: text("credential_url"),
+  createdAt: timestamp("created_at").notNull(),
+});
+
+export const certificationRelations = relations(certification, ({ one }) => ({
+  user: one(user, {
+    fields: [certification.userId],
+    references: [user.id],
+  }),
+}));

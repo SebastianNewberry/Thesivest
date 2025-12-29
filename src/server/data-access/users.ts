@@ -8,6 +8,30 @@ import { db } from "../../db/index";
 import { user, follow, post } from "../../db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 
+export type UserWithStats = {
+  id: string;
+  name: string;
+  username?: string;
+  email: string;
+  emailVerified: boolean;
+  image?: string;
+  bio?: string;
+  location?: string;
+  website?: string;
+  linkedin?: string;
+  twitter?: string;
+  isClub?: boolean;
+  clubName?: string;
+  verified?: boolean;
+  seekingEmployment?: boolean;
+  availableForHire?: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  totalPosts: number;
+  followersCount: number;
+  followingCount: number;
+};
+
 /**
  * Get user by ID
  */
@@ -39,13 +63,20 @@ export async function getUserById(id: string) {
   return {
     id: userData.id,
     name: userData.name,
+    username: userData.username || undefined,
     email: userData.email,
     emailVerified: userData.emailVerified,
     image: userData.image || undefined,
     bio: userData.bio || undefined,
+    location: userData.location || undefined,
+    website: userData.website || undefined,
+    linkedin: userData.linkedin || undefined,
+    twitter: userData.twitter || undefined,
     isClub: userData.isClub || undefined,
     clubName: userData.clubName || undefined,
     verified: userData.verified || undefined,
+    seekingEmployment: userData.seekingEmployment || undefined,
+    availableForHire: userData.availableForHire || undefined,
     createdAt: userData.createdAt,
     updatedAt: userData.updatedAt,
     totalPosts: Number(posts[0]?.count || 0),
@@ -90,10 +121,70 @@ export async function getUserByEmail(email: string) {
     ...userData,
     image: userData.image || undefined,
     name: userData.name || undefined,
+    username: userData.username || undefined,
     bio: userData.bio || undefined,
+    location: userData.location || undefined,
+    website: userData.website || undefined,
+    linkedin: userData.linkedin || undefined,
+    twitter: userData.twitter || undefined,
     isClub: userData.isClub || undefined,
     clubName: userData.clubName || undefined,
     verified: userData.verified || undefined,
+    seekingEmployment: userData.seekingEmployment || undefined,
+    availableForHire: userData.availableForHire || undefined,
+    totalPosts: Number(posts[0]?.count || 0),
+    followersCount: Number(followers[0]?.count || 0),
+    followingCount: Number(following[0]?.count || 0),
+  };
+}
+
+/**
+ * Get user by username
+ */
+export async function getUserByUsername(username: string) {
+  const users = await db
+    .select()
+    .from(user)
+    .where(eq(user.username, username))
+    .limit(1);
+
+  if (users.length === 0) return null;
+
+  const userData = users[0];
+
+  // Get post count
+  const posts = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(post)
+    .where(eq(post.userId, userData.id));
+
+  // Get followers count
+  const followers = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(follow)
+    .where(eq(follow.followingId, userData.id));
+
+  // Get following count
+  const following = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(follow)
+    .where(eq(follow.followerId, userData.id));
+
+  return {
+    ...userData,
+    image: userData.image || undefined,
+    name: userData.name || undefined,
+    username: userData.username || undefined,
+    bio: userData.bio || undefined,
+    location: userData.location || undefined,
+    website: userData.website || undefined,
+    linkedin: userData.linkedin || undefined,
+    twitter: userData.twitter || undefined,
+    isClub: userData.isClub || undefined,
+    clubName: userData.clubName || undefined,
+    verified: userData.verified || undefined,
+    seekingEmployment: userData.seekingEmployment || undefined,
+    availableForHire: userData.availableForHire || undefined,
     totalPosts: Number(posts[0]?.count || 0),
     followersCount: Number(followers[0]?.count || 0),
     followingCount: Number(following[0]?.count || 0),
@@ -136,10 +227,17 @@ export async function getUserByname(name: string) {
     ...userData,
     image: userData.image || undefined,
     name: userData.name || undefined,
+    username: userData.username || undefined,
     bio: userData.bio || undefined,
+    location: userData.location || undefined,
+    website: userData.website || undefined,
+    linkedin: userData.linkedin || undefined,
+    twitter: userData.twitter || undefined,
     isClub: userData.isClub || undefined,
     clubName: userData.clubName || undefined,
     verified: userData.verified || undefined,
+    seekingEmployment: userData.seekingEmployment || undefined,
+    availableForHire: userData.availableForHire || undefined,
     totalPosts: Number(posts[0]?.count || 0),
     followersCount: Number(followers[0]?.count || 0),
     followingCount: Number(following[0]?.count || 0),
@@ -180,10 +278,17 @@ export async function getAllUsers(limit?: number) {
         ...u,
         image: u.image || undefined,
         name: u.name || undefined,
+        username: u.username || undefined,
         bio: u.bio || undefined,
+        location: u.location || undefined,
+        website: u.website || undefined,
+        linkedin: u.linkedin || undefined,
+        twitter: u.twitter || undefined,
         isClub: u.isClub || undefined,
         clubName: u.clubName || undefined,
         verified: u.verified || undefined,
+        seekingEmployment: u.seekingEmployment || undefined,
+        availableForHire: u.availableForHire || undefined,
         totalPosts: Number(posts[0]?.count || 0),
         followersCount: Number(followers[0]?.count || 0),
         followingCount: Number(following[0]?.count || 0),
@@ -248,13 +353,20 @@ export async function getFollowers(userId: string, limit?: number) {
     .select({
       id: user.id,
       name: user.name,
+      username: user.username,
       email: user.email,
       emailVerified: user.emailVerified,
       image: user.image,
       bio: user.bio,
+      location: user.location,
+      website: user.website,
+      linkedin: user.linkedin,
+      twitter: user.twitter,
       isClub: user.isClub,
       clubName: user.clubName,
       verified: user.verified,
+      seekingEmployment: user.seekingEmployment,
+      availableForHire: user.availableForHire,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     })
@@ -291,10 +403,17 @@ export async function getFollowers(userId: string, limit?: number) {
         ...u,
         image: u.image || undefined,
         name: u.name || undefined,
+        username: u.username || undefined,
         bio: u.bio || undefined,
+        location: u.location || undefined,
+        website: u.website || undefined,
+        linkedin: u.linkedin || undefined,
+        twitter: u.twitter || undefined,
         isClub: u.isClub || undefined,
         clubName: u.clubName || undefined,
         verified: u.verified || undefined,
+        seekingEmployment: u.seekingEmployment || undefined,
+        availableForHire: u.availableForHire || undefined,
         totalPosts: Number(posts[0]?.count || 0),
         followersCount: Number(followers[0]?.count || 0),
         followingCount: Number(following[0]?.count || 0),
@@ -313,13 +432,20 @@ export async function getFollowing(userId: string, limit?: number) {
     .select({
       id: user.id,
       name: user.name,
+      username: user.username,
       email: user.email,
       emailVerified: user.emailVerified,
       image: user.image,
       bio: user.bio,
+      location: user.location,
+      website: user.website,
+      linkedin: user.linkedin,
+      twitter: user.twitter,
       isClub: user.isClub,
       clubName: user.clubName,
       verified: user.verified,
+      seekingEmployment: user.seekingEmployment,
+      availableForHire: user.availableForHire,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     })
@@ -356,10 +482,17 @@ export async function getFollowing(userId: string, limit?: number) {
         ...u,
         image: u.image || undefined,
         name: u.name || undefined,
+        username: u.username || undefined,
         bio: u.bio || undefined,
+        location: u.location || undefined,
+        website: u.website || undefined,
+        linkedin: u.linkedin || undefined,
+        twitter: u.twitter || undefined,
         isClub: u.isClub || undefined,
         clubName: u.clubName || undefined,
         verified: u.verified || undefined,
+        seekingEmployment: u.seekingEmployment || undefined,
+        availableForHire: u.availableForHire || undefined,
         totalPosts: Number(posts[0]?.count || 0),
         followersCount: Number(followers[0]?.count || 0),
         followingCount: Number(following[0]?.count || 0),

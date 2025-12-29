@@ -46,3 +46,24 @@ export {
   type TournamentWithParticipants,
   type TournamentParticipant,
 } from "./tournaments";
+
+// Profiles
+export {
+  getUserProfile,
+  getUserProfileByUsername,
+  getUserTradeHistory,
+  getUserActiveTrades,
+  getUserClosedTrades,
+  getUserPerformanceMetrics,
+  addEducation,
+  updateEducation,
+  deleteEducation,
+  addCertification,
+  updateCertification,
+  deleteCertification,
+  type UserProfile,
+  type Education,
+  type Certification,
+  type TradeHistoryEntry,
+  type PerformanceMetrics,
+} from "./profiles";
