@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { FamousFunds } from "../components/FamousFunds";
 import {
   getContributors,
   getContributorAnalyses,
@@ -15,8 +16,8 @@ import {
   TrendingUp,
   FileText,
 } from "lucide-react";
-import { PortfolioDeck } from "../components/PortfolioDeck";
-import { useState, useEffect } from "react";
+import { HeroDashboard } from "../components/HeroDashboard";
+import { useEffect } from "react";
 import {
   Card,
   CardContent,
@@ -55,7 +56,6 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { contributors, analyses } = useLoaderData({ from: "/" });
-  const [isDeckFanned, setIsDeckFanned] = useState(false);
 
   // Save scroll position on scroll (only if navigation will be to a post)
   useEffect(() => {
@@ -119,8 +119,8 @@ function Home() {
       status === "win"
         ? "text-green-600"
         : status === "loss"
-        ? "text-red-600"
-        : "text-muted-foreground";
+          ? "text-red-600"
+          : "text-muted-foreground";
     return (
       <span className={color}>
         {sign}
@@ -131,191 +131,196 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-x-hidden">
-      {/* Abstract Background Elements */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/5 blur-[120px]" />
-      </div>
+      {/* Editorial Premium Background - Clean & Trustworthy */}
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/5 via-background to-background" />
 
-      <div className="relative z-10 max-w-[1800px] mx-auto px-6 py-12">
-        {/* Hero Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 items-center min-h-[60vh] w-full mb-24">
-          {/* Left Column: Text & Animation */}
-          <div className="flex flex-col items-center justify-center w-full">
-            {/* Logo Animation - HOVER TRIGGER */}
-            <div className="relative h-20 md:h-32 text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter flex items-center justify-center overflow-hidden w-full m-auto select-none">
-              <div
-                className="inline-flex items-center cursor-pointer hover:text-primary/80 transition-colors relative z-10"
-                onMouseEnter={() => setIsDeckFanned(true)}
-                onMouseLeave={() => setIsDeckFanned(false)}
-              >
-                <motion.div
-                  className="flex items-center"
-                  initial={{ x: -200 }}
-                  animate={{ x: 0 }}
-                  transition={{ duration: 0.6, ease: "backOut" }}
-                >
-                  <span className="text-foreground">Thesi</span>
-                  <motion.span
-                    className="text-foreground"
-                    initial={{ opacity: 1, width: "auto" }}
-                    animate={{ opacity: 0, width: 0 }}
-                    transition={{ delay: 0.6, duration: 0.4 }}
-                    style={{ display: "inline-block", overflow: "hidden" }}
-                  >
-                    s
-                  </motion.span>
-                </motion.div>
+      <div className="relative z-10 max-w-[1600px] mx-auto px-6 py-16">
+        {/* Unified Centered Hero Section */}
+        <div className="flex flex-col items-center justify-center min-h-[70vh] w-full mb-32 text-center">
 
-                <motion.span
-                  className="text-muted-foreground mx-4"
-                  initial={{
-                    opacity: 1,
-                    width: "auto",
-                    scale: 1,
-                    marginLeft: 0,
-                    marginRight: 0,
-                  }}
-                  animate={{
-                    opacity: 0,
-                    width: 0,
-                    scale: 0,
-                    marginLeft: 0,
-                    marginRight: 0,
-                  }}
-                  transition={{ duration: 0.3, delay: 0.15 }}
-                  style={{ display: "inline-block", overflow: "hidden" }}
-                >
-                  +
-                </motion.span>
-
-                <motion.div
-                  className="flex items-center"
-                  initial={{ x: 200 }}
-                  animate={{ x: 0 }}
-                  transition={{ duration: 0.6, ease: "backOut" }}
-                >
-                  <motion.span
-                    className="text-primary"
-                    initial={{ opacity: 1, width: "auto" }}
-                    animate={{ opacity: 0, width: 0 }}
-                    transition={{ delay: 0.6, duration: 0.4 }}
-                    style={{ display: "inline-block", overflow: "hidden" }}
-                  >
-                    In
-                  </motion.span>
-                  <span className="text-primary">vest</span>
-                </motion.div>
-              </div>
+          {/* Logo / Headline Brand */}
+          <div className="mb-8">
+            <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 animate-fade-in">
+              <span className="flex h-2 w-2 rounded-full bg-primary mr-2"></span>
+              Thesivest Platform
             </div>
 
-            {/* Tagline */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.5, duration: 0.6 }}
-              className="space-y-6 text-center mt-4"
-            >
-              <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                Thesis + Invest. <br />
-                <span className="text-muted-foreground">
-                  Where Research Becomes Conviction.
-                </span>
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-                Stop buying stocks without a plan. Document your thesis, track
-                your performance, and learn from investors who actually beat the
-                market.
-              </p>
-              <div className="flex gap-4 justify-center pt-4">
-                <Link to="/signup">
-                  <Button size="lg" className="group">
-                    Start Tracking Your Picks
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-                <Button size="lg" variant="outline" asChild>
-                  <Link to="/tournaments">Explore Tournaments</Link>
-                </Button>
-              </div>
-            </motion.div>
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground mb-6 max-w-4xl mx-auto leading-[1.1]">
+              Thesis + Invest. <br />
+              <span className="text-primary italic font-serif">
+                Where Research Becomes Conviction.
+              </span>
+            </h1>
           </div>
 
-          {/* Right Column: Chart */}
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
+            Stop buying stocks without a plan. Document your thesis, track
+            your performance with institutional-grade tools, and learn from investors who actually beat the
+            market.
+          </p>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16 w-full sm:w-auto">
+            <Link to="/signup">
+              <Button size="lg" className="h-12 px-8 text-base bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg hover:shadow-primary/20 transition-all rounded-full">
+                Start Tracking Your Picks
+                <ArrowRight className="ml-2 w-4 h-4" />
+              </Button>
+            </Link>
+            <Button size="lg" variant="outline" className="h-12 px-8 text-base border-primary/20 hover:bg-primary/5 text-foreground transition-all rounded-full" asChild>
+              <Link to="/tournaments">Explore Tournaments</Link>
+            </Button>
+          </div>
+
+          {/* Centered Portfolio Dashboard Visualization */}
           <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.8, duration: 0.6 }}
-            className="flex items-center justify-center w-full relative z-20"
+            initial={{ opacity: 0, y: 40 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+            className="w-full max-w-5xl mx-auto relative z-20"
           >
-            <PortfolioDeck isFanned={isDeckFanned} />
+            <div className="absolute -inset-4 bg-primary/5 rounded-3xl blur-2xl z-0" />
+            <div className="relative z-10">
+              <HeroDashboard />
+            </div>
           </motion.div>
         </div>
 
-        {/* Core Features Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5 }}
-          className="mb-24"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything You Need to Invest Smarter
+        {/* Bento Grid Features Section */}
+        <section className="mb-32">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-serif text-foreground">
+              Institutional-Grade Tools for Retail Investors
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Track your investments, document your thesis, and build a
-              following of investors who learn from your decisions
+              Professional tools designed to help you build a verifiable track record.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-card/50 backdrop-blur-xl border-border hover:border-primary/50 transition-all">
-              <CardHeader>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Main Feature - Spans 2 Columns */}
+            <Card className="md:col-span-2 bg-card border-border/60 shadow-sm hover:shadow-md transition-all overflow-hidden relative group">
+              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+                <TrendingUp className="w-32 h-32 text-primary" />
+              </div>
+              <CardHeader className="relative z-10">
                 <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
                   <TrendingUp className="w-6 h-6 text-primary" />
                 </div>
-                <CardTitle>Track Your Portfolio</CardTitle>
-                <CardDescription>
-                  Create your portfolio and track every trade with automatic
-                  price updates. Monitor performance in real-time with
+                <CardTitle className="text-2xl">Track Your Portfolio</CardTitle>
+                <CardDescription className="text-base mt-2 max-w-lg">
+                  Create your portfolio and track every trade with daily
+                  price updates. Monitor performance with
                   comprehensive analytics including win rate, returns, and risk
                   metrics.
                 </CardDescription>
               </CardHeader>
+              <CardContent className="relative z-10">
+                {/* Decorative mini-graph or UI element could go here */}
+                <div className="h-32 bg-primary/5 rounded-lg border border-primary/10 mt-4 w-full flex items-center justify-center text-muted-foreground text-sm italic">
+                  Performance Analytics Dashboard Preview
+                </div>
+              </CardContent>
             </Card>
 
-            <Card className="bg-card/50 backdrop-blur-xl border-border hover:border-primary/50 transition-all">
+            {/* Secondary Feature - Vertical */}
+            <Card className="md:col-span-1 bg-card border-border/60 shadow-sm hover:shadow-md transition-all group">
               <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-                  <FileText className="w-6 h-6 text-primary" />
+                <div className="w-12 h-12 rounded-lg bg-accent/20 border border-accent/30 flex items-center justify-center mb-4">
+                  <FileText className="w-6 h-6 text-accent-foreground" />
                 </div>
-                <CardTitle>Document Your Thesis</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-xl">Document Your Thesis</CardTitle>
+                <CardDescription className="mt-2">
                   Before every trade, write down your investment thesis.
-                  Document entry price, target price, stop loss, and the
-                  reasoning behind your decision. Build a track record you can
-                  be proud of.
+                  Document entry price, target price, and stop loss.
                 </CardDescription>
               </CardHeader>
             </Card>
 
-            <Card className="bg-card/50 backdrop-blur-xl border-border hover:border-primary/50 transition-all">
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-                  <Users className="w-6 h-6 text-primary" />
+            {/* Third Feature - Full Width Bottom */}
+            <Card className="md:col-span-3 bg-gradient-to-r from-card to-muted/50 border-border/60 shadow-sm hover:shadow-md transition-all">
+              <div className="flex flex-col md:flex-row items-center">
+                <CardHeader className="flex-1">
+                  <div className="w-12 h-12 rounded-lg bg-secondary/10 border border-secondary/20 flex items-center justify-center mb-4">
+                    <Users className="w-6 h-6 text-secondary" />
+                  </div>
+                  <CardTitle className="text-2xl">Build Your Following</CardTitle>
+                  <CardDescription className="text-lg mt-2">
+                    Share your insights with the community. As you build a proven
+                    track record, you'll attract followers who learn from your
+                    research and investment process.
+                  </CardDescription>
+                </CardHeader>
+                <div className="p-8 hidden md:block">
+                  <div className="flex -space-x-4">
+                    {[1, 2, 3, 4].map(i => (
+                      <div key={i} className="w-12 h-12 rounded-full border-2 border-background bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
+                        U{i}
+                      </div>
+                    ))}
+                    <div className="w-12 h-12 rounded-full border-2 border-background bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+                      +1k
+                    </div>
+                  </div>
                 </div>
-                <CardTitle>Build Your Following</CardTitle>
-                <CardDescription>
-                  Share your insights with the community. As you build a proven
-                  track record, you'll attract followers who learn from your
-                  research and investment process.
-                </CardDescription>
-              </CardHeader>
+              </div>
             </Card>
           </div>
-        </motion.section>
+        </section>
+
+        {/* Mission & Vision Section - "The Business Card for Finance" */}
+        <section className="mb-32 py-24 border-y border-border/40 relative overflow-hidden bg-muted/20">
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-full bg-primary/5 blur-3xl -z-10 pointer-events-none" />
+
+          <div className="max-w-6xl mx-auto px-6">
+            <div className="text-center mb-20">
+              <span className="text-primary font-bold tracking-widest text-xs uppercase mb-4 block">The Mission</span>
+              <h2 className="text-4xl md:text-5xl font-serif text-foreground leading-tight max-w-3xl mx-auto">
+                Your Live Business Card for the Finance World.
+              </h2>
+              <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto">
+                Whether you're a student breaking into the industry or a professional building your reputation, Thesivest is where you prove your edge.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-12 text-left">
+              {/* Pillar 1: Career */}
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
+                  <FileText className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-2xl font-serif text-foreground">Build Your Track Record</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Stop sending static PDF resumes. Send a link to your live portfolio. Show employers exactly what you bought, when you bought it, and <span className="text-foreground font-medium">why</span>. Prove your analysis skills with a verified history of your calls.
+                </p>
+              </div>
+
+              {/* Pillar 2: AI Research */}
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center mb-2">
+                  <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <h3 className="text-2xl font-serif text-foreground">Leverage AI Research</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Institutional grade data at your fingertips. We're integrating advanced AI tools to help you tear down 10-Ks, analyze earnings calls, and stress-test your thesis in seconds, not hours. Focus on the decision, not the data entry.
+                </p>
+              </div>
+
+              {/* Pillar 3: Community */}
+              <div className="space-y-4">
+                <div className="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center mb-2">
+                  <Users className="w-6 h-6 text-amber-600 dark:text-amber-400" />
+                </div>
+                <h3 className="text-2xl font-serif text-foreground">Follow the Smart Money</h3>
+                <p className="text-muted-foreground leading-relaxed">
+                  Don't invest in a vacuum. Follow top performers, read their detailed investment memos, and debate the merits of a trade. Build a following of your own by consistently sharing high-quality insights.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Famous Funds Section - "Track the Giants" */}
+        <FamousFunds />
 
         {/* How It Works Section */}
         <motion.section
@@ -323,63 +328,53 @@ function Home() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.5 }}
-          className="mb-24"
+          className="mb-32"
         >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Get Started in Minutes
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 font-serif">
+              A Disciplined Process
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              A simple workflow that keeps you disciplined and accountable
+              Simple steps to professionalize your investing journey.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-4 gap-8">
             {[
               {
-                step: "1",
+                step: "01",
                 title: "Sign Up",
                 description:
-                  "Create your free account in seconds. No credit card required.",
+                  "Create your free investor profile.",
               },
               {
-                step: "2",
-                title: "Add Your Thesis",
+                step: "02",
+                title: "Add Thesis",
                 description:
-                  "Document your research, entry price, and target before buying.",
+                  "Document your research and targets.",
               },
               {
-                step: "3",
-                title: "Track Performance",
+                step: "03",
+                title: "Track",
                 description:
-                  "Automatic price updates show you how your thesis plays out.",
+                  "Monitor performance with daily updates.",
               },
               {
-                step: "4",
-                title: "Build Reputation",
+                step: "04",
+                title: "Grow",
                 description:
-                  "Share insights and grow your community of followers.",
+                  "Build reputation and community.",
               },
             ].map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-              >
-                <Card className="text-center h-full bg-card/50 backdrop-blur-xl border-border hover:border-primary/50 transition-all">
-                  <CardContent className="pt-6 flex flex-col items-center">
-                    <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg mb-4">
-                      {item.step}
-                    </div>
-                    <h3 className="font-semibold mb-2">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {item.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
+              <div key={index} className="relative group">
+                <div className="text-6xl font-black text-muted/20 absolute -top-8 -left-4 z-0 group-hover:text-primary/10 transition-colors select-none">
+                  {item.step}
+                </div>
+                <div className="relative z-10 pt-4 px-2">
+                  <h3 className="font-bold text-xl mb-2 text-foreground">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                </div>
+              </div>
             ))}
           </div>
         </motion.section>
@@ -427,8 +422,8 @@ function Home() {
                           {post.type === "trade"
                             ? "Trade"
                             : post.type === "thought"
-                            ? "Thought"
-                            : "Update"}
+                              ? "Thought"
+                              : "Update"}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
                           {post.publishedAt}

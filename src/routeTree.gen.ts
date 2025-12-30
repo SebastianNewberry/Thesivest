@@ -11,7 +11,9 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as TournamentsRouteImport } from './routes/tournaments'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SanityRouteImport } from './routes/sanity'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as FundsRouteImport } from './routes/funds'
 import { Route as DebugSimpleRouteImport } from './routes/debug-simple'
 import { Route as DebugDbRouteImport } from './routes/debug-db'
 import { Route as ContributorsRouteImport } from './routes/contributors'
@@ -39,9 +41,19 @@ const SignupRoute = SignupRouteImport.update({
   path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SanityRoute = SanityRouteImport.update({
+  id: '/sanity',
+  path: '/sanity',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FundsRoute = FundsRouteImport.update({
+  id: '/funds',
+  path: '/funds',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DebugSimpleRoute = DebugSimpleRouteImport.update({
@@ -132,7 +144,9 @@ export interface FileRoutesByFullPath {
   '/contributors': typeof ContributorsRoute
   '/debug-db': typeof DebugDbRoute
   '/debug-simple': typeof DebugSimpleRoute
+  '/funds': typeof FundsRoute
   '/login': typeof LoginRoute
+  '/sanity': typeof SanityRoute
   '/signup': typeof SignupRoute
   '/tournaments': typeof TournamentsRoute
   '/api/contributors': typeof ApiContributorsRoute
@@ -153,7 +167,9 @@ export interface FileRoutesByTo {
   '/contributors': typeof ContributorsRoute
   '/debug-db': typeof DebugDbRoute
   '/debug-simple': typeof DebugSimpleRoute
+  '/funds': typeof FundsRoute
   '/login': typeof LoginRoute
+  '/sanity': typeof SanityRoute
   '/signup': typeof SignupRoute
   '/tournaments': typeof TournamentsRoute
   '/api/contributors': typeof ApiContributorsRoute
@@ -175,7 +191,9 @@ export interface FileRoutesById {
   '/contributors': typeof ContributorsRoute
   '/debug-db': typeof DebugDbRoute
   '/debug-simple': typeof DebugSimpleRoute
+  '/funds': typeof FundsRoute
   '/login': typeof LoginRoute
+  '/sanity': typeof SanityRoute
   '/signup': typeof SignupRoute
   '/tournaments': typeof TournamentsRoute
   '/api/contributors': typeof ApiContributorsRoute
@@ -198,7 +216,9 @@ export interface FileRouteTypes {
     | '/contributors'
     | '/debug-db'
     | '/debug-simple'
+    | '/funds'
     | '/login'
+    | '/sanity'
     | '/signup'
     | '/tournaments'
     | '/api/contributors'
@@ -219,7 +239,9 @@ export interface FileRouteTypes {
     | '/contributors'
     | '/debug-db'
     | '/debug-simple'
+    | '/funds'
     | '/login'
+    | '/sanity'
     | '/signup'
     | '/tournaments'
     | '/api/contributors'
@@ -240,7 +262,9 @@ export interface FileRouteTypes {
     | '/contributors'
     | '/debug-db'
     | '/debug-simple'
+    | '/funds'
     | '/login'
+    | '/sanity'
     | '/signup'
     | '/tournaments'
     | '/api/contributors'
@@ -262,7 +286,9 @@ export interface RootRouteChildren {
   ContributorsRoute: typeof ContributorsRoute
   DebugDbRoute: typeof DebugDbRoute
   DebugSimpleRoute: typeof DebugSimpleRoute
+  FundsRoute: typeof FundsRoute
   LoginRoute: typeof LoginRoute
+  SanityRoute: typeof SanityRoute
   SignupRoute: typeof SignupRoute
   TournamentsRoute: typeof TournamentsRoute
   ApiContributorsRoute: typeof ApiContributorsRoute
@@ -291,11 +317,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sanity': {
+      id: '/sanity'
+      path: '/sanity'
+      fullPath: '/sanity'
+      preLoaderRoute: typeof SanityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/funds': {
+      id: '/funds'
+      path: '/funds'
+      fullPath: '/funds'
+      preLoaderRoute: typeof FundsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/debug-simple': {
@@ -446,7 +486,9 @@ const rootRouteChildren: RootRouteChildren = {
   ContributorsRoute: ContributorsRoute,
   DebugDbRoute: DebugDbRoute,
   DebugSimpleRoute: DebugSimpleRoute,
+  FundsRoute: FundsRoute,
   LoginRoute: LoginRoute,
+  SanityRoute: SanityRoute,
   SignupRoute: SignupRoute,
   TournamentsRoute: TournamentsRoute,
   ApiContributorsRoute: ApiContributorsRoute,
