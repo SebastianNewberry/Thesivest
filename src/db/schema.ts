@@ -387,3 +387,72 @@ export const certificationRelations = relations(certification, ({ one }) => ({
     references: [user.id],
   }),
 }));
+
+// Portfolio System
+export const portfolio = pgTable("portfolio", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  name: text("name").notNull(),
+  description: text("description"),
+  isPublic: boolean("is_public").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const portfolioRelations = relations(portfolio, ({ one, many }) => ({
+  user: one(user, {
+    fields: [portfolio.userId],
+    references: [user.id],
+  }),
+  holdings: many(portfolioHolding),
+  snapshots: many(portfolioSnapshot),
+}));
+
+export const portfolioHolding = pgTable("portfolio_holding", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  portfolioId: text("portfolio_id")
+    .notNull()
+    .references(() => portfolio.id, { onDelete: "cascade" }),
+  symbol: text("symbol").notNull(),
+  shares: numeric("shares").notNull(),
+  averageCost: numeric("average_cost").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const portfolioHoldingRelations = relations(portfolioHolding, ({ one }) => ({
+  portfolio: one(portfolio, {
+    fields: [portfolioHolding.portfolioId],
+    references: [portfolio.id],
+  }),
+}));
+
+export const portfolioSnapshot = pgTable("portfolio_snapshot", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  portfolioId: text("portfolio_id")
+    .notNull()
+    .references(() => portfolio.id, { onDelete: "cascade" }),
+  date: timestamp("date").notNull().defaultNow(),
+  totalValue: numeric("total_value").notNull(),
+});
+
+export const portfolioSnapshotRelations = relations(portfolioSnapshot, ({ one }) => ({
+  portfolio: one(portfolio, {
+    fields: [portfolioSnapshot.portfolioId],
+    references: [portfolio.id],
+  }),
+}));

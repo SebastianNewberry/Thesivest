@@ -6,7 +6,7 @@ import {
   getContributorAnalyses,
 } from "../server/features/contributors";
 import { useLoaderData } from "@tanstack/react-router";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   Users,
   ArrowRight,
@@ -17,7 +17,7 @@ import {
   FileText,
 } from "lucide-react";
 import { HeroDashboard } from "../components/HeroDashboard";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Card,
   CardContent,
@@ -139,19 +139,30 @@ function Home() {
         <div className="flex flex-col items-center justify-center min-h-[70vh] w-full mb-32 text-center">
 
           {/* Logo / Headline Brand */}
-          <div className="mb-8">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
+            className="mb-8"
+          >
             <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 animate-fade-in">
               <span className="flex h-2 w-2 rounded-full bg-primary mr-2"></span>
               Thesivest Platform
             </div>
 
-            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground mb-6 max-w-4xl mx-auto leading-[1.1]">
-              Thesis + Invest. <br />
-              <span className="text-primary italic font-serif">
+            <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground mb-6 max-w-[90vw] mx-auto leading-[1.1] min-h-[160px] flex flex-col items-center justify-center">
+              <span className="sr-only">Thesivest. Where Research Becomes Conviction.</span>
+              <TitleAnimation />
+              <motion.span
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2.5, duration: 1 }}
+                className="text-primary italic font-serif block mt-2"
+              >
                 Where Research Becomes Conviction.
-              </span>
+              </motion.span>
             </h1>
-          </div>
+          </motion.div>
 
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             Stop buying stocks without a plan. Document your thesis, track
@@ -186,7 +197,13 @@ function Home() {
         </div>
 
         {/* Bento Grid Features Section */}
-        <section className="mb-32">
+        <motion.section
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-100px" }}
+          transition={{ duration: 0.8 }}
+          className="mb-32"
+        >
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 font-serif text-foreground">
               Institutional-Grade Tools for Retail Investors
@@ -265,10 +282,16 @@ function Home() {
               </div>
             </Card>
           </div>
-        </section>
+        </motion.section>
 
         {/* Mission & Vision Section - "The Business Card for Finance" */}
-        <section className="mb-32 py-24 border-y border-border/40 relative overflow-hidden bg-muted/20">
+        <motion.section
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="mb-32 py-24 border-y border-border/40 relative overflow-hidden bg-muted/20"
+        >
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-full bg-primary/5 blur-3xl -z-10 pointer-events-none" />
 
           <div className="max-w-6xl mx-auto px-6">
@@ -317,10 +340,17 @@ function Home() {
               </div>
             </div>
           </div>
-        </section>
+        </motion.section>
 
         {/* Famous Funds Section - "Track the Giants" */}
-        <FamousFunds />
+        <motion.div
+          initial={{ opacity: 0 }}
+          whileInView={{ opacity: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        >
+          <FamousFunds />
+        </motion.div>
 
         {/* How It Works Section */}
         <motion.section
@@ -532,6 +562,65 @@ function Home() {
           </Card>
         </motion.section>
       </div>
+    </div>
+  );
+}
+function TitleAnimation() {
+  const [step, setStep] = useState(0);
+
+  useEffect(() => {
+    // 0 -> Show words
+    // 2s -> Start Move
+    const timer = setTimeout(() => {
+      setStep(1);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  return (
+    <div className="relative flex items-center justify-center p-2 min-h-[1.2em]">
+      <AnimatePresence mode="wait">
+        {step === 0 ? (
+          <motion.div
+            key="thesis-invest"
+            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            exit={{ opacity: 0, filter: "blur(20px)", scale: 0.9 }} // Quick fade out for smooth swap
+            transition={{ duration: 0.8 }}
+            className="flex items-center gap-4 text-foreground"
+          >
+            <motion.span
+              animate={step === 1 ? { x: 50, opacity: 0 } : { x: 0, opacity: 1 }} // Slide Right
+              transition={{ duration: 0.8, ease: "backIn" }}
+            >
+              Thesis
+            </motion.span>
+            <motion.span
+              animate={step === 1 ? { scale: 0, rotate: 180, opacity: 0 } : { scale: 1, rotate: 0, opacity: 1 }} // Spin out
+              transition={{ duration: 0.3, delay: 0.2 }}
+              className="text-primary text-4xl"
+            >
+              +
+            </motion.span>
+            <motion.span
+              animate={step === 1 ? { x: -50, opacity: 0 } : { x: 0, opacity: 1 }} // Slide Left
+              transition={{ duration: 0.8, ease: "backIn" }}
+            >
+              Invest.
+            </motion.span>
+          </motion.div>
+        ) : (
+          <motion.span
+            key="thesivest"
+            initial={{ opacity: 0, scale: 2, filter: "blur(20px)" }} // Explode in
+            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            transition={{ duration: 0.6, ease: "circOut" }}
+            className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/50 block absolute"
+          >
+            Thesivest.
+          </motion.span>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
