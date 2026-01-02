@@ -12,15 +12,128 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Loader2, ArrowRight } from "lucide-react";
+import { Loader2, ArrowRight, Check, X } from "lucide-react";
 import { motion } from "motion/react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+// Password field component with requirements list
+function PasswordField({
+  field,
+  everMet,
+  onEverMetChange,
+}: {
+  field: any;
+  everMet: Set<string>;
+  onEverMetChange: (newSet: Set<string>) => void;
+}) {
+  const password = field.state.value;
+
+  // Password requirements
+  const requirements = [
+    {
+      key: "length",
+      text: "At least 8 characters",
+      check: (pwd: string) => pwd.length >= 8,
+    },
+    {
+      key: "uppercase",
+      text: "Contains uppercase letter",
+      check: (pwd: string) => /[A-Z]/.test(pwd),
+    },
+    {
+      key: "lowercase",
+      text: "Contains lowercase letter",
+      check: (pwd: string) => /[a-z]/.test(pwd),
+    },
+    {
+      key: "number",
+      text: "Contains a number",
+      check: (pwd: string) => /\d/.test(pwd),
+    },
+  ];
+
+  useEffect(() => {
+    if (password) {
+      // Accumulate requirements that have been met (don't remove if they become invalid)
+      const met = requirements
+        .filter((r) => r.check(password))
+        .map((r) => r.key);
+
+      const newSet = new Set(everMet);
+      met.forEach((key) => newSet.add(key));
+      onEverMetChange(newSet);
+    }
+    // Don't reset when password is cleared - keep everMet state
+  }, [password, everMet, onEverMetChange]);
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={field.name}>Password</Label>
+      <Input
+        id={field.name}
+        type="password"
+        showPasswordToggle
+        value={field.state.value}
+        onBlur={field.handleBlur}
+        onChange={(e) => field.handleChange(e.target.value)}
+        className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
+          field.state.meta.errors.length > 0
+            ? "border-destructive focus:ring-destructive/20"
+            : ""
+        }`}
+      />
+      {field.state.meta.errors.length > 0 && (
+        <p className="text-sm text-destructive font-medium">
+          {typeof field.state.meta.errors[0] === "string"
+            ? field.state.meta.errors[0]
+            : field.state.meta.errors[0]?.message || "Invalid value"}
+        </p>
+      )}
+
+      {/* Password Requirements List */}
+      <ul className="space-y-1.5 mt-3">
+        {requirements.map((req) => {
+          const isMet = req.check(password);
+          const hasEverBeenMet = everMet.has(req.key);
+
+          // Color logic:
+          // - Green if requirement is currently met
+          // - Red if requirement has ever been met but is now not met (user is typing incorrectly)
+          // - Black if requirement has never been met yet
+          const getColor = () => {
+            if (isMet) return "text-green-600";
+            if (hasEverBeenMet) return "text-red-600";
+            return "text-foreground";
+          };
+
+          const getIcon = () => {
+            if (isMet) return <Check className="h-4 w-4 text-green-600" />;
+            if (hasEverBeenMet) return <X className="h-4 w-4 text-red-600" />;
+            return null;
+          };
+
+          return (
+            <li
+              key={req.key}
+              className={`flex items-center gap-2 text-sm ${getColor()}`}
+            >
+              {getIcon()}
+              <span>{req.text}</span>
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
 
 export function SignUp() {
   const navigate = useNavigate();
   const [authError, setAuthError] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [passwordEverMet, setPasswordEverMet] = useState<Set<string>>(
+    new Set()
+  );
 
   const form = useForm({
     defaultValues: {
@@ -195,34 +308,11 @@ export function SignUp() {
 
             <form.Field name="password">
               {(field) => (
-                <div className="space-y-2">
-                  <Label htmlFor={field.name}>Password</Label>
-                  <Input
-                    id={field.name}
-                    type="password"
-                    showPasswordToggle
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
-                      field.state.meta.errors.length > 0
-                        ? "border-destructive focus:ring-destructive/20"
-                        : ""
-                    }`}
-                  />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-sm text-destructive font-medium">
-                      {typeof field.state.meta.errors[0] === "string"
-                        ? field.state.meta.errors[0]
-                        : field.state.meta.errors[0]?.message ||
-                          "Invalid value"}
-                    </p>
-                  )}
-                  <p className="text-xs text-muted-foreground">
-                    Password must be at least 8 characters with uppercase,
-                    lowercase, and a number
-                  </p>
-                </div>
+                <PasswordField
+                  field={field}
+                  everMet={passwordEverMet}
+                  onEverMetChange={setPasswordEverMet}
+                />
               )}
             </form.Field>
 
@@ -233,7 +323,11 @@ export function SignUp() {
             )}
 
             <form.Subscribe
-              selector={(state) => [state.isSubmitting, state.canSubmit, isSubmitting]}
+              selector={(state) => [
+                state.isSubmitting,
+                state.canSubmit,
+                isSubmitting,
+              ]}
               children={([formIsSubmitting, canSubmit, submitting]) => (
                 <Button
                   type="submit"
