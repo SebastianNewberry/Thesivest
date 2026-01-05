@@ -124,12 +124,17 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                                         className="px-3 py-2 border-b border-border/50 flex justify-between items-center bg-muted/20 shrink-0"
                                     >
                                         <span className={cn(
-                                            "font-bold text-sm truncate",
+                                            "font-bold text-sm truncate max-w-[140px]",
                                             portfolio.id === 'thesivest' ? "text-secondary" : "text-foreground"
                                         )}>{portfolio.name}</span>
-                                        <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20 whitespace-nowrap">
-                                            vs S&P 500
-                                        </span>
+                                        {portfolio.id === 'thesivest' && (
+                                            <div className="flex gap-2">
+                                                <span className="text-[10px] bg-secondary/10 text-secondary px-1.5 py-0.5 rounded border border-secondary/20 whitespace-nowrap font-mono">
+                                                    α {portfolio.stats?.alpha}
+                                                </span>
+                                            </div>
+                                        )}
+
                                     </motion.div>
                                 )}
 
@@ -139,9 +144,22 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                                         <motion.div
                                             initial={{ opacity: 0 }}
                                             animate={{ opacity: 1 }}
-                                            className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-md border border-border/50 text-[10px] text-muted-foreground z-20 pointer-events-none"
+                                            className="absolute top-10 left-3 right-3 flex justify-between items-center z-20 pointer-events-none"
                                         >
-                                            Real User Portfolios
+                                            {/* Stats Row */}
+                                            <div className="flex gap-2 w-full">
+                                                <div className="bg-background/80 backdrop-blur px-2 py-1 rounded border border-border/50 text-[10px] text-muted-foreground flex-1 text-center">
+                                                    <div className="text-[8px] uppercase tracking-wider text-muted-foreground/70">Beta</div>
+                                                    <div className="font-mono font-medium text-foreground">{portfolio.stats?.beta}</div>
+                                                </div>
+                                                <div className="bg-background/80 backdrop-blur px-2 py-1 rounded border border-border/50 text-[10px] text-muted-foreground flex-1 text-center">
+                                                    <div className="text-[8px] uppercase tracking-wider text-muted-foreground/70">Return</div>
+                                                    <div className={`font-mono font-medium ${portfolio.stats?.return.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
+                                                        {portfolio.stats?.return}
+                                                    </div>
+                                                </div>
+                                            </div>
+
                                         </motion.div>
                                     )}
 

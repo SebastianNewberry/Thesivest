@@ -17,6 +17,7 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog";
 import { ExternalLink } from "lucide-react";
+import { FundSearch } from "./FundSearch";
 
 type AssetClass = "equity" | "fixed_income" | "alternatives";
 
@@ -98,8 +99,12 @@ const MOCKED_FUNDS = [
     }
 ];
 
+import { StockSearch } from "./StockSearch";
+import { motion, AnimatePresence } from "motion/react";
+
 export function FundResearch() {
     const [activeTab, setActiveTab] = useState<AssetClass>("equity");
+    const [searchMode, setSearchMode] = useState<'fund' | 'stock'>('fund');
 
     const filteredFunds = MOCKED_FUNDS.filter(f => f.type === activeTab);
 
@@ -112,18 +117,63 @@ export function FundResearch() {
                         <div>
                             <h1 className="text-4xl font-serif font-bold mb-2">Fund Research</h1>
                             <p className="text-muted-foreground text-lg max-w-2xl">
-                                Analyze institutional flows. Decrypt the "Smart Money" across asset classes.
+                                Analyze market flows. Decrypt the "Smart Money" across asset classes.
                             </p>
                         </div>
-                        <div className="flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">
-                            <TrendingUp className="w-4 h-4" />
-                            AI Sentiment Analysis Active
-                        </div>
+
                     </div>
                 </div>
             </div>
 
             <div className="container mx-auto px-4 py-8">
+
+                {/* Research Tool Selector */}
+                <div className="flex justify-center mb-8">
+                    <div className="bg-muted/30 p-1 rounded-full inline-flex">
+                        <button
+                            onClick={() => setSearchMode('fund')}
+                            className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${searchMode === 'fund' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                            Fund Intelligence
+                        </button>
+                        <button
+                            onClick={() => setSearchMode('stock')}
+                            className={`px-6 py-2 rounded-full text-sm font-medium transition-all ${searchMode === 'stock' ? 'bg-primary text-primary-foreground shadow-lg' : 'text-muted-foreground hover:text-foreground'}`}
+                        >
+                            Stock Analysis
+                        </button>
+                    </div>
+                </div>
+
+                {/* AI Research Integration */}
+                <div className="min-h-[400px]">
+                    <AnimatePresence mode="wait">
+                        {searchMode === 'fund' ? (
+                            <motion.div
+                                key="fund-search"
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <FundSearch />
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="stock-search"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <StockSearch />
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+
+                {/* Divider */}
+                <div className="my-12 border-t border-border/40" />
 
                 {/* Asset Class Tabs */}
                 <div className="flex flex-wrap gap-2 mb-8 border-b border-border/40 pb-1">

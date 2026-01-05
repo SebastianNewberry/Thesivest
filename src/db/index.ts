@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Resource } from "sst";
 
@@ -8,7 +9,7 @@ console.log("Resource:", Resource);
 console.log("VITE_DATABASE_URL_POOLER:", Resource.VITE_DATABASE_URL_POOLER);
 
 // Get the database URL with optional chaining
-const dbUrl = Resource.VITE_DATABASE_URL_POOLER?.value;
+const dbUrl = Resource.VITE_DATABASE_URL_POOLER?.value || process.env.VITE_DATABASE_URL_POOLER || process.env.DATABASE_URL;
 
 console.log("dbUrl:", dbUrl);
 

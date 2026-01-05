@@ -5,7 +5,7 @@
 
 import { db } from "../../db/index";
 import { post, postTag, tag, tradePerformance, user } from "../../db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, like, or } from "drizzle-orm";
 
 export interface PostWithDetails {
   id: string;
@@ -118,24 +118,24 @@ function convertPostToPostWithDetails(
     tags,
     user: user
       ? {
-          id: user.id,
-          name: user.name,
-          username: user.username || undefined,
-          image: user.image || undefined,
-          bio: user.bio || undefined,
-          isClub: user.isClub || undefined,
-          clubName: user.clubName || undefined,
-          verified: user.verified || undefined,
-        }
+        id: user.id,
+        name: user.name,
+        username: user.username || undefined,
+        image: user.image || undefined,
+        bio: user.bio || undefined,
+        isClub: user.isClub || undefined,
+        clubName: user.clubName || undefined,
+        verified: user.verified || undefined,
+      }
       : undefined,
     performance: performance
       ? {
-          returnPercent: Number(performance.returnPercent),
-          returnAmount: performance.returnAmount
-            ? Number(performance.returnAmount)
-            : undefined,
-          status: performance.status as "active" | "win" | "loss" | "breakeven",
-        }
+        returnPercent: Number(performance.returnPercent),
+        returnAmount: performance.returnAmount
+          ? Number(performance.returnAmount)
+          : undefined,
+        status: performance.status as "active" | "win" | "loss" | "breakeven",
+      }
       : undefined,
   };
 }
@@ -233,11 +233,11 @@ export async function getPostById(id: string): Promise<PostWithDetails | null> {
     .where(eq(postTag.postId, id));
 
   // Get user info
-  const users = (await db
+  const usersQuery = db
     .select({
       id: user.id,
       name: user.name,
-      username: user.username,
+      username: user.displayName,
       image: user.image,
       bio: user.bio,
       isClub: user.isClub,
@@ -245,9 +245,9 @@ export async function getPostById(id: string): Promise<PostWithDetails | null> {
       verified: user.verified,
     })
     .from(user)
-    .where(eq(user.id, postData.userId))) as any;
+    .where(eq(user.id, postData.userId));
 
-  const usersResult = await (users as any).limit(1);
+  const usersResult = await (usersQuery as any).limit(1);
 
   // Get performance if it's a trade
   let performance = undefined;
@@ -480,4 +480,83 @@ export async function updateTradePerformance(
       updatedAt: new Date(),
     })
     .where(eq(tradePerformance.postId, postId));
+}
+
+/**
+ * Search posts by title, content, or symbol
+ */
+export async function searchPosts(
+  queryStr: string,
+  limit: number = 20
+): Promise<PostWithDetails[]> {
+  const searchPattern = `%${queryStr}%`;
+
+  let query = db
+    .select({
+      id: post.id,
+      userId: post.userId,
+      type: post.type,
+      symbol: post.symbol,
+      title: post.title,
+      content: post.content,
+      buyPrice: post.buyPrice,
+      buyDate: post.buyDate,
+      currentPrice: post.currentPrice,
+      targetPrice: post.targetPrice,
+      stopLoss: post.stopLoss,
+      entryThoughts: post.entryThoughts,
+      publishedAt: post.publishedAt,
+      updatedAt: post.updatedAt,
+      views: post.views,
+      likes: post.likes,
+      comments: post.comments,
+    })
+    .from(post)
+    .where(
+      or(
+        like(post.title, searchPattern),
+        like(post.content, searchPattern),
+        like(post.symbol, searchPattern)
+      )
+    )
+    .orderBy(desc(post.publishedAt));
+
+  (query as any).limit(limit);
+
+  const posts = (await query) as PostQueryResult[];
+
+  // Get tags for each post
+  const postsWithTags = await Promise.all(
+    posts.map(async (p: PostQueryResult) => {
+      const tagsResult = await db
+        .select({ name: tag.name })
+        .from(tag)
+        .innerJoin(postTag, eq(postTag.tagId, tag.id))
+        .where(eq(postTag.postId, p.id));
+
+      const usersQuery = db
+        .select({
+          id: user.id,
+          name: user.name,
+          username: user.displayName,
+          image: user.image,
+          bio: user.bio,
+          isClub: user.isClub,
+          clubName: user.clubName,
+          verified: user.verified,
+        })
+        .from(user)
+        .where(eq(user.id, p.userId));
+
+      const usersResult = await (usersQuery as any).limit(1);
+
+      return convertPostToPostWithDetails(
+        p,
+        tagsResult.map((t: TagQueryResult) => t.name),
+        usersResult[0] as UserQueryResult
+      );
+    })
+  );
+
+  return postsWithTags;
 }

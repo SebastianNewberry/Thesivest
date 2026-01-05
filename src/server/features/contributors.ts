@@ -11,6 +11,7 @@ import {
   getAllPosts,
   getPostById as getPostByIdDAL,
   getPostsByUserId,
+  searchPosts,
 } from "../data-access/posts";
 
 export interface CommunityMember {
@@ -166,4 +167,9 @@ export async function getPostsByUser(userId: string): Promise<UserPost[]> {
 export async function getPostById(id: string): Promise<UserPost | null> {
   const post = await getPostByIdDAL(id);
   return post ? dbPostToUserPost(post) : null;
+}
+
+export async function searchCommunityPosts(query: string, limit?: number): Promise<UserPost[]> {
+  const posts = await searchPosts(query, limit);
+  return posts.map(dbPostToUserPost);
 }

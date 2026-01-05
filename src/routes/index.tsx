@@ -46,11 +46,16 @@ const getContributorAnalysesFn = createServerFn({ method: "GET" }).handler(
 export const Route = createFileRoute("/")({
   component: Home,
   loader: async () => {
-    const [contributors, analyses] = await Promise.all([
-      getContributorsFn(),
-      getContributorAnalysesFn(),
-    ]);
-    return { contributors, analyses };
+    try {
+      const [contributors, analyses] = await Promise.all([
+        getContributorsFn(),
+        getContributorAnalysesFn(),
+      ]);
+      return { contributors, analyses };
+    } catch (e) {
+      console.error("Home loader failed:", e);
+      return { contributors: [], analyses: [] };
+    }
   },
 });
 
@@ -145,10 +150,7 @@ function Home() {
             transition={{ duration: 0.8 }}
             className="mb-8"
           >
-            <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm font-medium mb-6 animate-fade-in">
-              <span className="flex h-2 w-2 rounded-full bg-primary mr-2"></span>
-              Thesivest Platform
-            </div>
+
 
             <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-foreground mb-6 max-w-[90vw] mx-auto leading-[1.1] min-h-[160px] flex flex-col items-center justify-center">
               <span className="sr-only">Thesivest. Where Research Becomes Conviction.</span>
@@ -166,7 +168,7 @@ function Home() {
 
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed">
             Stop buying stocks without a plan. Document your thesis, track
-            your performance with institutional-grade tools, and learn from investors who actually beat the
+            your performance with professional-grade tools, and learn from investors who actually beat the
             market.
           </p>
 
@@ -206,7 +208,7 @@ function Home() {
         >
           <div className="text-center mb-16">
             <h2 className="text-3xl md:text-4xl font-bold mb-4 font-serif text-foreground">
-              Institutional-Grade Tools for Retail Investors
+              Professional-Grade Tools for Retail Investors
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               Professional tools designed to help you build a verifiable track record.
@@ -324,7 +326,7 @@ function Home() {
                 </div>
                 <h3 className="text-2xl font-serif text-foreground">Leverage AI Research</h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Institutional grade data at your fingertips. We're integrating advanced AI tools to help you tear down 10-Ks, analyze earnings calls, and stress-test your thesis in seconds, not hours. Focus on the decision, not the data entry.
+                  Professional grade data at your fingertips. We're integrating advanced AI tools to help you tear down 10-Ks, analyze earnings calls, and stress-test your thesis in seconds, not hours. Focus on the decision, not the data entry.
                 </p>
               </div>
 
@@ -418,7 +420,7 @@ function Home() {
           className="mb-24"
         >
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">
+            <h2 className="text-3xl md:text-4xl font-bold mb-2 font-serif">
               Example Community Posts
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -543,7 +545,7 @@ function Home() {
         >
           <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
             <CardHeader className="text-center">
-              <CardTitle className="text-3xl md:text-4xl mb-4">
+              <CardTitle className="text-3xl md:text-4xl mb-4 font-serif">
                 Start Documenting Your Investment Thesis
               </CardTitle>
               <CardDescription className="text-lg">
@@ -566,7 +568,7 @@ function Home() {
   );
 }
 function TitleAnimation() {
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState<number>(0);
 
   useEffect(() => {
     // 0 -> Show words

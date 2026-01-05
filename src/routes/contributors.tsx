@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import { getCommunityPosts, getContributors } from "../server/features/contributors";
+import { getCommunityPosts, getContributors, searchCommunityPosts } from "../server/features/contributors";
 import { useLoaderData } from "@tanstack/react-router";
 import {
   Users,
@@ -11,6 +11,7 @@ import {
   Filter
 } from "lucide-react";
 import { useState } from "react";
+import { z } from "zod";
 import { FeedPost } from "../components/FeedPost";
 import { MarketMovers } from "../components/MarketMovers";
 import { WhoToFollow } from "../components/WhoToFollow";
@@ -18,20 +19,37 @@ import { UserLeaderboard } from "../components/UserLeaderboard";
 import { Button } from "../components/ui/button";
 
 // Server Function - Fetch Posts + Users (for author info)
-const getCommunityDataFn = createServerFn({ method: "GET" }).handler(
-  async () => {
+const getCommunityDataFn = createServerFn({ method: "GET" })
+  .inputValidator(z.string().optional())
+  .handler(async ({ data }) => {
+    const query = data;
+
+    // Select function based on query
+    const postsPromise = query
+      ? searchCommunityPosts(query, 20)
+      : getCommunityPosts(20);
+
     const [posts, users] = await Promise.all([
-      getCommunityPosts(20), // Fetch last 20 posts
+      postsPromise,
       getContributors()
     ]);
     return { posts, users };
-  }
-);
+  });
+
+type SearchParams = {
+  q?: string;
+};
 
 export const Route = createFileRoute("/contributors")({
   component: Contributors,
-  loader: async () => {
-    return await getCommunityDataFn();
+  validateSearch: (search: Record<string, unknown>): SearchParams => {
+    return {
+      q: typeof search.q === 'string' ? search.q : undefined,
+    };
+  },
+  loaderDeps: ({ search }) => ({ q: search.q }),
+  loader: async ({ deps }) => {
+    return await getCommunityDataFn({ data: deps.q });
   },
 });
 
@@ -39,8 +57,18 @@ type FilterType = "trending" | "latest" | "top";
 
 function Contributors() {
   const { posts, users } = useLoaderData({ from: "/contributors" });
+  const navigate = Route.useNavigate();
+  const search = Route.useSearch();
+
   const [activeFilter, setActiveFilter] = useState<FilterType>("trending");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState(search.q || "");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    navigate({
+      search: { q: searchQuery || undefined },
+    });
+  };
 
   // Helper to find author details
   const getAuthor = (userId: string) => {
@@ -65,7 +93,7 @@ function Contributors() {
           </div>
 
           {/* Search Bar - Hidden on mobile, visible on md+ */}
-          <div className="hidden md:flex items-center relative w-96">
+          <form onSubmit={handleSearch} className="hidden md:flex items-center relative w-96">
             <Search className="absolute left-3 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
@@ -74,7 +102,7 @@ function Contributors() {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-          </div>
+          </form>
 
           <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 rounded-full px-6">
             + New Post

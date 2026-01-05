@@ -1,7 +1,7 @@
 
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "./ui/card";
+import { Card } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { ArrowRight, PieChart, TrendingUp, Building2, ChevronLeft, ChevronRight, BarChart3, Target, Calendar } from "lucide-react";
+import { ArrowRight, PieChart, TrendingUp, Building2, ChevronLeft, ChevronRight } from "lucide-react";
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "./ui/button";
@@ -13,21 +13,21 @@ const FUNDS = [
         name: "Berkshire Hathaway",
         manager: "Warren Buffett",
         strategy: "Long-Term Value",
-        holdings: ["AAPL", "BAC", "AXP", "KO", "CVX"],
+        holdings: ["AAPL", "AXP", "BAC", "KO", "CVX"],
         color: "from-blue-900 to-slate-900",
         icon: Building2,
         return: "+15.8% YTD",
         description: "The gold standard of value investing. Focuses on businesses with strong moats and consistent cash flows.",
-        longDescription: "Berkshire Hathaway's portfolio reflects Warren Buffett's philosophy of buying great businesses at fair prices. The portfolio is heavily concentrated in high-quality consumer monopolies and financial institutions.",
+        longDescription: "Berkshire Hathaway's portfolio reflects Warren Buffett's philosophy of buying great businesses at fair prices. Recent moves include reducing the massive Apple stake while maintaining high conviction in American Express and Coca-Cola.",
         topPicks: [
-            { symbol: "AAPL", return: "+120%", reason: "Ecosystem Dominance" },
-            { symbol: "AXP", return: "+85%", reason: "Network Effect" },
-            { symbol: "KO", return: "+45%", reason: "Brand Moat" }
+            { symbol: "AAPL", return: "26.2%", reason: "Ecosystem Dominance" },
+            { symbol: "AXP", return: "15.4%", reason: "Network Economy" },
+            { symbol: "BAC", return: "11.9%", reason: "Interest Rate Play" }
         ],
         sectors: [
-            { name: "Tech", value: 45 },
-            { name: "Financials", value: 25 },
-            { name: "Consumer", value: 15 }
+            { name: "Tech", value: 30 },
+            { name: "Financials", value: 33 },
+            { name: "Consumer", value: 12 }
         ]
     },
     {
@@ -35,21 +35,21 @@ const FUNDS = [
         name: "ARK Invest",
         manager: "Cathie Wood",
         strategy: "Disruptive Innovation",
-        holdings: ["TSLA", "COIN", "ROKU", "U", "ZM"],
+        holdings: ["TSLA", "ROKU", "CRSP", "SHOP", "COIN"],
         color: "from-purple-900 to-indigo-900",
         icon: TrendingUp,
-        return: "+45.1% YTD",
+        return: "-5.1% YTD",
         description: "High-conviction investment in disruptive innovation, centering on AI, DNA sequencing, and blockchain.",
-        longDescription: "ARK Invest targets companies that are leading disruptive innovation. They focus on genomic revolution, autonomous technology, and next-generation internet.",
+        longDescription: "ARK targets 'disruptive innovation' - offering products and services that potentially change the way the world works. The portfolio is heavily weighted towards Tesla and Roku.",
         topPicks: [
-            { symbol: "TSLA", return: "+310%", reason: "Autonomous Driving" },
-            { symbol: "COIN", return: "+150%", reason: "Crypto Economy" },
-            { symbol: "U", return: "-20%", reason: "Metaverse Infra" }
+            { symbol: "TSLA", return: "11.6%", reason: "Autonomous Robotaxi" },
+            { symbol: "ROKU", return: "7.7%", reason: "CTV Operating System" },
+            { symbol: "CRSP", return: "5.4%", reason: "Gene Editing" }
         ],
         sectors: [
-            { name: "Tech", value: 60 },
-            { name: "Comm", value: 20 },
-            { name: "Health", value: 20 }
+            { name: "Health Care", value: 25 },
+            { name: "Tech", value: 24 },
+            { name: "Cons. Cyclical", value: 17 }
         ]
     },
     {
@@ -57,21 +57,21 @@ const FUNDS = [
         name: "Sequoia Fund",
         manager: "Ruane, Cunniff",
         strategy: "Concentrated Value",
-        holdings: ["GOOGL", "UNH", "ELV", "ICE", "MA"],
+        holdings: ["RYCEF", "ICE", "CNSWF", "GOOGL", "UNH"],
         color: "from-emerald-900 to-teal-900",
         icon: PieChart,
-        return: "+12.4% YTD",
-        description: "A focused portfolio of quality companies, originally established to handle capital for Buffett's partners.",
-        longDescription: "Sequoia Fund maintains a highly concentrated portfolio of quality businesses. They look for companies with strong competitive advantages and capable management teams.",
+        return: "+18.4% YTD",
+        description: "A focused portfolio of quality companies. Recently made a massive bet on the turnaround of Rolls-Royce.",
+        longDescription: "Sequoia Fund maintains a highly concentrated portfolio. Their largest recent conviction is Rolls-Royce Holdings, betting on the recovery of wide-body engine flying hours.",
         topPicks: [
-            { symbol: "GOOGL", return: "+40%", reason: "Search Monopoly" },
-            { symbol: "UNH", return: "+15%", reason: "Healthcare Scale" },
-            { symbol: "MA", return: "+25%", reason: "Payment Rails" }
+            { symbol: "RYCEF", return: "9.7%", reason: "Aerospace Recovery" },
+            { symbol: "ICE", return: "7.8%", reason: "Market Infrastructure" },
+            { symbol: "CNSWF", return: "7.5%", reason: "VMS Serial Acquirer" }
         ],
         sectors: [
-            { name: "Services", value: 35 },
-            { name: "Health", value: 30 },
-            { name: "Tech", value: 25 }
+            { name: "Industrials", value: 25 },
+            { name: "Financials", value: 20 },
+            { name: "Tech", value: 18 }
         ]
     },
     {
@@ -79,21 +79,21 @@ const FUNDS = [
         name: "Oakmark Select",
         manager: "Bill Nygren",
         strategy: "Value / Contrarian",
-        holdings: ["GOOGL", "CB", "C", "KCR", "APA"],
+        holdings: ["IQV", "FCNCA", "WBD", "KDP", "CRM"],
         color: "from-amber-900 to-orange-900",
         icon: TrendingUp,
-        return: "+18.2% YTD",
+        return: "+8.1% YTD",
         description: "High-conviction value investing, often taking contrarian positions in undervalued large-caps.",
-        longDescription: "Oakmark Select seeks out value by identifying companies trading at a significant discount to their intrinsic business value, often when they are out of favor.",
+        longDescription: "Oakmark Select seeks out value by identifying companies trading at a significant discount. Top holdings now include substantial stakes in IQVIA and First Citizens Bancshares.",
         topPicks: [
-            { symbol: "GOOGL", return: "+35%", reason: "Undervalued Growth" },
-            { symbol: "C", return: "+20%", reason: "Restructuring Play" },
-            { symbol: "CB", return: "+15%", reason: "Strong Underwriting" }
+            { symbol: "IQV", return: "6.6%", reason: "Clinical Trial Data" },
+            { symbol: "FCNCA", return: "6.4%", reason: "Undervalued Bank" },
+            { symbol: "WBD", return: "6.3%", reason: "Media Consolidation" }
         ],
         sectors: [
-            { name: "Financials", value: 40 },
-            { name: "Comm", value: 30 },
-            { name: "Energy", value: 15 }
+            { name: "Financials", value: 35 },
+            { name: "Comm Services", value: 25 },
+            { name: "Health Care", value: 15 }
         ]
     },
     {
@@ -101,21 +101,21 @@ const FUNDS = [
         name: "Pershing Square",
         manager: "Bill Ackman",
         strategy: "Activist",
-        holdings: ["CMG", "QSR", "HLT", "LOW", "HHC"],
+        holdings: ["GOOGL", "BN", "HLT", "CMG", "QSR"],
         color: "from-slate-800 to-gray-900",
         icon: Building2,
-        return: "+26.7% YTD",
-        description: "Activist hedge fund strategy operating within a closed-end fund structure, targeting operational improvements.",
-        longDescription: "Pershing Square runs a concentrated portfolio of large-capitalization companies. They often take activist roles to unlock shareholder value through operational changes.",
+        return: "+12.7% YTD",
+        description: "Activist strategy with a very concentrated portfolio of high-quality, predictable businesses.",
+        longDescription: "Pershing Square runs an extremely concentrated portfolio using an activist approach. Major recent moves include a large position in Brookfield and maintaining high conviction in Alphabet/Google.",
         topPicks: [
-            { symbol: "CMG", return: "+55%", reason: "Operational Turnaround" },
-            { symbol: "HLT", return: "+30%", reason: "Asset-Light Model" },
-            { symbol: "QSR", return: "+12%", reason: "Franchise Royalty" }
+            { symbol: "GOOGL", return: "18.0%", reason: "AI & Search Moat" },
+            { symbol: "BN", return: "15.0%", reason: "Alternative Assets" },
+            { symbol: "HLT", return: "12.0%", reason: "Asset-Light Hotel" }
         ],
         sectors: [
-            { name: "Consumer", value: 60 },
-            { name: "Real Estate", value: 20 },
-            { name: "Retail", value: 20 }
+            { name: "Cons. Discret.", value: 50 },
+            { name: "Comm Services", value: 25 },
+            { name: "Real Estate", value: 15 }
         ]
     }
 ];
@@ -144,7 +144,7 @@ export function FamousFunds() {
             <div className="container mx-auto px-6 relative z-10">
                 <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
                     <div className="max-w-2xl">
-                        <span className="text-primary font-bold tracking-widest text-xs uppercase mb-4 block">Institutional Intelligence</span>
+                        <span className="text-primary font-bold tracking-widest text-xs uppercase mb-4 block">Market Intelligence</span>
                         <h2 className="text-3xl md:text-5xl font-serif text-foreground leading-tight">
                             Track the Giants.
                         </h2>
@@ -243,7 +243,7 @@ export function FamousFunds() {
                                                         initial={{ opacity: 0, y: 10 }}
                                                         animate={{ opacity: 1, y: 0 }}
                                                         exit={{ opacity: 0, y: -10 }}
-                                                        transition={{ duration: 0.3 }}
+                                                        transition={{ duration: 0.2 }}
                                                     >
                                                         <h4 className="text-xl font-semibold mb-4 text-foreground">Invsetment Strategy</h4>
                                                         <p className="text-muted-foreground leading-relaxed text-lg mb-6">
@@ -284,7 +284,7 @@ export function FamousFunds() {
                                                                 </div>
                                                                 <div className="text-right">
                                                                     <div className="text-green-500 font-mono font-medium">{pick.return}</div>
-                                                                    <div className="text-[10px] text-muted-foreground">All time</div>
+                                                                    <div className="text-[10px] text-muted-foreground">Portfolio Wgt</div>
                                                                 </div>
                                                             </div>
                                                         ))}
@@ -297,7 +297,7 @@ export function FamousFunds() {
                                                         initial={{ opacity: 0, y: 10 }}
                                                         animate={{ opacity: 1, y: 0 }}
                                                         exit={{ opacity: 0, y: -10 }}
-                                                        transition={{ duration: 0.3 }}
+                                                        transition={{ duration: 0.2 }}
                                                     >
                                                         <div className="space-y-6 pt-4">
                                                             {currentFund.sectors.map((sector, i) => (
