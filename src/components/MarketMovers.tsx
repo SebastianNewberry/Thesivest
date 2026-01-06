@@ -34,7 +34,7 @@ export function MarketMovers() {
                                     <div className="font-bold group-hover:text-primary transition-colors">{stock.symbol}</div>
                                     <div className="text-[10px] text-muted-foreground">{stock.name}</div>
                                 </div>
-                                <div className="font-mono text-green-600 font-medium">{stock.change}</div>
+                                <div className="font-medium tabular-nums text-green-600">{stock.change}</div>
                             </div>
                         ))}
                     </div>
@@ -52,7 +52,7 @@ export function MarketMovers() {
                                     <div className="font-bold group-hover:text-primary transition-colors">{stock.symbol}</div>
                                     <div className="text-[10px] text-muted-foreground">{stock.name}</div>
                                 </div>
-                                <div className="font-mono text-red-600 font-medium">{stock.change}</div>
+                                <div className="font-medium tabular-nums text-red-600">{stock.change}</div>
                             </div>
                         ))}
                     </div>

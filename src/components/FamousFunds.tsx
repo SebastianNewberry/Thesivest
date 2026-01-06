@@ -145,7 +145,7 @@ export function FamousFunds() {
                 <div className="flex flex-col md:flex-row items-end justify-between mb-16 gap-6">
                     <div className="max-w-2xl">
                         <span className="text-primary font-bold tracking-widest text-xs uppercase mb-4 block">Market Intelligence</span>
-                        <h2 className="text-3xl md:text-5xl font-serif text-foreground leading-tight">
+                        <h2 className="text-3xl md:text-5xl font-heading text-foreground leading-tight">
                             Track the Giants.
                         </h2>
                         <p className="mt-4 text-lg text-muted-foreground">
@@ -187,7 +187,7 @@ export function FamousFunds() {
                                             <div className="w-16 h-16 rounded-2xl bg-white/10 backdrop-blur-md flex items-center justify-center mb-8 shadow-inner border border-white/20">
                                                 <currentFund.icon className="w-8 h-8 text-white" />
                                             </div>
-                                            <h3 className="text-3xl font-bold mb-2 font-serif tracking-tight">{currentFund.name}</h3>
+                                            <h3 className="text-3xl font-bold mb-2 font-heading tracking-tight">{currentFund.name}</h3>
                                             <p className="text-white/70 font-medium uppercase tracking-wider text-sm">{currentFund.manager}</p>
                                         </div>
 
@@ -283,7 +283,7 @@ export function FamousFunds() {
                                                                     </div>
                                                                 </div>
                                                                 <div className="text-right">
-                                                                    <div className="text-green-500 font-mono font-medium">{pick.return}</div>
+                                                                    <div className="text-green-500 font-medium tabular-nums">{pick.return}</div>
                                                                     <div className="text-[10px] text-muted-foreground">Portfolio Wgt</div>
                                                                 </div>
                                                             </div>

@@ -470,7 +470,7 @@ export function HeroChart({ portfolioId = 'thesivest', minimal = false, classNam
                                                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: entry.color }} />
                                                             {entry.name}
                                                         </span>
-                                                        <span className="font-mono font-bold" style={{ color: entry.color }}>
+                                                        <span className="font-bold tabular-nums" style={{ color: entry.color }}>
                                                             {val > 0 ? '+' : ''}{val.toFixed(1)}%
                                                         </span>
                                                     </div>

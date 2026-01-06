@@ -62,12 +62,12 @@ export function FeedPost({ post, author }: FeedPostProps) {
                         {post.type.toUpperCase()}
                     </Badge>
                     {post.symbol && (
-                        <Badge variant="outline" className="text-xs font-mono">
+                        <Badge variant="outline" className="text-xs font-medium tabular-nums">
                             ${post.symbol}
                         </Badge>
                     )}
                     {post.performance && (
-                        <Badge variant="outline" className={`text-xs font-mono border-transparent bg-muted/30 ${getReturnColor(post.performance.returnPercent)}`}>
+                        <Badge variant="outline" className={`text-xs font-medium tabular-nums border-transparent bg-muted/30 ${getReturnColor(post.performance.returnPercent)}`}>
                             {post.performance.returnPercent > 0 ? '+' : ''}{post.performance.returnPercent}%
                         </Badge>
                     )}
@@ -80,7 +80,7 @@ export function FeedPost({ post, author }: FeedPostProps) {
 
                 {/* Trade Details Box */}
                 {isTrade && (
-                    <div className="bg-muted/30 rounded-lg p-3 mb-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono border border-border/50">
+                    <div className="bg-muted/30 rounded-lg p-3 mb-4 grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-medium tabular-nums border border-border/50">
                         <div className="flex flex-col">
                             <span className="text-muted-foreground">Entry</span>
                             <span className="font-medium">${post.buyPrice?.toFixed(2)}</span>

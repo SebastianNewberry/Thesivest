@@ -129,7 +129,7 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                                         )}>{portfolio.name}</span>
                                         {portfolio.id === 'thesivest' && (
                                             <div className="flex gap-2">
-                                                <span className="text-[10px] bg-secondary/10 text-secondary px-1.5 py-0.5 rounded border border-secondary/20 whitespace-nowrap font-mono">
+                                                <span className="text-[10px] bg-secondary/10 text-secondary px-1.5 py-0.5 rounded border border-secondary/20 whitespace-nowrap font-medium tabular-nums">
                                                     α {portfolio.stats?.alpha}
                                                 </span>
                                             </div>
@@ -150,11 +150,11 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                                             <div className="flex gap-2 w-full">
                                                 <div className="bg-background/80 backdrop-blur px-2 py-1 rounded border border-border/50 text-[10px] text-muted-foreground flex-1 text-center">
                                                     <div className="text-[8px] uppercase tracking-wider text-muted-foreground/70">Beta</div>
-                                                    <div className="font-mono font-medium text-foreground">{portfolio.stats?.beta}</div>
+                                                    <div className="font-medium tabular-nums text-foreground">{portfolio.stats?.beta}</div>
                                                 </div>
                                                 <div className="bg-background/80 backdrop-blur px-2 py-1 rounded border border-border/50 text-[10px] text-muted-foreground flex-1 text-center">
                                                     <div className="text-[8px] uppercase tracking-wider text-muted-foreground/70">Return</div>
-                                                    <div className={`font-mono font-medium ${portfolio.stats?.return.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
+                                                    <div className={`font-medium tabular-nums ${portfolio.stats?.return.startsWith('+') ? 'text-green-500' : 'text-red-500'}`}>
                                                         {portfolio.stats?.return}
                                                     </div>
                                                 </div>

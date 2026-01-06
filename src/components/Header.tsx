@@ -38,7 +38,7 @@ export default function Header() {
           <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
             <TrendingUp className="text-primary-foreground w-6 h-6" />
           </div>
-          <span className="text-2xl font-serif font-bold tracking-tight text-foreground">
+          <span className="text-2xl font-heading font-bold tracking-tight text-foreground">
             Thesivest
           </span>
         </Link>

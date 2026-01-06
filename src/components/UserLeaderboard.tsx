@@ -20,7 +20,7 @@ export function UserLeaderboard() {
                         <Trophy className="w-4 h-4 text-yellow-500" />
                         Daily Top Performers
                     </CardTitle>
-                    <span className="text-[10px] text-green-500 font-mono animate-pulse">LIVE</span>
+                    <span className="text-[10px] text-green-500 font-bold animate-pulse">LIVE</span>
                 </div>
             </CardHeader>
             <CardContent className="pt-4 space-y-4">
@@ -42,7 +42,7 @@ export function UserLeaderboard() {
                         </div>
                         <div className="flex items-center gap-1.5">
                             <TrendingUp className="w-3 h-3 text-green-500" />
-                            <span className="font-mono text-sm font-bold text-green-600 dark:text-green-400">
+                            <span className="font-bold text-sm text-green-600 dark:text-green-400 tabular-nums">
                                 {user.return}
                             </span>
                         </div>

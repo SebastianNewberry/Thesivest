@@ -53,7 +53,7 @@ export function FundSearch() {
             <div className="max-w-4xl mx-auto space-y-12">
                 <div className="text-center space-y-4">
 
-                    <h2 className="text-3xl md:text-5xl font-serif text-foreground">
+                    <h2 className="text-3xl md:text-5xl font-heading text-foreground">
                         Decode Any Fund Strategy
                     </h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -107,7 +107,7 @@ export function FundSearch() {
                                             <span className="font-bold tracking-wider text-sm uppercase">Gemini AI Analysis</span>
                                         </div>
 
-                                        <h3 className="text-2xl font-serif font-bold text-foreground">
+                                        <h3 className="text-2xl font-heading font-bold text-foreground">
                                             {result.fundName} Strategy
                                         </h3>
 
@@ -158,7 +158,7 @@ export function FundSearch() {
                                                     </div>
                                                 </div>
                                                 <div className="text-right">
-                                                    <div className="font-mono font-medium">{holding.percent}%</div>
+                                                    <div className="font-medium tabular-nums">{holding.percent}%</div>
                                                     <div className="text-xs text-muted-foreground">Portfolio</div>
                                                 </div>
                                             </div>
@@ -193,7 +193,7 @@ export function FundSearch() {
                                                 </div>
                                             </div>
                                             <div className="text-right">
-                                                <div className="font-mono font-medium">{holding.percent}%</div>
+                                                <div className="font-medium tabular-nums">{holding.percent}%</div>
                                                 <div className="text-xs text-muted-foreground">Portfolio</div>
                                             </div>
                                         </div>

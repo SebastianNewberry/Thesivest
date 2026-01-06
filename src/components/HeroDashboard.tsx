@@ -107,7 +107,7 @@ export function HeroDashboard() {
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <TrendingUp className="w-4 h-4" /> Profit Factor
                             </div>
-                            <div className="text-2xl font-bold font-mono">2.45</div>
+                            <div className="text-2xl font-bold tabular-nums">2.45</div>
                             <div className="w-full bg-muted rounded-full h-1.5 mt-2">
                                 <div className="bg-primary w-[75%] h-full rounded-full" />
                             </div>
@@ -117,7 +117,7 @@ export function HeroDashboard() {
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <Activity className="w-4 h-4" /> Win Rate
                             </div>
-                            <div className="text-2xl font-bold font-mono">68%</div>
+                            <div className="text-2xl font-bold tabular-nums">68%</div>
                             <div className="w-full bg-muted rounded-full h-1.5 mt-2">
                                 <div className="bg-primary w-[68%] h-full rounded-full" />
                             </div>
@@ -127,7 +127,7 @@ export function HeroDashboard() {
                             <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                 <BarChart3 className="w-4 h-4" /> Open Trades
                             </div>
-                            <div className="text-2xl font-bold font-mono">12</div>
+                            <div className="text-2xl font-bold tabular-nums">12</div>
                         </div>
                     </div>
                 </div>

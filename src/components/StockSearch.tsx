@@ -38,7 +38,7 @@ export function StockSearch() {
         <section className="py-12 container mx-auto px-6">
             <div className="max-w-4xl mx-auto space-y-12">
                 <div className="text-center space-y-4">
-                    <h2 className="text-3xl md:text-5xl font-serif text-foreground">
+                    <h2 className="text-3xl md:text-5xl font-heading text-foreground">
                         Institutional-Grade Stock Analysis
                     </h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -85,7 +85,7 @@ export function StockSearch() {
                             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                                 <div>
                                     <div className="flex items-center gap-3">
-                                        <h3 className="text-4xl font-bold font-serif">{result.symbol}</h3>
+                                        <h3 className="text-4xl font-bold font-heading">{result.symbol}</h3>
                                         <Badge variant="outline" className="text-lg px-3 py-1">{result.companyName}</Badge>
                                     </div>
                                     <p className="text-muted-foreground mt-2 max-w-2xl">{result.businessSummary}</p>

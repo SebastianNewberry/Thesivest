@@ -115,7 +115,7 @@ export function FundResearch() {
                 <div className="container mx-auto px-4">
                     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                         <div>
-                            <h1 className="text-4xl font-serif font-bold mb-2">Fund Research</h1>
+                            <h1 className="text-4xl font-heading font-bold mb-2">Fund Research</h1>
                             <p className="text-muted-foreground text-lg max-w-2xl">
                                 Analyze market flows. Decrypt the "Smart Money" across asset classes.
                             </p>
@@ -221,7 +221,7 @@ export function FundResearch() {
                                                 <div>
                                                     <h3 className="text-xl font-bold flex items-center gap-2">
                                                         {fund.name}
-                                                        <Badge variant="secondary" className="text-[10px] font-mono">13F</Badge>
+                                                        <Badge variant="secondary" className="text-[10px]">13F</Badge>
                                                     </h3>
                                                     <p className="text-sm text-muted-foreground mt-1">AUM: <span className="text-foreground font-medium">{fund.aum}</span></p>
                                                 </div>
@@ -327,7 +327,7 @@ export function FundResearch() {
                             <CardContent className="space-y-4">
                                 <div className="flex items-center justify-between text-sm">
                                     <span>Positive Mentions</span>
-                                    <span className="font-mono text-green-500 font-bold">
+                                    <span className="font-bold text-green-500 tabular-nums">
                                         {activeTab === 'equity' ? '1,240' : activeTab === 'fixed_income' ? '450' : '890'}
                                     </span>
                                 </div>
