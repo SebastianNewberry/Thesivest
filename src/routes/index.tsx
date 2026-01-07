@@ -16,7 +16,6 @@ import {
   TrendingUp,
   FileText,
 } from "lucide-react";
-import { HeroDashboard } from "../components/HeroDashboard";
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -29,6 +28,7 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Link } from "@tanstack/react-router";
 import type { UserPost } from "../server/features/contributors";
+import { PortfolioDeck } from "@/components/PortfolioDeck";
 
 // Server Functions calling Shared Logic
 const getContributorsFn = createServerFn({ method: "GET" }).handler(
@@ -124,8 +124,8 @@ function Home() {
       status === "win"
         ? "text-green-600"
         : status === "loss"
-          ? "text-red-600"
-          : "text-muted-foreground";
+        ? "text-red-600"
+        : "text-muted-foreground";
     return (
       <span className={color}>
         {sign}
@@ -142,377 +142,376 @@ function Home() {
       <div className="relative z-10 max-w-[1600px] mx-auto px-6 py-16">
         {/* Unified Centered Hero Section */}
         <div className="min-h-screen bg-background text-foreground font-sans selection:bg-primary/30 overflow-x-hidden">
-      {/* Abstract Background Elements */}
-      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/5 blur-[120px]" />
-      </div>
+          {/* Abstract Background Elements */}
+          <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] rounded-full bg-primary/5 blur-[120px]" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] rounded-full bg-secondary/5 blur-[120px]" />
+          </div>
 
-      <div className="relative z-10 max-w-[1800px] mx-auto px-6 py-12">
-        {/* Hero Section */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 items-center min-h-[60vh] w-full mb-24">
-          {/* Left Column: Text & Animation */}
-          <div className="flex flex-col items-center justify-center w-full">
-            {/* Logo Animation - HOVER TRIGGER */}
-            <div className="relative h-20 md:h-32 text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter flex items-center justify-center overflow-hidden w-full m-auto select-none">
-              <div
-                className="inline-flex items-center cursor-pointer hover:text-primary/80 transition-colors relative z-10"
-              >
+          <div className="relative z-10 max-w-[1800px] mx-auto px-6 py-12">
+            {/* Hero Section */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-12 items-center min-h-[60vh] w-full mb-24">
+              {/* Left Column: Text & Animation */}
+              <div className="flex flex-col items-center justify-center w-full">
+                {/* Logo Animation - HOVER TRIGGER */}
+                <div className="relative h-20 md:h-32 text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter flex items-center justify-center overflow-hidden w-full m-auto select-none">
+                  <div className="inline-flex items-center cursor-pointer hover:text-primary/80 transition-colors relative z-10">
+                    <motion.div
+                      className="flex items-center"
+                      initial={{ x: -200 }}
+                      animate={{ x: 0 }}
+                      transition={{ duration: 0.6, ease: "backOut" }}
+                    >
+                      <span className="text-foreground">Thesi</span>
+                      <motion.span
+                        className="text-foreground"
+                        initial={{ opacity: 1, width: "auto" }}
+                        animate={{ opacity: 0, width: 0 }}
+                        transition={{ delay: 0.6, duration: 0.4 }}
+                        style={{ display: "inline-block", overflow: "hidden" }}
+                      >
+                        s
+                      </motion.span>
+                    </motion.div>
+
+                    <motion.span
+                      className="text-muted-foreground mx-4"
+                      initial={{
+                        opacity: 1,
+                        width: "auto",
+                        scale: 1,
+                        marginLeft: 0,
+                        marginRight: 0,
+                      }}
+                      animate={{
+                        opacity: 0,
+                        width: 0,
+                        scale: 0,
+                        marginLeft: 0,
+                        marginRight: 0,
+                      }}
+                      transition={{ duration: 0.3, delay: 0.15 }}
+                      style={{ display: "inline-block", overflow: "hidden" }}
+                    >
+                      +
+                    </motion.span>
+
+                    <motion.div
+                      className="flex items-center"
+                      initial={{ x: 200 }}
+                      animate={{ x: 0 }}
+                      transition={{ duration: 0.6, ease: "backOut" }}
+                    >
+                      <motion.span
+                        className="text-primary"
+                        initial={{ opacity: 1, width: "auto" }}
+                        animate={{ opacity: 0, width: 0 }}
+                        transition={{ delay: 0.6, duration: 0.4 }}
+                        style={{ display: "inline-block", overflow: "hidden" }}
+                      >
+                        In
+                      </motion.span>
+                      <span className="text-primary">vest</span>
+                    </motion.div>
+                  </div>
+                </div>
+
+                {/* Tagline */}
                 <motion.div
-                  className="flex items-center"
-                  initial={{ x: -200 }}
-                  animate={{ x: 0 }}
-                  transition={{ duration: 0.6, ease: "backOut" }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 1.5, duration: 0.6 }}
+                  className="space-y-6 text-center mt-4"
                 >
-                  <span className="text-foreground">Thesi</span>
-                  <motion.span
-                    className="text-foreground"
-                    initial={{ opacity: 1, width: "auto" }}
-                    animate={{ opacity: 0, width: 0 }}
-                    transition={{ delay: 0.6, duration: 0.4 }}
-                    style={{ display: "inline-block", overflow: "hidden" }}
-                  >
-                    s
-                  </motion.span>
-                </motion.div>
-
-                <motion.span
-                  className="text-muted-foreground mx-4"
-                  initial={{
-                    opacity: 1,
-                    width: "auto",
-                    scale: 1,
-                    marginLeft: 0,
-                    marginRight: 0,
-                  }}
-                  animate={{
-                    opacity: 0,
-                    width: 0,
-                    scale: 0,
-                    marginLeft: 0,
-                    marginRight: 0,
-                  }}
-                  transition={{ duration: 0.3, delay: 0.15 }}
-                  style={{ display: "inline-block", overflow: "hidden" }}
-                >
-                  +
-                </motion.span>
-
-                <motion.div
-                  className="flex items-center"
-                  initial={{ x: 200 }}
-                  animate={{ x: 0 }}
-                  transition={{ duration: 0.6, ease: "backOut" }}
-                >
-                  <motion.span
-                    className="text-primary"
-                    initial={{ opacity: 1, width: "auto" }}
-                    animate={{ opacity: 0, width: 0 }}
-                    transition={{ delay: 0.6, duration: 0.4 }}
-                    style={{ display: "inline-block", overflow: "hidden" }}
-                  >
-                    In
-                  </motion.span>
-                  <span className="text-primary">vest</span>
+                  <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight">
+                    Thesis + Invest. <br />
+                    <span className="text-muted-foreground">
+                      Where Research Becomes Conviction.
+                    </span>
+                  </h1>
+                  <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+                    Stop buying stocks without a plan. Document your thesis,
+                    track your performance, and learn from investors who
+                    actually beat the market.
+                  </p>
+                  <div className="flex gap-4 justify-center pt-4">
+                    <Link to="/signup">
+                      <Button size="lg" className="group">
+                        Start Tracking Your Picks
+                        <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                      </Button>
+                    </Link>
+                    <Button size="lg" variant="outline" asChild>
+                      <Link to="/tournaments">Explore Tournaments</Link>
+                    </Button>
+                  </div>
                 </motion.div>
               </div>
+
+              {/* Right Column: Chart */}
+              <motion.div
+                initial={{ opacity: 0, x: 50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 1.8, duration: 0.6 }}
+                className="flex items-center justify-center w-full relative z-20"
+              >
+                <PortfolioDeck isFanned={isDeckFanned} />
+              </motion.div>
             </div>
 
-            {/* Tagline */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1.5, duration: 0.6 }}
-              className="space-y-6 text-center mt-4"
+            {/* Core Features Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5 }}
+              className="mb-24"
             >
-              <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-tight">
-                Thesis + Invest. <br />
-                <span className="text-muted-foreground">
-                  Where Research Becomes Conviction.
-                </span>
-              </h1>
-              <p className="text-lg text-muted-foreground max-w-xl mx-auto">
-                Stop buying stocks without a plan. Document your thesis, track
-                your performance, and learn from investors who actually beat the
-                market.
-              </p>
-              <div className="flex gap-4 justify-center pt-4">
-                <Link to="/signup">
-                  <Button size="lg" className="group">
-                    Start Tracking Your Picks
-                    <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                  </Button>
-                </Link>
-                <Button size="lg" variant="outline" asChild>
-                  <Link to="/tournaments">Explore Tournaments</Link>
-                </Button>
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  Everything You Need to Invest Smarter
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  Track your investments, document your thesis, and build a
+                  following of investors who learn from your decisions
+                </p>
               </div>
-            </motion.div>
-          </div>
 
-          {/* Right Column: Chart */}
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 1.8, duration: 0.6 }}
-            className="flex items-center justify-center w-full relative z-20"
-          >
-            <PortfolioDeck isFanned={isDeckFanned} />
-          </motion.div>
+              <div className="grid md:grid-cols-3 gap-8">
+                <Card className="bg-card/50 backdrop-blur-xl border-border hover:border-primary/50 transition-all">
+                  <CardHeader>
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                      <TrendingUp className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle>Track Your Portfolio</CardTitle>
+                    <CardDescription>
+                      Create your portfolio and track every trade with automatic
+                      price updates. Monitor performance in real-time with
+                      comprehensive analytics including win rate, returns, and
+                      risk metrics.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <Card className="bg-card/50 backdrop-blur-xl border-border hover:border-primary/50 transition-all">
+                  <CardHeader>
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                      <FileText className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle>Document Your Thesis</CardTitle>
+                    <CardDescription>
+                      Before every trade, write down your investment thesis.
+                      Document entry price, target price, stop loss, and the
+                      reasoning behind your decision. Build a track record you
+                      can be proud of.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+
+                <Card className="bg-card/50 backdrop-blur-xl border-border hover:border-primary/50 transition-all">
+                  <CardHeader>
+                    <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                      <Users className="w-6 h-6 text-primary" />
+                    </div>
+                    <CardTitle>Build Your Following</CardTitle>
+                    <CardDescription>
+                      Share your insights with the community. As you build a
+                      proven track record, you'll attract followers who learn
+                      from your research and investment process.
+                    </CardDescription>
+                  </CardHeader>
+                </Card>
+              </div>
+            </motion.section>
+
+            {/* How It Works Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5 }}
+              className="mb-24"
+            >
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                  Get Started in Minutes
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  A simple workflow that keeps you disciplined and accountable
+                </p>
+              </div>
+
+              <div className="grid md:grid-cols-4 gap-6">
+                {[
+                  {
+                    step: "1",
+                    title: "Sign Up",
+                    description:
+                      "Create your free account in seconds. No credit card required.",
+                  },
+                  {
+                    step: "2",
+                    title: "Add Your Thesis",
+                    description:
+                      "Document your research, entry price, and target before buying.",
+                  },
+                  {
+                    step: "3",
+                    title: "Track Performance",
+                    description:
+                      "Automatic price updates show you how your thesis plays out.",
+                  },
+                  {
+                    step: "4",
+                    title: "Build Reputation",
+                    description:
+                      "Share insights and grow your community of followers.",
+                  },
+                ].map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-50px" }}
+                    transition={{ duration: 0.4, delay: index * 0.1 }}
+                  >
+                    <Card className="text-center h-full bg-card/50 backdrop-blur-xl border-border hover:border-primary/50 transition-all">
+                      <CardContent className="pt-6 flex flex-col items-center">
+                        <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg mb-4">
+                          {item.step}
+                        </div>
+                        <h3 className="font-semibold mb-2">{item.title}</h3>
+                        <p className="text-sm text-muted-foreground leading-relaxed">
+                          {item.description}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+            </motion.section>
+
+            {/* Contributors Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5 }}
+              className="mb-24"
+            >
+              <div className="text-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold mb-2">
+                  Example Community Posts
+                </h2>
+                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                  See what investors share on Thesivest. Click any post to view
+                  full details.
+                </p>
+              </div>
+            </motion.section>
+
+            {/* CTA Section */}
+            <motion.section
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.5 }}
+              className="mb-12"
+            >
+              <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
+                <CardHeader className="text-center">
+                  <CardTitle className="text-3xl md:text-4xl mb-4">
+                    Start Documenting Your Investment Thesis
+                  </CardTitle>
+                  <CardDescription className="text-lg">
+                    Create your free account and begin tracking your investment
+                    journey. Every trade you post builds your track record.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="flex justify-center gap-4">
+                  <Button size="lg" asChild>
+                    <Link to="/signup">
+                      Create Free Account
+                      <ArrowRight className="ml-2 w-4 h-4" />
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            </motion.section>
+          </div>
         </div>
 
-        {/* Core Features Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5 }}
-          className="mb-24"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Everything You Need to Invest Smarter
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              Track your investments, document your thesis, and build a
-              following of investors who learn from your decisions
-            </p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Main Feature - Spans 2 Columns */}
+          <Card className="md:col-span-2 bg-card border-border/60 shadow-sm hover:shadow-md transition-all overflow-hidden relative group">
+            <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
+              <TrendingUp className="w-32 h-32 text-primary" />
+            </div>
+            <CardHeader className="relative z-10">
+              <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
+                <TrendingUp className="w-6 h-6 text-primary" />
+              </div>
+              <CardTitle className="text-2xl">Track Your Portfolio</CardTitle>
+              <CardDescription className="text-base mt-2 max-w-lg">
+                Create your portfolio and track every trade with daily price
+                updates. Monitor performance with comprehensive analytics
+                including win rate, returns, and risk metrics.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="relative z-10">
+              {/* Decorative mini-graph or UI element could go here */}
+              <div className="h-32 bg-primary/5 rounded-lg border border-primary/10 mt-4 w-full flex items-center justify-center text-muted-foreground text-sm italic">
+                Performance Analytics Dashboard Preview
+              </div>
+            </CardContent>
+          </Card>
 
-          <div className="grid md:grid-cols-3 gap-8">
-            <Card className="bg-card/50 backdrop-blur-xl border-border hover:border-primary/50 transition-all">
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle>Track Your Portfolio</CardTitle>
-                <CardDescription>
-                  Create your portfolio and track every trade with automatic
-                  price updates. Monitor performance in real-time with
-                  comprehensive analytics including win rate, returns, and risk
-                  metrics.
-                </CardDescription>
-              </CardHeader>
-            </Card>
+          {/* Secondary Feature - Vertical */}
+          <Card className="md:col-span-1 bg-card border-border/60 shadow-sm hover:shadow-md transition-all group">
+            <CardHeader>
+              <div className="w-12 h-12 rounded-lg bg-accent/20 border border-accent/30 flex items-center justify-center mb-4">
+                <FileText className="w-6 h-6 text-accent-foreground" />
+              </div>
+              <CardTitle className="text-xl">Document Your Thesis</CardTitle>
+              <CardDescription className="mt-2">
+                Before every trade, write down your investment thesis. Document
+                entry price, target price, and stop loss.
+              </CardDescription>
+            </CardHeader>
+          </Card>
 
-            <Card className="bg-card/50 backdrop-blur-xl border-border hover:border-primary/50 transition-all">
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-                  <FileText className="w-6 h-6 text-primary" />
+          {/* Third Feature - Full Width Bottom */}
+          <Card className="md:col-span-3 bg-gradient-to-r from-card to-muted/50 border-border/60 shadow-sm hover:shadow-md transition-all">
+            <div className="flex flex-col md:flex-row items-center">
+              <CardHeader className="flex-1">
+                <div className="w-12 h-12 rounded-lg bg-secondary/10 border border-secondary/20 flex items-center justify-center mb-4">
+                  <Users className="w-6 h-6 text-secondary" />
                 </div>
-                <CardTitle>Document Your Thesis</CardTitle>
-                <CardDescription>
-                  Before every trade, write down your investment thesis.
-                  Document entry price, target price, stop loss, and the
-                  reasoning behind your decision. Build a track record you can
-                  be proud of.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            <Card className="bg-card/50 backdrop-blur-xl border-border hover:border-primary/50 transition-all">
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-                  <Users className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle>Build Your Following</CardTitle>
-                <CardDescription>
+                <CardTitle className="text-2xl">Build Your Following</CardTitle>
+                <CardDescription className="text-lg mt-2">
                   Share your insights with the community. As you build a proven
                   track record, you'll attract followers who learn from your
                   research and investment process.
                 </CardDescription>
               </CardHeader>
-            </Card>
-          </div>
-        </motion.section>
-
-        {/* How It Works Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5 }}
-          className="mb-24"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
-              Get Started in Minutes
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              A simple workflow that keeps you disciplined and accountable
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-4 gap-6">
-            {[
-              {
-                step: "1",
-                title: "Sign Up",
-                description:
-                  "Create your free account in seconds. No credit card required.",
-              },
-              {
-                step: "2",
-                title: "Add Your Thesis",
-                description:
-                  "Document your research, entry price, and target before buying.",
-              },
-              {
-                step: "3",
-                title: "Track Performance",
-                description:
-                  "Automatic price updates show you how your thesis plays out.",
-              },
-              {
-                step: "4",
-                title: "Build Reputation",
-                description:
-                  "Share insights and grow your community of followers.",
-              },
-            ].map((item, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-50px" }}
-                transition={{ duration: 0.4, delay: index * 0.1 }}
-              >
-                <Card className="text-center h-full bg-card/50 backdrop-blur-xl border-border hover:border-primary/50 transition-all">
-                  <CardContent className="pt-6 flex flex-col items-center">
-                    <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-lg mb-4">
-                      {item.step}
+              <div className="p-8 hidden md:block">
+                <div className="flex -space-x-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div
+                      key={i}
+                      className="w-12 h-12 rounded-full border-2 border-background bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground"
+                    >
+                      U{i}
                     </div>
-                    <h3 className="font-semibold mb-2">{item.title}</h3>
-                    <p className="text-sm text-muted-foreground leading-relaxed">
-                      {item.description}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </div>
-        </motion.section>
-
-        {/* Contributors Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5 }}
-          className="mb-24"
-        >
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-2">
-              Example Community Posts
-            </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              See what investors share on Thesivest. Click any post to view full
-              details.
-            </p>
-          </div>
-        </motion.section>
-
-        {/* CTA Section */}
-        <motion.section
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.5 }}
-          className="mb-12"
-        >
-          <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
-            <CardHeader className="text-center">
-              <CardTitle className="text-3xl md:text-4xl mb-4">
-                Start Documenting Your Investment Thesis
-              </CardTitle>
-              <CardDescription className="text-lg">
-                Create your free account and begin tracking your investment
-                journey. Every trade you post builds your track record.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="flex justify-center gap-4">
-              <Button size="lg" asChild>
-                <Link to="/signup">
-                  Create Free Account
-                  <ArrowRight className="ml-2 w-4 h-4" />
-                </Link>
-              </Button>
-            </CardContent>
+                  ))}
+                  <div className="w-12 h-12 rounded-full border-2 border-background bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
+                    +1k
+                  </div>
+                </div>
+              </div>
+            </div>
           </Card>
-        </motion.section>
-      </div>
-    </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {/* Main Feature - Spans 2 Columns */}
-            <Card className="md:col-span-2 bg-card border-border/60 shadow-sm hover:shadow-md transition-all overflow-hidden relative group">
-              <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-20 transition-opacity">
-                <TrendingUp className="w-32 h-32 text-primary" />
-              </div>
-              <CardHeader className="relative z-10">
-                <div className="w-12 h-12 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center mb-4">
-                  <TrendingUp className="w-6 h-6 text-primary" />
-                </div>
-                <CardTitle className="text-2xl">Track Your Portfolio</CardTitle>
-                <CardDescription className="text-base mt-2 max-w-lg">
-                  Create your portfolio and track every trade with daily
-                  price updates. Monitor performance with
-                  comprehensive analytics including win rate, returns, and risk
-                  metrics.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="relative z-10">
-                {/* Decorative mini-graph or UI element could go here */}
-                <div className="h-32 bg-primary/5 rounded-lg border border-primary/10 mt-4 w-full flex items-center justify-center text-muted-foreground text-sm italic">
-                  Performance Analytics Dashboard Preview
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Secondary Feature - Vertical */}
-            <Card className="md:col-span-1 bg-card border-border/60 shadow-sm hover:shadow-md transition-all group">
-              <CardHeader>
-                <div className="w-12 h-12 rounded-lg bg-accent/20 border border-accent/30 flex items-center justify-center mb-4">
-                  <FileText className="w-6 h-6 text-accent-foreground" />
-                </div>
-                <CardTitle className="text-xl">Document Your Thesis</CardTitle>
-                <CardDescription className="mt-2">
-                  Before every trade, write down your investment thesis.
-                  Document entry price, target price, and stop loss.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-
-            {/* Third Feature - Full Width Bottom */}
-            <Card className="md:col-span-3 bg-gradient-to-r from-card to-muted/50 border-border/60 shadow-sm hover:shadow-md transition-all">
-              <div className="flex flex-col md:flex-row items-center">
-                <CardHeader className="flex-1">
-                  <div className="w-12 h-12 rounded-lg bg-secondary/10 border border-secondary/20 flex items-center justify-center mb-4">
-                    <Users className="w-6 h-6 text-secondary" />
-                  </div>
-                  <CardTitle className="text-2xl">Build Your Following</CardTitle>
-                  <CardDescription className="text-lg mt-2">
-                    Share your insights with the community. As you build a proven
-                    track record, you'll attract followers who learn from your
-                    research and investment process.
-                  </CardDescription>
-                </CardHeader>
-                <div className="p-8 hidden md:block">
-                  <div className="flex -space-x-4">
-                    {[1, 2, 3, 4].map(i => (
-                      <div key={i} className="w-12 h-12 rounded-full border-2 border-background bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground">
-                        U{i}
-                      </div>
-                    ))}
-                    <div className="w-12 h-12 rounded-full border-2 border-background bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
-                      +1k
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          </div>
-        </motion.section>
+        </div>
 
         {/* Mission & Vision Section - "The Business Card for Finance" */}
         <motion.section
@@ -526,12 +525,16 @@ function Home() {
 
           <div className="max-w-6xl mx-auto px-6">
             <div className="text-center mb-20">
-              <span className="text-primary font-bold tracking-widest text-xs uppercase mb-4 block">The Mission</span>
+              <span className="text-primary font-bold tracking-widest text-xs uppercase mb-4 block">
+                The Mission
+              </span>
               <h2 className="text-4xl md:text-5xl font-serif text-foreground leading-tight max-w-3xl mx-auto">
                 Your Live Business Card for the Finance World.
               </h2>
               <p className="mt-6 text-xl text-muted-foreground max-w-2xl mx-auto">
-                Whether you're a student breaking into the industry or a professional building your reputation, Thesivest is where you prove your edge.
+                Whether you're a student breaking into the industry or a
+                professional building your reputation, Thesivest is where you
+                prove your edge.
               </p>
             </div>
 
@@ -541,9 +544,16 @@ function Home() {
                 <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2">
                   <FileText className="w-6 h-6 text-primary" />
                 </div>
-                <h3 className="text-2xl font-serif text-foreground">Build Your Track Record</h3>
+                <h3 className="text-2xl font-serif text-foreground">
+                  Build Your Track Record
+                </h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Stop sending static PDF resumes. Send a link to your live portfolio. Show employers exactly what you bought, when you bought it, and <span className="text-foreground font-medium">why</span>. Prove your analysis skills with a verified history of your calls.
+                  Stop sending static PDF resumes. Send a link to your live
+                  portfolio. Show employers exactly what you bought, when you
+                  bought it, and{" "}
+                  <span className="text-foreground font-medium">why</span>.
+                  Prove your analysis skills with a verified history of your
+                  calls.
                 </p>
               </div>
 
@@ -552,9 +562,14 @@ function Home() {
                 <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center mb-2">
                   <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                 </div>
-                <h3 className="text-2xl font-serif text-foreground">Leverage AI Research</h3>
+                <h3 className="text-2xl font-serif text-foreground">
+                  Leverage AI Research
+                </h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Professional grade data at your fingertips. We're integrating advanced AI tools to help you tear down 10-Ks, analyze earnings calls, and stress-test your thesis in seconds, not hours. Focus on the decision, not the data entry.
+                  Professional grade data at your fingertips. We're integrating
+                  advanced AI tools to help you tear down 10-Ks, analyze
+                  earnings calls, and stress-test your thesis in seconds, not
+                  hours. Focus on the decision, not the data entry.
                 </p>
               </div>
 
@@ -563,9 +578,14 @@ function Home() {
                 <div className="w-12 h-12 rounded-lg bg-amber-500/10 flex items-center justify-center mb-2">
                   <Users className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                 </div>
-                <h3 className="text-2xl font-serif text-foreground">Follow the Smart Money</h3>
+                <h3 className="text-2xl font-serif text-foreground">
+                  Follow the Smart Money
+                </h3>
                 <p className="text-muted-foreground leading-relaxed">
-                  Don't invest in a vacuum. Follow top performers, read their detailed investment memos, and debate the merits of a trade. Build a following of your own by consistently sharing high-quality insights.
+                  Don't invest in a vacuum. Follow top performers, read their
+                  detailed investment memos, and debate the merits of a trade.
+                  Build a following of your own by consistently sharing
+                  high-quality insights.
                 </p>
               </div>
             </div>
@@ -604,26 +624,22 @@ function Home() {
               {
                 step: "01",
                 title: "Sign Up",
-                description:
-                  "Create your free investor profile.",
+                description: "Create your free investor profile.",
               },
               {
                 step: "02",
                 title: "Add Thesis",
-                description:
-                  "Document your research and targets.",
+                description: "Document your research and targets.",
               },
               {
                 step: "03",
                 title: "Track",
-                description:
-                  "Monitor performance with daily updates.",
+                description: "Monitor performance with daily updates.",
               },
               {
                 step: "04",
                 title: "Grow",
-                description:
-                  "Build reputation and community.",
+                description: "Build reputation and community.",
               },
             ].map((item, index) => (
               <div key={index} className="relative group">
@@ -631,8 +647,12 @@ function Home() {
                   {item.step}
                 </div>
                 <div className="relative z-10 pt-4 px-2">
-                  <h3 className="font-bold text-xl mb-2 text-foreground">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
+                  <h3 className="font-bold text-xl mb-2 text-foreground">
+                    {item.title}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">
+                    {item.description}
+                  </p>
                 </div>
               </div>
             ))}
@@ -682,8 +702,8 @@ function Home() {
                           {post.type === "trade"
                             ? "Trade"
                             : post.type === "thought"
-                              ? "Thought"
-                              : "Update"}
+                            ? "Thought"
+                            : "Update"}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
                           {post.publishedAt}
@@ -792,65 +812,6 @@ function Home() {
           </Card>
         </motion.section>
       </div>
-    </div>
-  );
-}
-function TitleAnimation() {
-  const [step, setStep] = useState<number>(0);
-
-  useEffect(() => {
-    // 0 -> Show words
-    // 2s -> Start Move
-    const timer = setTimeout(() => {
-      setStep(1);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  return (
-    <div className="relative flex items-center justify-center p-2 min-h-[1.2em]">
-      <AnimatePresence mode="wait">
-        {step === 0 ? (
-          <motion.div
-            key="thesis-invest"
-            initial={{ opacity: 0, y: 20, filter: "blur(10px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-            exit={{ opacity: 0, filter: "blur(20px)", scale: 0.9 }} // Quick fade out for smooth swap
-            transition={{ duration: 0.8 }}
-            className="flex items-center gap-4 text-foreground"
-          >
-            <motion.span
-              animate={step === 1 ? { x: 50, opacity: 0 } : { x: 0, opacity: 1 }} // Slide Right
-              transition={{ duration: 0.8, ease: "backIn" }}
-            >
-              Thesis
-            </motion.span>
-            <motion.span
-              animate={step === 1 ? { scale: 0, rotate: 180, opacity: 0 } : { scale: 1, rotate: 0, opacity: 1 }} // Spin out
-              transition={{ duration: 0.3, delay: 0.2 }}
-              className="text-primary text-4xl"
-            >
-              +
-            </motion.span>
-            <motion.span
-              animate={step === 1 ? { x: -50, opacity: 0 } : { x: 0, opacity: 1 }} // Slide Left
-              transition={{ duration: 0.8, ease: "backIn" }}
-            >
-              Invest.
-            </motion.span>
-          </motion.div>
-        ) : (
-          <motion.span
-            key="thesivest"
-            initial={{ opacity: 0, scale: 2, filter: "blur(20px)" }} // Explode in
-            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-            transition={{ duration: 0.6, ease: "circOut" }}
-            className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-primary/80 to-primary/50 block absolute"
-          >
-            Thesivest.
-          </motion.span>
-        )}
-      </AnimatePresence>
     </div>
   );
 }
