@@ -13,8 +13,8 @@ export function MiniChart({ portfolioId }: MiniChartProps) {
     const data = useMemo(() => {
         // Default to a safe fallback if ID not found, though it should be
         const sets = ALL_DATA_SETS[portfolioId] || ALL_DATA_SETS['thesivest']
-        // Use 1Y data for the preview
-        return sets['1Y'] || []
+        // Use 3Y data for the preview
+        return sets['3Y'] || []
     }, [portfolioId])
 
     const portfolioConfig = PORTFOLIOS.find(p => p.id === portfolioId)
@@ -55,8 +55,7 @@ export function MiniChart({ portfolioId }: MiniChartProps) {
                         stroke={color}
                         strokeWidth={isMobile ? 2 : 2.5}
                         dot={false}
-                        isAnimationActive={!isMobile}
-                        animationDuration={isMobile ? 0 : 1500}
+                        isAnimationActive={false}
                     />
                 </LineChart>
             </ResponsiveContainer>

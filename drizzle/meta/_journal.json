@@ -15,6 +15,20 @@
       "when": 1766981107792,
       "tag": "0001_smiling_albert_cleary",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1767822804059,
+      "tag": "0002_fat_dust",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1767823515797,
+      "tag": "0003_graceful_sentry",
+      "breakpoints": true
     }
   ]
 }

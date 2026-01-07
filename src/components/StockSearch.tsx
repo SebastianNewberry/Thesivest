@@ -19,19 +19,21 @@ export function StockSearch() {
 
         setIsLoading(true);
         setError("");
-        setResult(null);
 
-        try {
-            const data = await searchStock({
-                data: query
+        // Use View Transition API if available
+        if (document.startViewTransition) {
+            document.startViewTransition(() => {
+                // Determine if we navigate to analysis or just show results
+                // For now, based on user request, we want a new page for analysis
+                window.location.href = `/analysis/${query}`;
             });
-            setResult(data);
-        } catch (err) {
-            console.error(err);
-            setError("Could not fetch stock data. Please try again.");
-        } finally {
-            setIsLoading(false);
+        } else {
+            window.location.href = `/analysis/${query}`;
         }
+
+        // Note: In a real React app with a router, we should use the router's navigate function
+        // wrapped in the view transition. Since we are using TanStack Router:
+        // navigate({ to: '/analysis/$symbol', params: { symbol: query } })
     };
 
     return (
@@ -47,11 +49,12 @@ export function StockSearch() {
                 </div>
 
                 {/* Search Bar */}
-                <Card className="p-2 flex flex-row items-center gap-2 border-primary/20 bg-background/50 backdrop-blur-sm shadow-xl max-w-2xl mx-auto">
-                    <Search className="w-5 h-5 text-muted-foreground ml-3" />
+                <Card className="p-2 flex flex-row items-center gap-2 border-primary/20 bg-background/50 backdrop-blur-sm shadow-xl max-w-2xl mx-auto group">
+                    <Search className="w-5 h-5 text-muted-foreground ml-3 group-focus-within:text-primary transition-colors" />
                     <Input
                         placeholder="Search ticker e.g. 'AAPL', 'MSFT', 'NVDA'..."
-                        className="border-none shadow-none focus-visible:ring-0 text-lg py-6 bg-transparent flex-1"
+                        className="border-none shadow-none focus-visible:ring-0 text-lg py-6 bg-transparent flex-1 view-transition-name-[search-box]"
+                        style={{ viewTransitionName: "search-box" } as any}
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                     />
@@ -64,6 +67,7 @@ export function StockSearch() {
                         {isLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : "Analyze"}
                     </Button>
                 </Card>
+
 
                 {/* Error State */}
                 {error && (

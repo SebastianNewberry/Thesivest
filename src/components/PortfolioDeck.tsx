@@ -42,10 +42,10 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
           const step = spreadAngle / totalItems;
 
           const angle = startAngle + index * step;
-          // Responsive radius: smaller on mobile to prevent overflow
-          const radius = isMobile ? 90 : 140;
+          // Responsive radius: larger for more spread out fan
+          const radius = isMobile ? 120 : 180;
           const fannedX = Math.cos(angle) * radius;
-          const fannedY = Math.sin(angle) * radius; // Circular (no squash)
+          const fannedY = Math.sin(angle) * radius * 0.85; // Compress Y to bring portfolios closer vertically
 
           // Stack Geometry (Peeking Cards)
           const stackX = (index + 1) * 10;
@@ -56,10 +56,14 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
           const isHero = isActive && !showFan;
 
           // Animation Stagger
-          // If returning to stack (showFan false), delay 0.
+          // If returning to stack (showFan false), use synchronized animation.
           // If fanning out (showFan true), stagger.
           // If active, it moves immediately (0). Others stagger.
-          const delay = showFan ? (isActive ? 0 : 0.05 + index * 0.03) : 0;
+          const delay = showFan
+            ? isActive
+              ? 0
+              : 0.05 + index * 0.03
+            : 0.02 * index;
 
           // Z-Index config
           // Hero always on top (100).
@@ -92,9 +96,9 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                 // Position
                 x: isHero ? 0 : showFan ? fannedX : stackX,
                 y: isHero ? 0 : showFan ? fannedY : stackY,
-                // Dimension - smaller on mobile
-                width: isHero ? "calc(100% - 32px)" : isMobile ? 280 : 310,
-                height: isHero ? "calc(100% - 32px)" : isMobile ? 180 : 200,
+                // Dimension - smaller on mobile, compact mini charts
+                width: isHero ? "calc(100% - 32px)" : isMobile ? 220 : 240,
+                height: isHero ? "calc(100% - 32px)" : isMobile ? 140 : 160,
                 // Scale & Rotate
                 scale: 1,
                 rotate: isHero ? 0 : showFan ? 0 : stackRotate,
@@ -140,17 +144,6 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                 )}
 
                 <div className="flex-1 w-full relative min-h-0">
-                  {/* Context Label - Shown in mini charts only */}
-                  {!isHero && (
-                    <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-md border border-border/50 text-[10px] text-muted-foreground z-20 pointer-events-none"
-                    >
-                      Real User Portfolios
-                    </motion.div>
-                  )}
-
                   <AnimatePresence mode="popLayout">
                     {isHero ? (
                       <>
@@ -197,16 +190,9 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                         />
                       </>
                     ) : (
-                      <motion.div
-                        key="mini"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.2 }}
-                        className="absolute inset-0 w-full h-full z-10"
-                      >
+                      <div className="absolute inset-0 w-full h-full z-10">
                         <MiniChart portfolioId={portfolio.id} />
-                      </motion.div>
+                      </div>
                     )}
                   </AnimatePresence>
                 </div>
@@ -218,20 +204,6 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
             </motion.div>
           );
         })}
-      </AnimatePresence>
-
-      {/* Instruction Hint - Only show if NO active ID (initial state) */}
-      <AnimatePresence>
-        {activeId === null && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 text-sm font-bold text-primary bg-background/80 px-4 py-2 rounded-full border border-primary/20 backdrop-blur z-0 shadow-lg"
-          >
-            Select a Portfolio to Begin
-          </motion.div>
-        )}
       </AnimatePresence>
     </div>
   );

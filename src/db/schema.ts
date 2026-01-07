@@ -456,3 +456,47 @@ export const portfolioSnapshotRelations = relations(portfolioSnapshot, ({ one })
     references: [portfolio.id],
   }),
 }));
+
+// Stock Analysis (RAG)
+export const stock = pgTable("stock", {
+  symbol: text("symbol").primaryKey(),
+  name: text("name").notNull(),
+  ragAnalysisId: text("rag_analysis_id"),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const stockRelations = relations(stock, ({ many }) => ({
+  analyses: many(stockAnalysis),
+}));
+
+export const stockAnalysis = pgTable("stock_analysis", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  symbol: text("symbol")
+    .notNull()
+    .references(() => stock.symbol, { onDelete: "cascade" }),
+  ragAnalysisId: text("rag_analysis_id").notNull(),
+  title: text("title"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const stockAnalysisRelations = relations(stockAnalysis, ({ one }) => ({
+  user: one(user, {
+    fields: [stockAnalysis.userId],
+    references: [user.id],
+  }),
+  stock: one(stock, {
+    fields: [stockAnalysis.symbol],
+    references: [stock.symbol],
+  }),
+}));
+
+
+
