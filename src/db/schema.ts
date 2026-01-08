@@ -498,5 +498,45 @@ export const stockAnalysisRelations = relations(stockAnalysis, ({ one }) => ({
   }),
 }));
 
+// Fund Analysis (RAG)
+export const fund = pgTable("fund", {
+  id: text("id").primaryKey(), // Ticker or slug, e.g. "bridgewater"
+  name: text("name").notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
+
+export const fundRelations = relations(fund, ({ many }) => ({
+  analyses: many(fundAnalysis),
+}));
+
+export const fundAnalysis = pgTable("fund_analysis", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  userId: text("user_id")
+    .references(() => user.id, { onDelete: "cascade" }),
+  fundId: text("fund_id")
+    .notNull()
+    .references(() => fund.id, { onDelete: "cascade" }),
+  ragAnalysisId: text("rag_analysis_id").notNull(),
+  title: text("title"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const fundAnalysisRelations = relations(fundAnalysis, ({ one }) => ({
+  user: one(user, {
+    fields: [fundAnalysis.userId],
+    references: [user.id],
+  }),
+  fund: one(fund, {
+    fields: [fundAnalysis.fundId],
+    references: [fund.id],
+  }),
+}));
+
+
 
 

@@ -1,16 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getStockAnalysis, getUserStockSnapshots } from "@/server/features/stocks";
+import { getStockAnalysisFn } from "@/server/fn/stocks";
 import { useLoaderData } from "@tanstack/react-router";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BrainCircuit, Scale, TrendingUp, AlertTriangle, Activity } from "lucide-react";
 import { motion } from "motion/react";
 
 export const Route = createFileRoute("/analysis/$symbol")({
-    loader: async ({ params: { symbol } }) => {
-        const analysis = await getStockAnalysis({ data: symbol });
-        // TODO: In real app, get userId from context and fetch snapshots
-        // const snapshots = await getUserStockSnapshots({ data: { symbol, userId: 'current-user' } });
+    loader: async ({ params }) => {
+        const { symbol } = params;
+        const analysis = await getStockAnalysisFn({ data: { symbol } });
         return { symbol, analysis };
     },
     component: AnalysisPage,

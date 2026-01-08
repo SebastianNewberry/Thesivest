@@ -1,17 +1,22 @@
 import { useState } from "react";
-import { Search, Loader2, BrainCircuit, TrendingUp, AlertTriangle, Scale, Activity } from "lucide-react";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { Card } from "./ui/card";
-import { motion, AnimatePresence } from "motion/react";
-import { searchStock, StockData } from "../server/features/stocks";
-import { Badge } from "./ui/badge";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Search, Loader2 } from "lucide-react";
+import { searchStocksFn } from "@/server/fn/stocks";
+import { useNavigate } from "@tanstack/react-router";
+
+interface Stock {
+    symbol: string;
+    name: string;
+}
 
 export function StockSearch() {
     const [query, setQuery] = useState("");
     const [isLoading, setIsLoading] = useState(false);
-    const [result, setResult] = useState<StockData | null>(null);
     const [error, setError] = useState("");
+    const [result, setResult] = useState<Stock[] | null>(null);
+    const navigate = useNavigate();
 
     const handleSearch = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -23,17 +28,11 @@ export function StockSearch() {
         // Use View Transition API if available
         if (document.startViewTransition) {
             document.startViewTransition(() => {
-                // Determine if we navigate to analysis or just show results
-                // For now, based on user request, we want a new page for analysis
-                window.location.href = `/analysis/${query}`;
+                navigate({ to: "/analysis/$symbol", params: { symbol: query } });
             });
         } else {
-            window.location.href = `/analysis/${query}`;
+            navigate({ to: "/analysis/$symbol", params: { symbol: query } });
         }
-
-        // Note: In a real React app with a router, we should use the router's navigate function
-        // wrapped in the view transition. Since we are using TanStack Router:
-        // navigate({ to: '/analysis/$symbol', params: { symbol: query } })
     };
 
     return (
@@ -68,88 +67,12 @@ export function StockSearch() {
                     </Button>
                 </Card>
 
-
                 {/* Error State */}
                 {error && (
                     <div className="text-center text-red-500 bg-red-500/10 p-4 rounded-lg border border-red-500/20">
-                        {error}
+                        <p>{error}</p>
                     </div>
                 )}
-
-                {/* Results View */}
-                <AnimatePresence mode="wait">
-                    {result && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -20 }}
-                            className="space-y-8"
-                        >
-                            {/* Header Section */}
-                            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                                <div>
-                                    <div className="flex items-center gap-3">
-                                        <h3 className="text-4xl font-bold font-heading">{result.symbol}</h3>
-                                        <Badge variant="outline" className="text-lg px-3 py-1">{result.companyName}</Badge>
-                                    </div>
-                                    <p className="text-muted-foreground mt-2 max-w-2xl">{result.businessSummary}</p>
-                                </div>
-                                <div className="flex items-center gap-2 text-primary bg-primary/10 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">
-                                    <BrainCircuit className="w-4 h-4" />
-                                    AI Generated Analysis
-                                </div>
-                            </div>
-
-                            {/* Main Grid */}
-                            <div className="grid md:grid-cols-2 gap-6">
-                                {/* Moat Analysis */}
-                                <Card className="p-6 bg-card border-border/60">
-                                    <div className="flex items-center gap-2 mb-4 text-blue-500">
-                                        <Scale className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Economic Moat</h4>
-                                    </div>
-                                    <p className="text-muted-foreground leading-relaxed">{result.moatAnalysis}</p>
-                                </Card>
-
-                                {/* Growth Catalysts */}
-                                <Card className="p-6 bg-card border-border/60">
-                                    <div className="flex items-center gap-2 mb-4 text-green-500">
-                                        <TrendingUp className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Growth Catalysts</h4>
-                                    </div>
-                                    <p className="text-muted-foreground leading-relaxed">{result.growthCatalysts}</p>
-                                </Card>
-
-                                {/* Key Risks */}
-                                <Card className="p-6 bg-card border-border/60">
-                                    <div className="flex items-center gap-2 mb-4 text-red-500">
-                                        <AlertTriangle className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Key Risks</h4>
-                                    </div>
-                                    <p className="text-muted-foreground leading-relaxed">{result.keyRisks}</p>
-                                </Card>
-
-                                {/* Financials & Valuation */}
-                                <Card className="p-6 bg-card border-border/60">
-                                    <div className="flex items-center gap-2 mb-4 text-purple-500">
-                                        <Activity className="w-5 h-5" />
-                                        <h4 className="font-bold uppercase tracking-wider text-sm">Financials & Valuation</h4>
-                                    </div>
-                                    <div className="space-y-4">
-                                        <div>
-                                            <span className="text-xs font-semibold text-foreground uppercase block mb-1">Health</span>
-                                            <p className="text-muted-foreground text-sm">{result.financialHealth}</p>
-                                        </div>
-                                        <div className="pt-4 border-t border-border/40">
-                                            <span className="text-xs font-semibold text-foreground uppercase block mb-1">Valuation Context</span>
-                                            <p className="text-muted-foreground text-sm">{result.valuationCommentary}</p>
-                                        </div>
-                                    </div>
-                                </Card>
-                            </div>
-                        </motion.div>
-                    )}
-                </AnimatePresence>
             </div>
         </section>
     );

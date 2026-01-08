@@ -16,9 +16,11 @@ export default $config({
     const better_auth_secret = new sst.Secret("BETTER_AUTH_SECRET");
     const better_auth_url = new sst.Secret("BETTER_AUTH_URL");
     const gemini_key = new sst.Secret("GEMINI_API_KEY");
+    const qdrant_api_key = new sst.Secret("QDRANT_API_KEY");
+    const qdrant_api_url = new sst.Secret("QDRANT_API_URL");
 
     new sst.aws.TanStackStart("MyWeb", {
-      link: [database_connection, better_auth_secret, better_auth_url, gemini_key],
+      link: [database_connection, better_auth_secret, better_auth_url, gemini_key, qdrant_api_key, qdrant_api_url],
     });
   },
 });

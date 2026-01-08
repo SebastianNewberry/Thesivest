@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, Variants } from "motion/react";
 import { X } from "lucide-react";
 import { HeroChart } from "./HeroChart";
 import { PORTFOLIOS, ALL_DATA_SETS } from "../lib/chartData";
@@ -26,6 +26,19 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
 
   // Logic: Fan out if explicitly triggered (logo hover) OR if no chart is selected yet.
   const showFan = isFanned || activeId === null;
+
+  // Animation variants for hero chart - different timings for entry vs exit
+  const heroChartVariants: Variants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { duration: 0.15, ease: "easeOut" } },
+    exit: { opacity: 0, transition: { duration: 0.35, ease: "easeOut" } },
+  };
+
+  const heroLoadingVariants: Variants = {
+    initial: { opacity: 1 },
+    animate: { opacity: 0, transition: { duration: 0.15, ease: "easeOut" } },
+    exit: { opacity: 0, transition: { duration: 0.35, ease: "easeOut" } },
+  };
 
   return (
     <div className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center perspective-1000">
@@ -56,14 +69,13 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
           const isHero = isActive && !showFan;
 
           // Animation Stagger
-          // If returning to stack (showFan false), use synchronized animation.
+          // If returning to stack (showFan false), delay 0.
           // If fanning out (showFan true), stagger.
           // If active, it moves immediately (0). Others stagger.
-          const delay = showFan
-            ? isActive
-              ? 0
-              : 0.05 + index * 0.03
-            : 0.02 * index;
+          const delay = showFan ? (isActive ? 0 : 0.05 + index * 0.03) : 0;
+
+          // Faster exit when closing hero chart
+          const isExitingHero = !showFan && !isActive && activeId === null;
 
           // Z-Index config
           // Hero always on top (100).
@@ -106,11 +118,13 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                 opacity: 1,
               }}
               transition={{
-                type: "spring",
-                stiffness: isHero ? 120 : 160,
-                damping: isHero ? 20 : 25,
-                mass: isMobile ? 0.8 : 1, // Lighter mass for faster animations on mobile
-                delay: isMobile ? Math.min(delay as number, 0.1) : delay, // Reduce stagger on mobile
+                duration: isExitingHero ? 0.35 : 0.25,
+                ease: [0.25, 0.1, 0.25, 1],
+                delay: isExitingHero
+                  ? 0
+                  : isMobile
+                  ? Math.min(delay as number, 0.05)
+                  : delay,
               }}
               onClick={(e) => {
                 if (isHero) return;
@@ -149,14 +163,10 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                       <>
                         <motion.div
                           key="hero-chart"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{
-                            duration: 0.4,
-                            delay: 0.4,
-                            ease: "easeOut",
-                          }}
+                          variants={heroChartVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
                           className="absolute inset-0 w-full h-full z-10"
                         >
                           <HeroChart
@@ -171,21 +181,17 @@ export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
                               e.stopPropagation();
                               setActiveId(null);
                             }}
-                            className="absolute top-4 right-4 z-50 p-2 rounded-full bg-background/50 backdrop-blur hover:bg-muted/80 transition-colors border border-border/50 text-foreground cursor-pointer"
+                            className="absolute top-2 right-2 z-50 p-1 rounded-md bg-background/50 backdrop-blur hover:bg-muted/80 transition-colors border border-border/50 text-foreground cursor-pointer"
                           >
-                            <X className="w-5 h-5" />
+                            <X className="w-3.5 h-3.5" />
                           </button>
                         </motion.div>
                         <motion.div
                           key="hero-loading"
-                          initial={{ opacity: 1 }}
-                          animate={{ opacity: 0 }}
-                          exit={{ opacity: 0 }}
-                          transition={{
-                            duration: 0.4,
-                            delay: 0.4,
-                            ease: "easeOut",
-                          }}
+                          variants={heroLoadingVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
                           className="absolute inset-0 w-full h-full bg-background z-20 pointer-events-none"
                         />
                       </>

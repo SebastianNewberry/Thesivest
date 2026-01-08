@@ -53,7 +53,6 @@ const getAxisTicks = (min: number, max: number) => {
 
   // Generate ticks based on bestInterval type
   let d = new Date(min);
-  const end = new Date(max);
 
   // Normalize start date based on interval type
   if (bestInterval.label.includes("year")) {
@@ -200,6 +199,7 @@ export function HeroChart({
     right: string | number;
     timeRange: TimeRange | null;
   } | null>(null);
+  const [isNavigating, setIsNavigating] = useState(false);
 
   // Calculate current return for the main portfolio
   // If zoomed, use data from the visible range
@@ -306,8 +306,12 @@ export function HeroChart({
       newRight = minDate + duration;
     }
 
+    setIsNavigating(true);
     setLeft(newLeft);
     setRight(newRight);
+
+    // Reset navigation state after animation completes
+    setTimeout(() => setIsNavigating(false), 500);
   };
 
   const toggleSeries = (id: string) => {
@@ -343,6 +347,9 @@ export function HeroChart({
         setPreZoomState({ left, right, timeRange });
       }
 
+      setIsNavigating(true);
+      setTimeout(() => setIsNavigating(false), 500);
+
       setLeft(start);
       setRight(end);
       setTimeRange(null);
@@ -352,6 +359,9 @@ export function HeroChart({
   const zoomOut = () => {
     setRefAreaLeft(null);
     setRefAreaRight(null);
+
+    setIsNavigating(true);
+    setTimeout(() => setIsNavigating(false), 500);
 
     if (preZoomState) {
       setLeft(preZoomState.left);
@@ -435,6 +445,8 @@ export function HeroChart({
                   const lastDate = currentData[currentData.length - 1].date;
                   setRight("dataMax"); // Pin to live
                   setLeft(getStartDateForRange(range, lastDate));
+                  setIsNavigating(true);
+                  setTimeout(() => setIsNavigating(false), 500);
                 }}
                 className={cn(
                   "px-1.5 md:px-3 py-1 md:py-1.5 rounded-md text-[10px] md:text-xs font-semibold transition-all duration-200",
@@ -705,6 +717,8 @@ export function HeroChart({
                         name={label}
                         strokeOpacity={opacity}
                         style={{ opacity }}
+                        isAnimationActive={isNavigating}
+                        animationDuration={isNavigating ? 300 : 0}
                       />
                     );
                   }
@@ -721,6 +735,8 @@ export function HeroChart({
                       name={label}
                       strokeOpacity={opacity}
                       style={{ transition: "opacity 0.3s" }}
+                      isAnimationActive={isNavigating}
+                      animationDuration={isNavigating ? 300 : 0}
                     />
                   );
                 })}

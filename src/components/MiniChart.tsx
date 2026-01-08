@@ -45,7 +45,8 @@ export function MiniChart({ portfolioId }: MiniChartProps) {
                         strokeWidth={1.5}
                         strokeOpacity={0.3}
                         dot={false}
-                        isAnimationActive={false} // Disable animation for instant render
+                        isAnimationActive={false}
+                        animationDuration={0}
                     />
 
                     {/* Portfolio Line - Vibrant, Colored */}
@@ -56,6 +57,7 @@ export function MiniChart({ portfolioId }: MiniChartProps) {
                         strokeWidth={isMobile ? 2 : 2.5}
                         dot={false}
                         isAnimationActive={false}
+                        animationDuration={0}
                     />
                 </LineChart>
             </ResponsiveContainer>
