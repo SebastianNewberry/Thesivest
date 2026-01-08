@@ -11,6 +11,7 @@ import {
   getAllPosts,
   getPostById as getPostByIdDAL,
   getPostsByUserId,
+  searchPosts,
 } from "../data-access/posts";
 
 export interface CommunityMember {
@@ -90,12 +91,12 @@ function dbPostToUserPost(dbPost: any): UserPost {
     comments: dbPost.comments,
     performance: dbPost.performance
       ? {
-          returnPercent: Number(dbPost.performance.returnPercent),
-          returnAmount: dbPost.performance.returnAmount
-            ? Number(dbPost.performance.returnAmount)
-            : undefined,
-          status: dbPost.performance.status,
-        }
+        returnPercent: Number(dbPost.performance.returnPercent),
+        returnAmount: dbPost.performance.returnAmount
+          ? Number(dbPost.performance.returnAmount)
+          : undefined,
+        status: dbPost.performance.status,
+      }
       : undefined,
   };
 }
@@ -119,8 +120,15 @@ function dbUserToCommunityMember(dbUser: any): CommunityMember {
 }
 
 export async function getContributors(): Promise<CommunityMember[]> {
-  const users = await getAllUsers();
-  return users.map(dbUserToCommunityMember);
+  console.log("Starting getContributors...");
+  try {
+    const users = await getAllUsers();
+    console.log("getAllUsers result count:", users.length);
+    return users.map(dbUserToCommunityMember);
+  } catch (error) {
+    console.error("Error in getContributors:", error);
+    throw error;
+  }
 }
 
 // Keep for backward compatibility but use new interface
@@ -159,4 +167,9 @@ export async function getPostsByUser(userId: string): Promise<UserPost[]> {
 export async function getPostById(id: string): Promise<UserPost | null> {
   const post = await getPostByIdDAL(id);
   return post ? dbPostToUserPost(post) : null;
+}
+
+export async function searchCommunityPosts(query: string, limit?: number): Promise<UserPost[]> {
+  const posts = await searchPosts(query, limit);
+  return posts.map(dbPostToUserPost);
 }

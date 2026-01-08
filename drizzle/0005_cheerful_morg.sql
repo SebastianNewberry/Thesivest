@@ -1,0 +1,1 @@
+ALTER TABLE "fund_analysis" ALTER COLUMN "user_id" DROP NOT NULL;

@@ -38,7 +38,7 @@ export default function Header() {
           <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
             <TrendingUp className="text-primary-foreground w-6 h-6" />
           </div>
-          <span className="text-2xl font-bold tracking-tight text-foreground">
+          <span className="text-2xl font-heading font-bold tracking-tight text-foreground">
             Thesivest
           </span>
         </Link>
@@ -46,7 +46,8 @@ export default function Header() {
       <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
         <Link to="/" className="hover:text-primary transition-colors" onClick={handleNavbarClick}>Discover</Link>
         <Link to="/tournaments" className="hover:text-primary transition-colors" onClick={handleNavbarClick}>Tournaments</Link>
-        <Link to="/" className="hover:text-primary transition-colors" onClick={handleNavbarClick}>Contributors</Link>
+        <Link to="/funds" className="hover:text-primary transition-colors" onClick={handleNavbarClick}>Fund Research</Link>
+        <Link to="/contributors" className="hover:text-primary transition-colors" onClick={handleNavbarClick}>Contributors</Link>
       </nav>
 
       {/* Show user info if logged in, otherwise show sign in */}

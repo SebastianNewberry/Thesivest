@@ -1,3 +1,4 @@
+import "dotenv/config";
 import { drizzle } from "drizzle-orm/node-postgres";
 import { Resource } from "sst";
 
@@ -8,17 +9,32 @@ console.log("Resource:", Resource);
 console.log("VITE_DATABASE_URL_POOLER:", Resource.VITE_DATABASE_URL_POOLER);
 
 // Get the database URL with optional chaining
-const dbUrl = Resource.VITE_DATABASE_URL_POOLER?.value;
+const dbUrl = Resource.VITE_DATABASE_URL_POOLER?.value || process.env.VITE_DATABASE_URL_POOLER || process.env.DATABASE_URL;
 
 console.log("dbUrl:", dbUrl);
 
-if (!dbUrl || typeof dbUrl !== "string") {
-  console.error("Database URL is missing or invalid");
-  throw new Error(
-    "Database URL not found. Make sure VITE_DATABASE_URL_POOLER is set in your environment."
-  );
+// Safe initialization
+let dbInstance: any;
+
+try {
+  if (!dbUrl || typeof dbUrl !== "string") {
+    console.warn("⚠️ Database URL is missing or invalid. DB operations will fail.");
+  } else {
+    dbInstance = drizzle(dbUrl, { schema });
+    console.log("✅ db initialized successfully");
+  }
+} catch (err) {
+  console.error("❌ Error initializing db:", err);
 }
 
-export const db = drizzle(dbUrl, { schema });
+// Export a proxy that throws if db failed to init
+export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
+  get: (_target, prop) => {
+    if (!dbInstance) {
+      throw new Error(`Database not initialized. check VITE_DATABASE_URL_POOLER. URL: ${dbUrl}`);
+    }
+    return (dbInstance as any)[prop];
+  },
+});
 
 console.log("db initialized successfully");

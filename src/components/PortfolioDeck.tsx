@@ -1,224 +1,216 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'motion/react'
-import { X } from 'lucide-react'
-import { HeroChart } from './HeroChart'
-import { PORTFOLIOS, ALL_DATA_SETS } from '../lib/chartData'
-import { MiniChart } from './MiniChart'
-import { cn } from '../lib/utils'
-import { useMediaQuery } from '../hooks/useMediaQuery'
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence, Variants } from "motion/react";
+import { X } from "lucide-react";
+import { HeroChart } from "./HeroChart";
+import { PORTFOLIOS, ALL_DATA_SETS } from "../lib/chartData";
+import { MiniChart } from "./MiniChart";
+import { cn } from "../lib/utils";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 
 interface PortfolioDeckProps {
-    isFanned?: boolean
+  isFanned?: boolean;
 }
 
 export function PortfolioDeck({ isFanned = false }: PortfolioDeckProps) {
-    // Default to null so it stays fanned until a chart is selected
-    const [activeId, setActiveId] = useState<string | null>(null)
-    const isMobile = useMediaQuery('(max-width: 768px)')
+  // Default to null so it stays fanned until a chart is selected
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
-    // If the logo is hovered (isFanned=true), we reset to the "Menu" state (activeId=null).
-    // This allows the fan to persist even after the user stops hovering the logo.
-    useEffect(() => {
-        if (isFanned) {
-            setActiveId(null)
-        }
-    }, [isFanned])
+  // If the logo is hovered (isFanned=true), we reset to the "Menu" state (activeId=null).
+  // This allows the fan to persist even after the user stops hovering the logo.
+  useEffect(() => {
+    if (isFanned) {
+      setActiveId(null);
+    }
+  }, [isFanned]);
 
-    // Logic: Fan out if explicitly triggered (logo hover) OR if no chart is selected yet.
-    const showFan = isFanned || activeId === null
+  // Logic: Fan out if explicitly triggered (logo hover) OR if no chart is selected yet.
+  const showFan = isFanned || activeId === null;
 
-    return (
-        <div className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center perspective-1000">
-            <AnimatePresence>
-                {PORTFOLIOS.map((portfolio, index) => {
-                    const isActive = portfolio.id === activeId
+  // Animation variants for hero chart - different timings for entry vs exit
+  const heroChartVariants: Variants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1, transition: { duration: 0.15, ease: "easeOut" } },
+    exit: { opacity: 0, transition: { duration: 0.35, ease: "easeOut" } },
+  };
 
-                    // --- Geometry Config ---
-                    const totalItems = PORTFOLIOS.length
+  const heroLoadingVariants: Variants = {
+    initial: { opacity: 1 },
+    animate: { opacity: 0, transition: { duration: 0.15, ease: "easeOut" } },
+    exit: { opacity: 0, transition: { duration: 0.35, ease: "easeOut" } },
+  };
 
-                    // Fan Geometry: Full 360 Circle (desktop) / Reduced for mobile
-                    const spreadAngle = 2 * Math.PI
-                    const startAngle = -Math.PI / 2 // Start at top
-                    const step = spreadAngle / totalItems
+  return (
+    <div className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center perspective-1000">
+      <AnimatePresence>
+        {PORTFOLIOS.map((portfolio, index) => {
+          const isActive = portfolio.id === activeId;
 
-                    const angle = startAngle + (index * step)
-                    // Responsive radius: smaller on mobile to prevent overflow
-                    const radius = isMobile ? 90 : 140
-                    const fannedX = Math.cos(angle) * radius
-                    const fannedY = Math.sin(angle) * radius // Circular (no squash)
+          // --- Geometry Config ---
+          const totalItems = PORTFOLIOS.length;
 
-                    // Stack Geometry (Peeking Cards)
-                    const stackX = (index + 1) * 10
-                    const stackY = (index + 1) * 5
-                    const stackRotate = (index + 1) * 5
+          // Fan Geometry: Full 360 Circle (desktop) / Reduced for mobile
+          const spreadAngle = 2 * Math.PI;
+          const startAngle = -Math.PI / 2; // Start at top
+          const step = spreadAngle / totalItems;
 
-                    // Hero Logic
-                    const isHero = isActive && !showFan
+          const angle = startAngle + index * step;
+          // Responsive radius: larger for more spread out fan
+          const radius = isMobile ? 120 : 180;
+          const fannedX = Math.cos(angle) * radius;
+          const fannedY = Math.sin(angle) * radius * 0.85; // Compress Y to bring portfolios closer vertically
 
-                    // Animation Stagger
-                    // If returning to stack (showFan false), delay 0.
-                    // If fanning out (showFan true), stagger.
-                    // If active, it moves immediately (0). Others stagger.
-                    const delay = showFan
-                        ? (isActive ? 0 : 0.05 + (index * 0.03))
-                        : 0
+          // Stack Geometry (Peeking Cards)
+          const stackX = (index + 1) * 10;
+          const stackY = (index + 1) * 5;
+          const stackRotate = (index + 1) * 5;
 
-                    // Z-Index config
-                    // Hero always on top (100).
-                    // Fanned: 40-50 range?
-                    // Stacked: 10-index.
-                    // When fanned, we want them to layer nicely.
-                    // But if no activeId, they are all equal? No, index z-ordering is fine for fan overlap.
+          // Hero Logic
+          const isHero = isActive && !showFan;
 
-                    return (
-                        <motion.div
-                            key={portfolio.id}
-                            layoutId={portfolio.id}
-                            className={cn(
-                                "absolute bg-card font-sans overflow-hidden shadow-2xl border",
-                                isHero
-                                    ? "rounded-xl bg-background/50 backdrop-blur border-border"
-                                    : cn(
-                                        "rounded-xl cursor-pointer hover:ring-2 hover:ring-primary z-50 transition-shadow",
-                                        portfolio.id === 'thesivest' ? "border-secondary ring-1 ring-secondary shadow-secondary/20" : "border-border"
-                                    )
-                            )}
-                            style={{
-                                zIndex: isHero ? 100 : (showFan ? 50 - index : 10 - index),
-                                transformOrigin: "center center"
-                            }}
-                            initial={false}
-                            animate={{
-                                // Position
-                                x: isHero ? 0 : (showFan ? fannedX : stackX),
-                                y: isHero ? 0 : (showFan ? fannedY : stackY),
-                                // Dimension - smaller on mobile
-                                width: isHero ? "calc(100% - 32px)" : (isMobile ? 280 : 310),
-                                height: isHero ? "calc(100% - 32px)" : (isMobile ? 180 : 200),
-                                // Scale & Rotate
-                                scale: 1,
-                                rotate: isHero ? 0 : (showFan ? 0 : stackRotate),
-                                // Opacity
-                                opacity: 1
-                            }}
-                            transition={{
-                                type: "spring",
-                                stiffness: isHero ? 120 : 160,
-                                damping: isHero ? 20 : 25,
-                                mass: isMobile ? 0.8 : 1, // Lighter mass for faster animations on mobile
-                                delay: isMobile ? Math.min(delay as number, 0.1) : delay // Reduce stagger on mobile
-                            }}
-                            onClick={(e) => {
-                                if (isHero) return
-                                e.stopPropagation()
-                                setActiveId(portfolio.id)
-                            }}
-                            whileHover={!isHero ? { scale: 1.05, zIndex: 60 } : {}}
-                        >
-                            {/* Inner Content */}
-                            <div className="w-full h-full relative flex flex-col">
-                                {!isHero && (
-                                    <motion.div
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="px-3 py-2 border-b border-border/50 flex justify-between items-center bg-muted/20 shrink-0"
-                                    >
-                                        <span className={cn(
-                                            "font-bold text-sm truncate",
-                                            portfolio.id === 'thesivest' ? "text-secondary" : "text-foreground"
-                                        )}>{portfolio.name}</span>
-                                        <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20 whitespace-nowrap">
-                                            vs S&P 500
-                                        </span>
-                                    </motion.div>
-                                )}
+          // Animation Stagger
+          // If returning to stack (showFan false), delay 0.
+          // If fanning out (showFan true), stagger.
+          // If active, it moves immediately (0). Others stagger.
+          const delay = showFan ? (isActive ? 0 : 0.05 + index * 0.03) : 0;
 
-                                <div className="flex-1 w-full relative min-h-0">
-                                    {/* Context Label - Shown in mini charts only */}
-                                    {!isHero && (
-                                        <motion.div
-                                            initial={{ opacity: 0 }}
-                                            animate={{ opacity: 1 }}
-                                            className="absolute top-3 left-3 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-md border border-border/50 text-[10px] text-muted-foreground z-20 pointer-events-none"
-                                        >
-                                            Real User Portfolios
-                                        </motion.div>
-                                    )}
+          // Faster exit when closing hero chart
+          const isExitingHero = !showFan && !isActive && activeId === null;
 
-                                    <AnimatePresence mode="popLayout">
-                                        {isHero ? (
-                                            <>
-                                                <motion.div
-                                                    key="hero-chart"
-                                                    initial={{ opacity: 0 }}
-                                                    animate={{ opacity: 1 }}
-                                                    exit={{ opacity: 0 }}
-                                                    transition={{ duration: 0.4, delay: 0.4, ease: "easeOut" }}
-                                                    className="absolute inset-0 w-full h-full z-10"
-                                                >
-                                                    <HeroChart
-                                                        portfolioId={portfolio.id}
-                                                        data={ALL_DATA_SETS[portfolio.id]['3Y']}
-                                                        className="rounded-none border-0 shadow-none h-full"
-                                                    />
+          // Z-Index config
+          // Hero always on top (100).
+          // Fanned: 40-50 range?
+          // Stacked: 10-index.
+          // When fanned, we want them to layer nicely.
+          // But if no activeId, they are all equal? No, index z-ordering is fine for fan overlap.
 
-                                                    {/* Close Button */}
-                                                    <button
-                                                        onClick={(e) => {
-                                                            e.stopPropagation()
-                                                            setActiveId(null)
-                                                        }}
-                                                        className="absolute top-4 right-4 z-50 p-2 rounded-full bg-background/50 backdrop-blur hover:bg-muted/80 transition-colors border border-border/50 text-foreground cursor-pointer"
-                                                    >
-                                                        <X className="w-5 h-5" />
-                                                    </button>
-                                                </motion.div>
-                                                <motion.div
-                                                    key="hero-loading"
-                                                    initial={{ opacity: 1 }}
-                                                    animate={{ opacity: 0 }}
-                                                    exit={{ opacity: 0 }}
-                                                    transition={{ duration: 0.4, delay: 0.4, ease: "easeOut" }}
-                                                    className="absolute inset-0 w-full h-full bg-background z-20 pointer-events-none"
-                                                />
-                                            </>
-                                        ) : (
-                                            <motion.div
-                                                key="mini"
-                                                initial={{ opacity: 0 }}
-                                                animate={{ opacity: 1 }}
-                                                exit={{ opacity: 0 }}
-                                                transition={{ duration: 0.2 }}
-                                                className="absolute inset-0 w-full h-full z-10"
-                                            >
-                                                <MiniChart portfolioId={portfolio.id} />
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
-                                </div>
-
-                                {!isHero && (
-                                    <div className="absolute inset-0 hover:bg-primary/5 transition-colors pointer-events-none" />
-                                )}
-                            </div>
-                        </motion.div>
+          return (
+            <motion.div
+              key={portfolio.id}
+              layoutId={portfolio.id}
+              className={cn(
+                "absolute bg-card font-sans overflow-hidden shadow-2xl border",
+                isHero
+                  ? "rounded-xl bg-background/50 backdrop-blur border-border"
+                  : cn(
+                      "rounded-xl cursor-pointer hover:ring-2 hover:ring-primary z-50 transition-shadow",
+                      portfolio.id === "thesivest"
+                        ? "border-secondary ring-1 ring-secondary shadow-secondary/20"
+                        : "border-border"
                     )
-                })}
-            </AnimatePresence>
-
-            {/* Instruction Hint - Only show if NO active ID (initial state) */}
-            <AnimatePresence>
-                {activeId === null && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        className="absolute bottom-10 left-1/2 -translate-x-1/2 text-sm font-bold text-primary bg-background/80 px-4 py-2 rounded-full border border-primary/20 backdrop-blur z-0 shadow-lg"
+              )}
+              style={{
+                zIndex: isHero ? 100 : showFan ? 50 - index : 10 - index,
+                transformOrigin: "center center",
+              }}
+              initial={false}
+              animate={{
+                // Position
+                x: isHero ? 0 : showFan ? fannedX : stackX,
+                y: isHero ? 0 : showFan ? fannedY : stackY,
+                // Dimension - smaller on mobile, compact mini charts
+                width: isHero ? "calc(100% - 32px)" : isMobile ? 220 : 240,
+                height: isHero ? "calc(100% - 32px)" : isMobile ? 140 : 160,
+                // Scale & Rotate
+                scale: 1,
+                rotate: isHero ? 0 : showFan ? 0 : stackRotate,
+                // Opacity
+                opacity: 1,
+              }}
+              transition={{
+                duration: isExitingHero ? 0.35 : 0.25,
+                ease: [0.25, 0.1, 0.25, 1],
+                delay: isExitingHero
+                  ? 0
+                  : isMobile
+                  ? Math.min(delay as number, 0.05)
+                  : delay,
+              }}
+              onClick={(e) => {
+                if (isHero) return;
+                e.stopPropagation();
+                setActiveId(portfolio.id);
+              }}
+              whileHover={!isHero ? { scale: 1.05, zIndex: 60 } : {}}
+            >
+              {/* Inner Content */}
+              <div className="w-full h-full relative flex flex-col">
+                {!isHero && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="px-3 py-2 border-b border-border/50 flex justify-between items-center bg-muted/20 shrink-0"
+                  >
+                    <span
+                      className={cn(
+                        "font-bold text-sm truncate",
+                        portfolio.id === "thesivest"
+                          ? "text-secondary"
+                          : "text-foreground"
+                      )}
                     >
-                        Select a Portfolio to Begin
-                    </motion.div>
+                      {portfolio.name}
+                    </span>
+                    <span className="text-[10px] bg-primary/10 text-primary px-1.5 py-0.5 rounded border border-primary/20 whitespace-nowrap">
+                      vs S&P 500
+                    </span>
+                  </motion.div>
                 )}
-            </AnimatePresence>
-        </div>
-    )
+
+                <div className="flex-1 w-full relative min-h-0">
+                  <AnimatePresence mode="popLayout">
+                    {isHero ? (
+                      <>
+                        <motion.div
+                          key="hero-chart"
+                          variants={heroChartVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                          className="absolute inset-0 w-full h-full z-10"
+                        >
+                          <HeroChart
+                            portfolioId={portfolio.id}
+                            data={ALL_DATA_SETS[portfolio.id]["3Y"]}
+                            className="rounded-none border-0 shadow-none h-full"
+                          />
+
+                          {/* Close Button */}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setActiveId(null);
+                            }}
+                            className="absolute top-2 right-2 z-50 p-1 rounded-md bg-background/50 backdrop-blur hover:bg-muted/80 transition-colors border border-border/50 text-foreground cursor-pointer"
+                          >
+                            <X className="w-3.5 h-3.5" />
+                          </button>
+                        </motion.div>
+                        <motion.div
+                          key="hero-loading"
+                          variants={heroLoadingVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                          className="absolute inset-0 w-full h-full bg-background z-20 pointer-events-none"
+                        />
+                      </>
+                    ) : (
+                      <div className="absolute inset-0 w-full h-full z-10">
+                        <MiniChart portfolioId={portfolio.id} />
+                      </div>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                {!isHero && (
+                  <div className="absolute inset-0 hover:bg-primary/5 transition-colors pointer-events-none" />
+                )}
+              </div>
+            </motion.div>
+          );
+        })}
+      </AnimatePresence>
+    </div>
+  );
 }

@@ -24,13 +24,13 @@ export const SERIES: SeriesConfig[] = [
 
 // Portfolios Config
 export const PORTFOLIOS = [
-    { id: 'thesivest', name: 'Your Portfolio', color: 'var(--color-primary)', acronym: 'YP' },
-    { id: 'berkshire', name: 'Berkshire Hathaway', color: '#3b82f6', acronym: 'BRK' }, // blue-500
-    { id: 'pershing', name: 'Pershing Square', color: '#64748b', acronym: 'PS' }, // slate-500
+    { id: 'thesivest', name: 'Your Investing Portfolio', color: 'var(--color-primary)', acronym: 'YP', stats: { beta: 1.12, alpha: '+5.4%', return: '+24.8%' } },
+    { id: 'berkshire', name: 'Berkshire Hathaway', color: '#3b82f6', acronym: 'BRK', stats: { beta: 0.88, alpha: '+2.1%', return: '+15.2%' } }, // blue-500
+    { id: 'pershing', name: 'Pershing Square', color: '#64748b', acronym: 'PS', stats: { beta: 1.05, alpha: '+1.8%', return: '+12.4%' } }, // slate-500
     // { id: 'bridgewater', name: 'Bridgewater', color: '#ef4444', acronym: 'BW' }, // red-500
-    { id: 'thirdpoint', name: 'Third Point', color: '#14b8a6', acronym: 'TP' },
-    { id: 'ark', name: 'ARK Invest', color: '#d946ef', acronym: 'AR' }, // fuchsia-500
-    { id: 'renaissance', name: 'Renaissance', color: '#8b5cf6', acronym: 'RT' },
+    { id: 'thirdpoint', name: 'Third Point', color: '#14b8a6', acronym: 'TP', stats: { beta: 0.95, alpha: '+0.5%', return: '+9.8%' } },
+    { id: 'ark', name: 'ARK Invest', color: '#d946ef', acronym: 'AR', stats: { beta: 1.55, alpha: '-4.2%', return: '-12.5%' } }, // fuchsia-500
+    { id: 'renaissance', name: 'Renaissance', color: '#8b5cf6', acronym: 'RT', stats: { beta: 0.92, alpha: '+8.4%', return: '+28.1%' } },
 ] as const
 
 // --- Global Benchmark Generation ---

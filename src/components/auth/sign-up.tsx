@@ -60,12 +60,15 @@ function PasswordField({
         .filter((r) => r.check(password))
         .map((r) => r.key);
 
+      // Use functional update to access the latest everMet state
+      // This prevents the infinite loop by not depending on everMet
       const newSet = new Set(everMet);
       met.forEach((key) => newSet.add(key));
       onEverMetChange(newSet);
     }
     // Don't reset when password is cleared - keep everMet state
-  }, [password, everMet, onEverMetChange]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [password]);
 
   return (
     <div className="space-y-2">
@@ -78,12 +81,12 @@ function PasswordField({
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
         className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
-          field.state.meta.errors.length > 0
+          field.state.meta.isTouched && field.state.meta.errors.length > 0
             ? "border-destructive focus:ring-destructive/20"
             : ""
         }`}
       />
-      {field.state.meta.errors.length > 0 && (
+      {field.state.meta.isTouched && field.state.meta.errors.length > 0 && (
         <p className="text-sm text-destructive font-medium">
           {typeof field.state.meta.errors[0] === "string"
             ? field.state.meta.errors[0]
@@ -137,8 +140,7 @@ export function SignUp() {
 
   const form = useForm({
     defaultValues: {
-      firstName: "",
-      lastName: "",
+      name: "",
       email: "",
       password: "",
     },
@@ -146,51 +148,24 @@ export function SignUp() {
       onChange: signUpSchema,
     },
     onSubmit: async ({ value }) => {
-      console.log("=== SIGN UP STARTED ===");
-      console.log("Form values:", value);
       setAuthError("");
-      setIsSubmitting(true);
 
-      // Combine firstName and lastName for Better Auth's name field
-      const fullName = `${value.firstName} ${value.lastName}`.trim();
-      console.log("Full name to send:", fullName);
-
-      try {
-        console.log("Calling authClient.signUp.email...");
-        const result = await authClient.signUp.email(
-          {
-            email: value.email,
-            password: value.password,
-            name: fullName,
+      await authClient.signUp.email(
+        {
+          email: value.email,
+          password: value.password,
+          name: value.name,
+          displayName: value.name,
+        },
+        {
+          onSuccess: async () => {
+            navigate({ to: "/" });
           },
-          {
-            onRequest: () => {
-              console.log("authClient: onRequest - Setting submitting to true");
-              setIsSubmitting(true);
-            },
-            onSuccess: async () => {
-              console.log("✅ authClient: onSuccess - Sign up successful!");
-              console.log("Result:", result);
-              setIsSubmitting(false);
-              // Avatar is generated automatically in auth hook
-              console.log("Navigating to home...");
-              navigate({ to: "/" });
-            },
-            onError: (ctx) => {
-              console.error("❌ authClient: onError - Sign up failed");
-              console.error("Error context:", ctx);
-              console.error("Error message:", ctx.error.message);
-              setAuthError(ctx.error.message || "Failed to create account");
-              setIsSubmitting(false);
-            },
-          }
-        );
-        console.log("authClient.signUp.email completed");
-      } catch (error) {
-        console.error("❌ SIGN UP CATCH - Unexpected error:", error);
-        setAuthError("An unexpected error occurred. Please try again.");
-        setIsSubmitting(false);
-      }
+          onError: (ctx) => {
+            setAuthError(ctx.error.message);
+          },
+        }
+      );
     },
   });
 
@@ -214,65 +189,40 @@ export function SignUp() {
             onSubmit={(e) => {
               e.preventDefault();
               e.stopPropagation();
-              console.log("=== FORM SUBMIT ===");
               form.handleSubmit();
             }}
             className="space-y-4"
           >
-            <form.Field name="firstName">
+            <form.Field name="name">
               {(field) => (
                 <div className="space-y-2">
-                  <Label htmlFor={field.name}>First Name</Label>
+                  <Label htmlFor={field.name}>Name</Label>
                   <Input
                     id={field.name}
                     type="text"
-                    placeholder="John"
+                    placeholder="John Doe"
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
+                      field.state.meta.isTouched &&
                       field.state.meta.errors.length > 0
                         ? "border-destructive focus:ring-destructive/20"
                         : ""
                     }`}
                   />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-sm text-destructive font-medium">
-                      {typeof field.state.meta.errors[0] === "string"
-                        ? field.state.meta.errors[0]
-                        : field.state.meta.errors[0]?.message ||
-                          "Invalid value"}
-                    </p>
-                  )}
-                </div>
-              )}
-            </form.Field>
-
-            <form.Field name="lastName">
-              {(field) => (
-                <div className="space-y-2">
-                  <Label htmlFor={field.name}>Last Name</Label>
-                  <Input
-                    id={field.name}
-                    type="text"
-                    placeholder="Doe"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
-                      field.state.meta.errors.length > 0
-                        ? "border-destructive focus:ring-destructive/20"
-                        : ""
-                    }`}
-                  />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-sm text-destructive font-medium">
-                      {typeof field.state.meta.errors[0] === "string"
-                        ? field.state.meta.errors[0]
-                        : field.state.meta.errors[0]?.message ||
-                          "Invalid value"}
-                    </p>
-                  )}
+                  {field.state.meta.isTouched &&
+                    field.state.meta.errors.length > 0 && (
+                      <p className="text-sm text-destructive font-medium">
+                        {typeof field.state.meta.errors[0] === "string"
+                          ? field.state.meta.errors[0]
+                          : field.state.meta.errors[0]?.message ||
+                            "Invalid value"}
+                      </p>
+                    )}
+                  <p className="text-xs text-muted-foreground">
+                    This will be your display name. You can change it later.
+                  </p>
                 </div>
               )}
             </form.Field>
@@ -289,19 +239,21 @@ export function SignUp() {
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
                     className={`bg-background/50 border-input transition-all focus:ring-2 focus:ring-primary/20 ${
+                      field.state.meta.isTouched &&
                       field.state.meta.errors.length > 0
                         ? "border-destructive focus:ring-destructive/20"
                         : ""
                     }`}
                   />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-sm text-destructive font-medium">
-                      {typeof field.state.meta.errors[0] === "string"
-                        ? field.state.meta.errors[0]
-                        : field.state.meta.errors[0]?.message ||
-                          "Invalid value"}
-                    </p>
-                  )}
+                  {field.state.meta.isTouched &&
+                    field.state.meta.errors.length > 0 && (
+                      <p className="text-sm text-destructive font-medium">
+                        {typeof field.state.meta.errors[0] === "string"
+                          ? field.state.meta.errors[0]
+                          : field.state.meta.errors[0]?.message ||
+                            "Invalid value"}
+                      </p>
+                    )}
                 </div>
               )}
             </form.Field>
@@ -323,6 +275,7 @@ export function SignUp() {
             )}
 
             <form.Subscribe
+<<<<<<< HEAD
               selector={(state) => [
                 state.isSubmitting,
                 state.canSubmit,
@@ -341,6 +294,33 @@ export function SignUp() {
                   {!submitting && <ArrowRight className="ml-2 h-4 w-4" />}
                 </Button>
               )}
+=======
+              selector={(state) => ({
+                isSubmitting: state.isSubmitting,
+                canSubmit: state.canSubmit,
+                values: state.values,
+              })}
+              children={({ isSubmitting, canSubmit, values }) => {
+                const hasStartedTyping =
+                  values.name !== "" ||
+                  values.email !== "" ||
+                  values.password !== "";
+
+                return (
+                  <Button
+                    type="submit"
+                    className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]"
+                    disabled={isSubmitting || !canSubmit || !hasStartedTyping}
+                  >
+                    {isSubmitting && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
+                    Sign Up
+                    {!isSubmitting && <ArrowRight className="ml-2 h-4 w-4" />}
+                  </Button>
+                );
+              }}
+>>>>>>> 0f360109429d29c2d8e31a4bc9eabb3c73301353
             />
           </form>
 
@@ -357,19 +337,19 @@ export function SignUp() {
 
           <form.Subscribe
             selector={(state) => state.isSubmitting}
-            children={(formIsSubmitting) => (
+            children={(isSubmitting) => (
               <div className="grid grid-cols-2 gap-4">
                 <Button
                   variant="outline"
                   className="bg-background/50 hover:bg-muted"
-                  disabled={formIsSubmitting}
+                  disabled={isSubmitting}
                 >
                   Google
                 </Button>
                 <Button
                   variant="outline"
                   className="bg-background/50 hover:bg-muted"
-                  disabled={formIsSubmitting}
+                  disabled={isSubmitting}
                 >
                   Github
                 </Button>

@@ -1,9 +1,8 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { getClient } from "../db";
+import { getClient } from "../db/client";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "../db/schema";
-import { generateInitialsAvatar } from "./avatars";
 
 const client = await getClient();
 const db = drizzle(client || "", { schema });
@@ -18,6 +17,15 @@ export const auth = betterAuth({
   account: {
     accountLinking: {
       enabled: true,
+    },
+  },
+  user: {
+    additionalFields: {
+      displayName: {
+        type: "string",
+        required: true,
+        returned: true,
+      },
     },
   },
 });

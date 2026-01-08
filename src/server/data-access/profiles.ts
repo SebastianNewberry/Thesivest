@@ -12,7 +12,7 @@ import {
   tradePerformance,
   follow,
 } from "../../db/schema";
-import { eq, desc, sql, and, gte, lte } from "drizzle-orm";
+import { eq, desc, sql, and, gte } from "drizzle-orm";
 
 /**
  * Complete user profile with all details
@@ -310,7 +310,7 @@ export async function getUserProfile(id: string): Promise<UserProfile | null> {
       field: e.field || undefined,
       startDate: e.startDate,
       endDate: e.endDate || undefined,
-      current: e.current,
+      current: e.current || false,
       gpa: e.gpa || undefined,
       honors: e.honors || undefined,
       activities: e.activities || undefined,
@@ -395,9 +395,9 @@ export async function getUserTradeHistory(
           | "win"
           | "loss"
           | "breakeven",
-        views: p.views,
-        likes: p.likes,
-        comments: p.comments,
+        views: p.views || 0,
+        likes: p.likes || 0,
+        comments: p.comments || 0,
       };
     })
   );
@@ -454,9 +454,9 @@ export async function getUserActiveTrades(
           | "win"
           | "loss"
           | "breakeven",
-        views: p.views,
-        likes: p.likes,
-        comments: p.comments,
+        views: p.views || 0,
+        likes: p.likes || 0,
+        comments: p.comments || 0,
       };
     })
   );
@@ -520,9 +520,9 @@ export async function getUserClosedTrades(
           | "win"
           | "loss"
           | "breakeven",
-        views: p.views,
-        likes: p.likes,
-        comments: p.comments,
+        views: p.views || 0,
+        likes: p.likes || 0,
+        comments: p.comments || 0,
       };
     })
   );
@@ -587,14 +587,14 @@ export async function getUserPerformanceMetrics(
       const periodTotalReturn = perfData
         .filter((p) => {
           const trade = trades.find((t) => t.id === p.postId);
-          return trade && trade.buyDate >= period.start;
+          return trade && trade.buyDate && trade.buyDate >= period.start;
         })
         .reduce((sum, p) => sum + Number(p.returnAmount || 0), 0);
 
       const periodReturns = perfData
         .filter((p) => {
           const trade = trades.find((t) => t.id === p.postId);
-          return trade && trade.buyDate >= period.start;
+          return trade && trade.buyDate && trade.buyDate >= period.start;
         })
         .map((p) => Number(p.returnPercent));
 
@@ -632,8 +632,7 @@ export async function addEducation(
   data: Omit<Education, "id">
 ) {
   await db.insert(education).values({
-    id: crypto.randomUUID(),
-    userId,
+    userId: userId,
     school: data.school,
     degree: data.degree,
     field: data.field,
@@ -671,7 +670,6 @@ export async function addCertification(
   data: Omit<Certification, "id">
 ) {
   await db.insert(certification).values({
-    id: crypto.randomUUID(),
     userId,
     name: data.name,
     organization: data.organization,
