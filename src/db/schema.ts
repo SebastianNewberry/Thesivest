@@ -432,12 +432,15 @@ export const portfolioHolding = pgTable("portfolio_holding", {
     .$onUpdate(() => new Date()),
 });
 
-export const portfolioHoldingRelations = relations(portfolioHolding, ({ one }) => ({
-  portfolio: one(portfolio, {
-    fields: [portfolioHolding.portfolioId],
-    references: [portfolio.id],
-  }),
-}));
+export const portfolioHoldingRelations = relations(
+  portfolioHolding,
+  ({ one }) => ({
+    portfolio: one(portfolio, {
+      fields: [portfolioHolding.portfolioId],
+      references: [portfolio.id],
+    }),
+  })
+);
 
 export const portfolioSnapshot = pgTable("portfolio_snapshot", {
   id: text("id")
@@ -450,12 +453,15 @@ export const portfolioSnapshot = pgTable("portfolio_snapshot", {
   totalValue: numeric("total_value").notNull(),
 });
 
-export const portfolioSnapshotRelations = relations(portfolioSnapshot, ({ one }) => ({
-  portfolio: one(portfolio, {
-    fields: [portfolioSnapshot.portfolioId],
-    references: [portfolio.id],
-  }),
-}));
+export const portfolioSnapshotRelations = relations(
+  portfolioSnapshot,
+  ({ one }) => ({
+    portfolio: one(portfolio, {
+      fields: [portfolioSnapshot.portfolioId],
+      references: [portfolio.id],
+    }),
+  })
+);
 
 // Stock Analysis (RAG)
 export const stock = pgTable("stock", {
@@ -516,8 +522,7 @@ export const fundAnalysis = pgTable("fund_analysis", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  userId: text("user_id")
-    .references(() => user.id, { onDelete: "cascade" }),
+  userId: text("user_id").references(() => user.id, { onDelete: "cascade" }),
   fundId: text("fund_id")
     .notNull()
     .references(() => fund.id, { onDelete: "cascade" }),
@@ -536,7 +541,3 @@ export const fundAnalysisRelations = relations(fundAnalysis, ({ one }) => ({
     references: [fund.id],
   }),
 }));
-
-
-
-
