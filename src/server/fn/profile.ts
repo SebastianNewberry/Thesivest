@@ -13,7 +13,34 @@ import {
   addCertification,
   updateCertification,
   deleteCertification,
-} from "../data-access/profiles";
+} from "../data-access/profiles.server";
+import { followUser, unfollowUser } from "../data-access/users.server";
+
+// Follow function
+export const followFn = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      followerId: z.string().cuid("Invalid follower ID"),
+      followingId: z.string().cuid("Invalid following ID"),
+    })
+  )
+  .handler(async ({ data: { followerId, followingId } }) => {
+    await followUser(followerId, followingId);
+    return { success: true };
+  });
+
+// Unfollow function
+export const unfollowFn = createServerFn({ method: "POST" })
+  .inputValidator(
+    z.object({
+      followerId: z.string().cuid("Invalid follower ID"),
+      followingId: z.string().cuid("Invalid following ID"),
+    })
+  )
+  .handler(async ({ data: { followerId, followingId } }) => {
+    await unfollowUser(followerId, followingId);
+    return { success: true };
+  });
 
 // Get profile by ID
 export const getProfileFn = createServerFn({ method: "GET" })

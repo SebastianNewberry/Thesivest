@@ -7,14 +7,19 @@ import {
   getAllTournaments,
   getTournamentById as getTournamentByIdDAL,
   getTournamentsByCategory as getTournamentsByCategoryDAL,
-  getActiveTournaments as getActiveTournamentsDAL
-} from "../data-access/tournaments";
+  getActiveTournaments as getActiveTournamentsDAL,
+} from "../data-access/tournaments.server";
 
 export interface Tournament {
   id: string;
   name: string;
   description: string;
-  category: "Value Investing" | "Growth Investing" | "Sector Focus" | "Options Trading" | "Crypto";
+  category:
+    | "Value Investing"
+    | "Growth Investing"
+    | "Sector Focus"
+    | "Options Trading"
+    | "Crypto";
   status: "Upcoming" | "Active" | "Completed";
   startDate: string;
   endDate: string;
@@ -27,7 +32,7 @@ export interface Tournament {
 // Helper function to format date for display
 function formatDate(date: Date | string): string {
   const d = typeof date === "string" ? new Date(date) : date;
-  return d.toISOString().split('T')[0]; // Returns YYYY-MM-DD
+  return d.toISOString().split("T")[0]; // Returns YYYY-MM-DD
 }
 
 /**
@@ -47,14 +52,16 @@ export async function getTournaments(): Promise<Tournament[]> {
     participants: t.participants,
     prizePool: t.prizePool,
     rules: t.rules || [],
-    icon: t.icon
+    icon: t.icon,
   }));
 }
 
 /**
  * Get tournament by ID
  */
-export async function getTournamentById(id: string): Promise<Tournament | null> {
+export async function getTournamentById(
+  id: string
+): Promise<Tournament | null> {
   const tournament = await getTournamentByIdDAL(id);
 
   if (!tournament) return null;
@@ -70,14 +77,16 @@ export async function getTournamentById(id: string): Promise<Tournament | null> 
     participants: tournament.participants,
     prizePool: tournament.prizePool,
     rules: tournament.rules || [],
-    icon: tournament.icon
+    icon: tournament.icon,
   };
 }
 
 /**
  * Get tournaments by category
  */
-export async function getTournamentsByCategory(category: Tournament["category"]): Promise<Tournament[]> {
+export async function getTournamentsByCategory(
+  category: Tournament["category"]
+): Promise<Tournament[]> {
   const tournaments = await getTournamentsByCategoryDAL(category);
 
   return tournaments.map((t) => ({
@@ -91,7 +100,7 @@ export async function getTournamentsByCategory(category: Tournament["category"])
     participants: t.participants,
     prizePool: t.prizePool,
     rules: t.rules || [],
-    icon: t.icon
+    icon: t.icon,
   }));
 }
 
@@ -112,7 +121,6 @@ export async function getActiveTournaments(): Promise<Tournament[]> {
     participants: t.participants,
     prizePool: t.prizePool,
     rules: t.rules || [],
-    icon: t.icon
+    icon: t.icon,
   }));
 }
-

@@ -1,14 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useLoaderData } from "@tanstack/react-router";
-import { getProfileFn } from "../server/fn/profile";
-import { getUserById } from "../server/data-access/users";
-import {
-  isFollowing,
-  followUser,
-  unfollowUser,
-} from "../server/data-access/users";
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
+import { getProfileFn, followFn, unfollowFn } from "../server/fn/profile";
 import {
   Card,
   CardContent,
@@ -16,36 +8,24 @@ import {
   CardTitle,
   CardDescription,
 } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Button } from "../components/ui/button";
-import { TrendingUp, TrendingDown, BarChart3, DollarSign, Activity } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
-
-// Follow function
-const followFn = createServerFn({ method: "POST" })
-  .inputValidator((z) =>
-    z.object({
-      followerId: z.string().cuid("Invalid follower ID"),
-      followingId: z.string().cuid("Invalid following ID"),
-    })
-  )
-  .handler(async ({ input: { followerId, followingId } }) => {
-    await followUser(followerId, followingId);
-    return { success: true };
-  });
-
-// Unfollow function
-const unfollowFn = createServerFn({ method: "POST" })
-  .inputValidator((z) =>
-    z.object({
-      followerId: z.string().cuid("Invalid follower ID"),
-      followingId: z.string().cuid("Invalid following ID"),
-    })
-  )
-  .handler(async ({ input: { followerId, followingId } }) => {
-    await unfollowUser(followerId, followingId);
-    return { success: true };
-  });
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import {
+  Activity,
+  BarChart3,
+  DollarSign,
+  TrendingDown,
+  TrendingUp,
+} from "lucide-react";
+import {
+  ResponsiveContainer,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Area,
+  AreaChart,
+} from "recharts";
 
 export const Route = createFileRoute("/profiles/$id")({
   loader: async ({ params }) => {
@@ -226,12 +206,7 @@ function Profile() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-green-600">
-                  {profile.alpha !== undefined
-                    ? profile.alpha >= 0
-                      ? "+"
-                      : ""
-                    : ""}
-                  {profile.alpha?.toFixed(2) || "0.00"}%
+                  {"0.00"}%
                 </div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Excess return over market
@@ -248,15 +223,9 @@ function Profile() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-blue-600">
-                  {profile.beta?.toFixed(2) || "1.00"}
-                </div>
+                <div className="text-3xl font-bold text-blue-600">{"1.00"}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {profile.beta > 1
-                    ? "Higher volatility than market"
-                    : profile.beta < 1
-                    ? "Lower volatility than market"
-                    : "Matches market volatility"}
+                  {"Higher volatility than market"}
                 </p>
               </CardContent>
             </Card>
@@ -269,13 +238,11 @@ function Profile() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold">
-                  {profile.winRate.toFixed(1)}%
-                </div>
+                <div className="text-3xl font-bold">{"0.00"}%</div>
                 <div className="w-full bg-muted rounded-full h-2 mt-2">
                   <div
                     className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all"
-                    style={{ width: `${profile.winRate}%` }}
+                    style={{ width: "0%" }}
                   />
                 </div>
               </CardContent>
@@ -322,9 +289,7 @@ function Profile() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-green-600">
-                +{profile.bestTrade?.toFixed(2) || "0.00"}%
-              </div>
+              <div className="text-2xl font-bold text-green-600">{"0.00"}%</div>
             </CardContent>
           </Card>
 
@@ -335,9 +300,7 @@ function Profile() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                {profile.worstTrade?.toFixed(2) || "0.00"}%
-              </div>
+              <div className="text-2xl font-bold text-red-600">{"0.00"}%</div>
             </CardContent>
           </Card>
 
@@ -348,9 +311,7 @@ function Profile() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                -{Math.abs(profile.maxDrawdown || 0).toFixed(2)}%
-              </div>
+              <div className="text-2xl font-bold text-red-600">{"0.00"}%</div>
             </CardContent>
           </Card>
         </div>
@@ -372,23 +333,9 @@ function Profile() {
                 <div className="text-sm text-muted-foreground mb-1">
                   Sharpe Ratio
                 </div>
-                <div
-                  className={`text-2xl font-bold ${
-                    (profile.sharpeRatio || 0) >= 1
-                      ? "text-green-600"
-                      : (profile.sharpeRatio || 0) >= 0
-                      ? "text-yellow-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {(profile.sharpeRatio || 0).toFixed(2)}
-                </div>
+                <div>{"0.00"}</div>
                 <p className="text-xs text-muted-foreground mt-1">
-                  {profile.sharpeRatio && profile.sharpeRatio >= 1
-                    ? "Good risk-adjusted returns"
-                    : profile.sharpeRatio && profile.sharpeRatio >= 0
-                    ? "Moderate risk-adjusted returns"
-                    : "Poor risk-adjusted returns"}
+                  {"Moderate risk-adjusted returns"}
                 </p>
               </div>
 
@@ -406,9 +353,7 @@ function Profile() {
                 <div className="text-sm text-muted-foreground mb-1">
                   Win/Loss Ratio
                 </div>
-                <div className="text-2xl font-bold">
-                  {profile.winLossRatio?.toFixed(2) || "0.00"}
-                </div>
+                <div className="text-2xl font-bold">{"0.00"}</div>
                 <p className="text-xs text-muted-foreground mt-1">
                   Average win / Average loss
                 </p>
@@ -425,7 +370,8 @@ function Profile() {
               Trading Performance Over Time
             </CardTitle>
             <CardDescription>
-              Visual representation of trading performance and cumulative returns
+              Visual representation of trading performance and cumulative
+              returns
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -449,12 +395,30 @@ function Profile() {
                     ]}
                   >
                     <defs>
-                      <linearGradient id="colorPerformance" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
+                      <linearGradient
+                        id="colorPerformance"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="var(--color-primary)"
+                          stopOpacity={0.3}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="var(--color-primary)"
+                          stopOpacity={0}
+                        />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" strokeOpacity={0.2} />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="var(--color-border)"
+                      strokeOpacity={0.2}
+                    />
                     <XAxis
                       dataKey="name"
                       stroke="var(--color-muted-foreground)"
@@ -474,7 +438,9 @@ function Profile() {
                         if (active && payload && payload.length) {
                           return (
                             <div className="bg-popover/95 backdrop-blur border border-border rounded-lg shadow-lg p-3">
-                              <p className="text-sm font-medium mb-1">{label}</p>
+                              <p className="text-sm font-medium mb-1">
+                                {label}
+                              </p>
                               <p className="text-lg font-bold text-primary">
                                 {payload[0].value}%
                               </p>
@@ -502,7 +468,8 @@ function Profile() {
                   No trading data yet
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-md">
-                  Start documenting your trades to see your performance chart here.
+                  Start documenting your trades to see your performance chart
+                  here.
                 </p>
               </div>
             )}
@@ -516,9 +483,7 @@ function Profile() {
               <TrendingUp className="w-5 h-5 text-primary" />
               Buy & Sell Activity
             </CardTitle>
-            <CardDescription>
-              Overview of your trading activity
-            </CardDescription>
+            <CardDescription>Overview of your trading activity</CardDescription>
           </CardHeader>
           <CardContent>
             {profile.totalTrades > 0 ? (
@@ -568,7 +533,8 @@ function Profile() {
                   No trading activity yet
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-md">
-                  Start buying and selling stocks to see your trading activity here.
+                  Start buying and selling stocks to see your trading activity
+                  here.
                 </p>
               </div>
             )}
@@ -582,211 +548,25 @@ function Profile() {
               <TrendingUp className="w-6 h-6 text-primary" />
               Recent Posts
             </h2>
-            <Link to={`/profiles/${Route.useParams().id}/trades`}>
+            <Link
+              to={`/profiles/$id/trades`}
+              params={{ id: Route.useParams().id }}
+            >
               <Button variant="outline" size="sm">
                 View All Trades
               </Button>
             </Link>
           </div>
 
-          {profile.recentPosts && profile.recentPosts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {profile.recentPosts.slice(0, 6).map((post) => (
-                <Card
-                  key={post.id}
-                  className="bg-card/50 backdrop-blur hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer border-border"
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-lg line-clamp-2">
-                        {post.title}
-                      </CardTitle>
-                      {post.type && (
-                        <Badge
-                          variant={
-                            post.type === "trade"
-                              ? "default"
-                              : post.type === "thought"
-                              ? "secondary"
-                              : "outline"
-                          }
-                          className="flex-shrink-0"
-                        >
-                          {post.type}
-                        </Badge>
-                      )}
-                    </div>
-                    <CardDescription className="flex items-center gap-2">
-                      <span>{post.publishedAt}</span>
-                      {post.symbol && <Badge variant="outline">{post.symbol}</Badge>}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                      {post.content}
-                    </p>
-
-                    {post.type === "trade" && post.performance && (
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-xs text-muted-foreground">Return</div>
-                          <div
-                            className={`text-lg font-bold ${
-                              post.performance.returnPercent >= 0
-                                ? "text-green-600"
-                                : "text-red-600"
-                            }`}
-                          >
-                            {post.performance.returnPercent >= 0 ? "+" : ""}
-                            {post.performance.returnPercent.toFixed(2)}%
-                          </div>
-                        </div>
-                        <Badge
-                          variant={
-                            post.performance.status === "win"
-                              ? "default"
-                              : post.performance.status === "loss"
-                              ? "destructive"
-                              : "secondary"
-                          }
-                        >
-                          {post.performance.status.toUpperCase()}
-                        </Badge>
-                      </div>
-                    )}
-
-                    <div className="flex gap-4 mt-3 pt-3 border-t text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        👁️ {post.views}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        ❤️ {post.likes}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        💬 {post.comments}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                <p className="text-lg mb-2">No posts yet</p>
-                <p className="text-sm">
-                  This user hasn't shared any investment posts yet.
-                </p>
-              </CardContent>
-            </Card>
-          )}
+          <Card>
+            <CardContent className="py-12 text-center text-muted-foreground">
+              <p className="text-lg mb-2">No posts yet</p>
+              <p className="text-sm">
+                This user hasn't shared any investment posts yet.
+              </p>
+            </CardContent>
+          </Card>
         </div>
-
-        {/* Education Section */}
-        {profile.educations && profile.educations.length > 0 && (
-          <Card className="bg-card/50 backdrop-blur border-border mt-8">
-            <CardHeader>
-              <CardTitle>Education</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {profile.educations.map((edu) => (
-                  <div
-                    key={edu.id}
-                    className="border-l-4 border-primary pl-4 py-2"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-lg">{edu.degree}</h3>
-                        <p className="text-muted-foreground">{edu.school}</p>
-                        {edu.field && (
-                          <p className="text-sm text-muted-foreground">
-                            {edu.field}
-                          </p>
-                        )}
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(edu.startDate).toLocaleDateString("en-US", {
-                            month: "short",
-                            year: "numeric",
-                          })}{" "}
-                          -{" "}
-                          {edu.current
-                            ? "Present"
-                            : edu.endDate
-                            ? new Date(edu.endDate).toLocaleDateString(
-                                "en-US",
-                                {
-                                  month: "short",
-                                  year: "numeric",
-                                }
-                              )
-                            : "N/A"}
-                        </p>
-                        {(edu.gpa || edu.honors) && (
-                          <div className="mt-2 flex gap-2 flex-wrap">
-                            {edu.gpa && <Badge>GPA: {edu.gpa}</Badge>}
-                            {edu.honors && <Badge>{edu.honors}</Badge>}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Certifications Section */}
-        {profile.certifications && profile.certifications.length > 0 && (
-          <Card className="bg-card/50 backdrop-blur border-border mt-8">
-            <CardHeader>
-              <CardTitle>Certifications</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                {profile.certifications.map((cert) => (
-                  <div
-                    key={cert.id}
-                    className="border-l-4 border-primary pl-4 py-2"
-                  >
-                    <h3 className="font-semibold text-lg">{cert.name}</h3>
-                    <p className="text-muted-foreground">{cert.organization}</p>
-                    <p className="text-sm text-muted-foreground">
-                      Issued:{" "}
-                      {new Date(cert.issueDate).toLocaleDateString("en-US", {
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </p>
-                    {cert.expirationDate && (
-                      <p className="text-sm text-muted-foreground">
-                        Expires:{" "}
-                        {new Date(cert.expirationDate).toLocaleDateString(
-                          "en-US",
-                          {
-                            month: "short",
-                            year: "numeric",
-                          }
-                        )}
-                      </p>
-                    )}
-                    {cert.credentialUrl && (
-                      <a
-                        href={cert.credentialUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline text-sm"
-                      >
-                        View Credential
-                      </a>
-                    )}
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
       </div>
     </div>
   );

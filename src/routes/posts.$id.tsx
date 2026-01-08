@@ -1,11 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
-import {
-  getContributorById,
-  getPostById,
-  type UserPost,
-} from "../server/features/contributors";
+import { createFileRoute, notFound } from "@tanstack/react-router";
+import { getPostFn } from "../server/fn/posts";
+import type { UserPost } from "../server/features/contributors.server";
 import { useLoaderData } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import {
@@ -30,59 +25,20 @@ import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Link } from "@tanstack/react-router";
 
-// Server Function to get post details
-const getPostFn = createServerFn({ method: "GET" })
-  .inputValidator(
-    z.object({
-      id: z.string(),
-    })
-  )
-  .handler(async ({ data }) => {
-    const post = await getPostById(data.id);
-
-    if (!post) {
-      throw new Error("Post not found");
-    }
-
-    const member = await getContributorById(post.userId);
-
-    return { post, member };
-  });
-
 export const Route = createFileRoute("/posts/$id")({
   component: PostDetailPage,
   loader: async ({ params }) => {
     const { id } = params;
-    return await getPostFn({ data: { id } });
+    const post = await getPostFn({ data: { id } });
+    if (!post || !post.post || !post.member) {
+      throw notFound();
+    }
+    return { post: post.post, member: post.member };
   },
 });
 
 function PostDetailPage() {
   const { post, member } = useLoaderData({ from: "/posts/$id" });
-
-  if (!member) {
-    return (
-      <div className="min-h-screen bg-background text-foreground font-sans">
-        <div className="max-w-4xl mx-auto px-6 py-12">
-          <div className="mb-8">
-            <Link to="/">
-              <Button variant="ghost" size="sm" className="mb-4">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
-          </div>
-          <Card className="bg-card/50 backdrop-blur-xl border-border">
-            <CardContent className="pt-6">
-              <p className="text-center text-muted-foreground">
-                Member not found
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   const getTypeColor = (type: UserPost["type"]) => {
     switch (type) {
@@ -113,30 +69,6 @@ function PostDetailPage() {
       </span>
     );
   };
-
-  if (!post) {
-    return (
-      <div className="min-h-screen bg-background text-foreground font-sans">
-        <div className="max-w-4xl mx-auto px-6 py-12">
-          <div className="mb-8">
-            <Link to="/">
-              <Button variant="ghost" size="sm" className="mb-4">
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Home
-              </Button>
-            </Link>
-          </div>
-          <Card className="bg-card/50 backdrop-blur-xl border-border">
-            <CardContent className="pt-6">
-              <p className="text-center text-muted-foreground">
-                Post not found
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background text-foreground font-sans">

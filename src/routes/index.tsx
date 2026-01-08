@@ -1,12 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
 import { FamousFunds } from "../components/FamousFunds";
 import {
-  getContributors,
-  getContributorAnalyses,
-} from "../server/features/contributors";
+  getContributorsFn,
+  getContributorAnalysesFn,
+} from "../server/fn/contributors";
 import { useLoaderData } from "@tanstack/react-router";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import {
   Users,
   ArrowRight,
@@ -27,21 +26,8 @@ import {
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Link } from "@tanstack/react-router";
-import type { UserPost } from "../server/features/contributors";
+import type { UserPost } from "../server/features/contributors.server";
 import { PortfolioDeck } from "@/components/PortfolioDeck";
-
-// Server Functions calling Shared Logic
-const getContributorsFn = createServerFn({ method: "GET" }).handler(
-  async () => {
-    return getContributors();
-  }
-);
-
-const getContributorAnalysesFn = createServerFn({ method: "GET" }).handler(
-  async () => {
-    return getContributorAnalyses(6);
-  }
-);
 
 export const Route = createFileRoute("/")({
   component: Home,
@@ -102,7 +88,7 @@ function Home() {
       case "trade":
         return "bg-primary/10 text-primary border-primary/20";
       case "thought":
-        return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20";
+        return "bg-accent/20 text-accent-foreground border-accent/30";
       case "update":
         return "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20";
       default:
@@ -375,8 +361,8 @@ function Home() {
 
               {/* Pillar 2: AI Research */}
               <div className="space-y-4">
-                <div className="w-12 h-12 rounded-lg bg-blue-500/10 flex items-center justify-center mb-2">
-                  <TrendingUp className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                <div className="w-12 h-12 rounded-lg bg-accent/20 flex items-center justify-center mb-2">
+                  <TrendingUp className="w-6 h-6 text-accent-foreground" />
                 </div>
                 <h3 className="text-2xl font-serif text-foreground">
                   Leverage AI Research

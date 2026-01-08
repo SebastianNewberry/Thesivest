@@ -6,13 +6,13 @@
 import {
   getAllUsers,
   getUserById as getUserByIdDAL,
-} from "../data-access/users";
+} from "../data-access/users.server";
 import {
   getAllPosts,
   getPostById as getPostByIdDAL,
   getPostsByUserId,
   searchPosts,
-} from "../data-access/posts";
+} from "../data-access/posts.server";
 
 export interface CommunityMember {
   id: string;
@@ -91,12 +91,12 @@ function dbPostToUserPost(dbPost: any): UserPost {
     comments: dbPost.comments,
     performance: dbPost.performance
       ? {
-        returnPercent: Number(dbPost.performance.returnPercent),
-        returnAmount: dbPost.performance.returnAmount
-          ? Number(dbPost.performance.returnAmount)
-          : undefined,
-        status: dbPost.performance.status,
-      }
+          returnPercent: Number(dbPost.performance.returnPercent),
+          returnAmount: dbPost.performance.returnAmount
+            ? Number(dbPost.performance.returnAmount)
+            : undefined,
+          status: dbPost.performance.status,
+        }
       : undefined,
   };
 }
@@ -169,7 +169,10 @@ export async function getPostById(id: string): Promise<UserPost | null> {
   return post ? dbPostToUserPost(post) : null;
 }
 
-export async function searchCommunityPosts(query: string, limit?: number): Promise<UserPost[]> {
+export async function searchCommunityPosts(
+  query: string,
+  limit?: number
+): Promise<UserPost[]> {
   const posts = await searchPosts(query, limit);
   return posts.map(dbPostToUserPost);
 }

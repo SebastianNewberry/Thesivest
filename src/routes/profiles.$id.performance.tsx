@@ -1,12 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useLoaderData } from "@tanstack/react-router";
 import { getPerformanceMetricsFn } from "../server/fn/profile";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Button } from "../components/ui/button";
 
 export const Route = createFileRoute("/profiles/$id/performance")({
   loader: async ({ params }) => {
-    const metrics = await getPerformanceMetricsFn({ data: { userId: params.id } });
+    const metrics = await getPerformanceMetricsFn({
+      data: { userId: params.id },
+    });
     return { metrics };
   },
   component: ProfilePerformance,
@@ -20,7 +27,7 @@ function ProfilePerformance() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Performance Analytics</h1>
-          <Link to={`/profiles/${Route.useParams().id}`}>
+          <Link to={`/profiles/$id`} params={{ id: Route.useParams().id }}>
             <Button variant="outline">Back to Profile</Button>
           </Link>
         </div>
@@ -155,13 +162,16 @@ function ProfilePerformance() {
           <CardContent>
             <div className="space-y-4">
               {metrics.map((metric) => (
-                <div key={metric.period} className="border-b pb-4 last:border-0">
+                <div
+                  key={metric.period}
+                  className="border-b pb-4 last:border-0"
+                >
                   <h3 className="font-semibold mb-2">{metric.period}</h3>
                   <ul className="space-y-2 text-sm">
                     {metric.winRate >= 60 && (
                       <li className="text-green-600">
-                        ✓ Strong win rate of {metric.winRate.toFixed(1)}% indicates
-                        good investment selection
+                        ✓ Strong win rate of {metric.winRate.toFixed(1)}%
+                        indicates good investment selection
                       </li>
                     )}
                     {metric.winRate < 40 && metric.totalTrades > 10 && (
@@ -172,8 +182,8 @@ function ProfilePerformance() {
                     )}
                     {metric.averageReturn >= 5 && (
                       <li className="text-green-600">
-                        ✓ Average return of {metric.averageReturn.toFixed(2)}% is
-                        above market
+                        ✓ Average return of {metric.averageReturn.toFixed(2)}%
+                        is above market
                       </li>
                     )}
                     {metric.totalReturn > 0 && (
@@ -185,12 +195,11 @@ function ProfilePerformance() {
                         })}
                       </li>
                     )}
-                    {metric.maxDrawdown &&
-                      metric.maxDrawdown < -20 && (
-                        <li className="text-yellow-600">
-                          ⚠ Consider risk management to reduce drawdown
-                        </li>
-                      )}
+                    {metric.maxDrawdown && metric.maxDrawdown < -20 && (
+                      <li className="text-yellow-600">
+                        ⚠ Consider risk management to reduce drawdown
+                      </li>
+                    )}
                   </ul>
                 </div>
               ))}

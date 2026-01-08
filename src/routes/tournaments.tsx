@@ -1,10 +1,10 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { createServerFn } from '@tanstack/react-start';
-import { authClient } from '../lib/auth-client';
-import { useNavigate } from '@tanstack/react-router';
-import { getTournaments, type Tournament } from '../server/features/tournaments';
-import { useLoaderData } from '@tanstack/react-router';
-import { motion } from 'motion/react';
+import { createFileRoute } from "@tanstack/react-router";
+import { authClient } from "../lib/auth-client";
+import { useNavigate } from "@tanstack/react-router";
+import { getTournamentsFn } from "@/server/fn/tournaments";
+import type { Tournament } from "../server/features/tournaments.server";
+import { useLoaderData } from "@tanstack/react-router";
+import { motion } from "motion/react";
 import {
   TrendingUp,
   Zap,
@@ -17,18 +17,20 @@ import {
   Trophy,
   ArrowRight,
   Clock,
-} from 'lucide-react';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { Badge } from '../components/ui/badge';
-import { cn } from '../lib/utils';
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { Badge } from "../components/ui/badge";
+import { cn } from "../lib/utils";
 
-// Server Function
-const getTournamentsFn = createServerFn({ method: 'GET' }).handler(async () => {
-  return getTournaments();
-});
-
-export const Route = createFileRoute('/tournaments')({
+export const Route = createFileRoute("/tournaments")({
   component: TournamentsPage,
   loader: async () => await getTournamentsFn(),
 });
@@ -44,37 +46,37 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
 };
 
 function TournamentsPage() {
-  const tournaments = useLoaderData({ from: '/tournaments' });
+  const tournaments = useLoaderData({ from: "/tournaments" });
   const { data: session } = authClient.useSession();
   const navigate = useNavigate();
 
-  const getStatusColor = (status: Tournament['status']) => {
+  const getStatusColor = (status: Tournament["status"]) => {
     switch (status) {
-      case 'Active':
-        return 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20';
-      case 'Upcoming':
-        return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20';
-      case 'Completed':
-        return 'bg-muted text-muted-foreground border-border';
+      case "Active":
+        return "bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20";
+      case "Upcoming":
+        return "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20";
+      case "Completed":
+        return "bg-muted text-muted-foreground border-border";
       default:
-        return 'bg-muted text-muted-foreground border-border';
+        return "bg-muted text-muted-foreground border-border";
     }
   };
 
-  const getCategoryColor = (category: Tournament['category']) => {
+  const getCategoryColor = (category: Tournament["category"]) => {
     switch (category) {
-      case 'Value Investing':
-        return 'bg-primary/10 text-primary border-primary/20';
-      case 'Growth Investing':
-        return 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20';
-      case 'Sector Focus':
-        return 'bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20';
-      case 'Options Trading':
-        return 'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20';
-      case 'Crypto':
-        return 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20';
+      case "Value Investing":
+        return "bg-primary/10 text-primary border-primary/20";
+      case "Growth Investing":
+        return "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20";
+      case "Sector Focus":
+        return "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20";
+      case "Options Trading":
+        return "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20";
+      case "Crypto":
+        return "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-500/20";
       default:
-        return 'bg-muted text-muted-foreground border-border';
+        return "bg-muted text-muted-foreground border-border";
     }
   };
 
@@ -103,7 +105,8 @@ function TournamentsPage() {
             Investment Tournaments
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto">
-            Compete with the best investors. Showcase your analysis, prove your thesis, and win prizes.
+            Compete with the best investors. Showcase your analysis, prove your
+            thesis, and win prizes.
           </p>
         </motion.div>
 
@@ -122,17 +125,30 @@ function TournamentsPage() {
                     <div className="p-3 rounded-lg bg-primary/10 border border-primary/20">
                       <IconComponent iconName={tournament.icon} />
                     </div>
-                    <Badge className={cn('border', getStatusColor(tournament.status))}>
+                    <Badge
+                      className={cn(
+                        "border",
+                        getStatusColor(tournament.status)
+                      )}
+                    >
                       {tournament.status}
                     </Badge>
                   </div>
-                  <CardTitle className="text-xl mb-2">{tournament.name}</CardTitle>
+                  <CardTitle className="text-xl mb-2">
+                    {tournament.name}
+                  </CardTitle>
                   <CardDescription className="text-sm leading-relaxed">
                     {tournament.description}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="flex-1 space-y-4">
-                  <Badge variant="outline" className={cn('border', getCategoryColor(tournament.category))}>
+                  <Badge
+                    variant="outline"
+                    className={cn(
+                      "border",
+                      getCategoryColor(tournament.category)
+                    )}
+                  >
                     {tournament.category}
                   </Badge>
 
@@ -140,7 +156,7 @@ function TournamentsPage() {
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Calendar className="w-4 h-4" />
                       <span>
-                        {new Date(tournament.startDate).toLocaleDateString()} -{' '}
+                        {new Date(tournament.startDate).toLocaleDateString()} -{" "}
                         {new Date(tournament.endDate).toLocaleDateString()}
                       </span>
                     </div>
@@ -150,17 +166,26 @@ function TournamentsPage() {
                     </div>
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Trophy className="w-4 h-4" />
-                      <span className="font-semibold text-foreground">Prize: {tournament.prizePool}</span>
+                      <span className="font-semibold text-foreground">
+                        Prize: {tournament.prizePool}
+                      </span>
                     </div>
                   </div>
 
-                  {tournament.status === 'Active' && (
+                  {tournament.status === "Active" && (
                     <div className="flex items-center gap-2 text-sm text-green-600 dark:text-green-400">
                       <Clock className="w-4 h-4" />
                       <span>
-                        Ends {(() => {
-                          const daysRemaining = Math.ceil((new Date(tournament.endDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-                          return daysRemaining > 0 ? `in ${daysRemaining} days` : 'soon';
+                        Ends{" "}
+                        {(() => {
+                          const daysRemaining = Math.ceil(
+                            (new Date(tournament.endDate).getTime() -
+                              Date.now()) /
+                              (1000 * 60 * 60 * 24)
+                          );
+                          return daysRemaining > 0
+                            ? `in ${daysRemaining} days`
+                            : "soon";
                         })()}
                       </span>
                     </div>
@@ -169,20 +194,26 @@ function TournamentsPage() {
                 <CardFooter>
                   <Button
                     className="w-full group"
-                    variant={tournament.status === 'Active' ? 'default' : 'outline'}
-                    disabled={tournament.status === 'Completed'}
+                    variant={
+                      tournament.status === "Active" ? "default" : "outline"
+                    }
+                    disabled={tournament.status === "Completed"}
                     onClick={() => {
                       if (!session) {
-                        navigate({ to: '/login' });
+                        navigate({ to: "/login" });
                         return;
                       }
-                      if (tournament.status === 'Active') {
+                      if (tournament.status === "Active") {
                         // TODO: Implement join logic
                         alert("Successfully joined tournament!");
                       }
                     }}
                   >
-                    {tournament.status === 'Active' ? 'Join Tournament' : tournament.status === 'Upcoming' ? 'Notify Me' : 'View Results'}
+                    {tournament.status === "Active"
+                      ? "Join Tournament"
+                      : tournament.status === "Upcoming"
+                      ? "Notify Me"
+                      : "View Results"}
                     <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
                   </Button>
                 </CardFooter>
@@ -210,7 +241,8 @@ function TournamentsPage() {
                   </div>
                   <h3 className="font-semibold">Submit Your Thesis</h3>
                   <p className="text-sm text-muted-foreground">
-                    Research and submit a detailed investment thesis following the tournament rules.
+                    Research and submit a detailed investment thesis following
+                    the tournament rules.
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -219,7 +251,8 @@ function TournamentsPage() {
                   </div>
                   <h3 className="font-semibold">Track Performance</h3>
                   <p className="text-sm text-muted-foreground">
-                    Your picks are tracked in real-time. Leaderboards show top performers.
+                    Your picks are tracked in real-time. Leaderboards show top
+                    performers.
                   </p>
                 </div>
                 <div className="space-y-2">
@@ -228,7 +261,8 @@ function TournamentsPage() {
                   </div>
                   <h3 className="font-semibold">Win Prizes</h3>
                   <p className="text-sm text-muted-foreground">
-                    Top performers at the end of the tournament period win cash prizes and recognition.
+                    Top performers at the end of the tournament period win cash
+                    prizes and recognition.
                   </p>
                 </div>
               </div>
@@ -239,4 +273,3 @@ function TournamentsPage() {
     </div>
   );
 }
-
