@@ -1,14 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useLoaderData } from "@tanstack/react-router";
 import { getProfileFn } from "../server/fn/profile";
-import { getUserById } from "../server/data-access/users";
-import {
-  isFollowing,
-  followUser,
-  unfollowUser,
-} from "../server/data-access/users";
-import { createServerFn } from "@tanstack/react-start";
-import { z } from "zod";
 import {
   Card,
   CardContent,
@@ -18,34 +10,22 @@ import {
 } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
-import { TrendingUp, TrendingDown, BarChart3, DollarSign, Activity } from "lucide-react";
-import { AreaChart, Area, XAxis, YAxis, ResponsiveContainer, Tooltip, CartesianGrid } from "recharts";
-
-// Follow function
-const followFn = createServerFn({ method: "POST" })
-  .inputValidator((z) =>
-    z.object({
-      followerId: z.string().cuid("Invalid follower ID"),
-      followingId: z.string().cuid("Invalid following ID"),
-    })
-  )
-  .handler(async ({ input: { followerId, followingId } }) => {
-    await followUser(followerId, followingId);
-    return { success: true };
-  });
-
-// Unfollow function
-const unfollowFn = createServerFn({ method: "POST" })
-  .inputValidator((z) =>
-    z.object({
-      followerId: z.string().cuid("Invalid follower ID"),
-      followingId: z.string().cuid("Invalid following ID"),
-    })
-  )
-  .handler(async ({ input: { followerId, followingId } }) => {
-    await unfollowUser(followerId, followingId);
-    return { success: true };
-  });
+import {
+  TrendingUp,
+  TrendingDown,
+  BarChart3,
+  DollarSign,
+  Activity,
+} from "lucide-react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  ResponsiveContainer,
+  Tooltip,
+  CartesianGrid,
+} from "recharts";
 
 export const Route = createFileRoute("/profiles/$id")({
   loader: async ({ params }) => {
@@ -105,9 +85,9 @@ function Profile() {
                 <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
                   {profile.name}
                 </h1>
-                {profile.username && (
+                {profile.displayName && (
                   <Badge variant="outline" className="text-base px-3 py-1">
-                    @{profile.username}
+                    @{profile.displayName}
                   </Badge>
                 )}
                 {profile.isClub && (
@@ -215,102 +195,6 @@ function Profile() {
             <BarChart3 className="w-6 h-6 text-primary" />
             Performance Metrics
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Alpha */}
-            <Card className="bg-gradient-to-br from-green-500/10 to-green-500/5 border-green-500/20 hover:shadow-lg transition-all hover:-translate-y-1">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-sm font-medium flex items-center gap-2">
-                  <TrendingUp className="w-4 h-4 text-green-600" />
-                  Alpha (vs S&P 500)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-green-600">
-                  {profile.alpha !== undefined
-                    ? profile.alpha >= 0
-                      ? "+"
-                      : ""
-                    : ""}
-                  {profile.alpha?.toFixed(2) || "0.00"}%
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Excess return over market
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Beta */}
-            <Card className="bg-gradient-to-br from-blue-500/10 to-blue-500/5 border-blue-500/20 hover:shadow-lg transition-all hover:-translate-y-1">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-sm font-medium flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-blue-600" />
-                  Beta (vs S&P 500)
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold text-blue-600">
-                  {profile.beta?.toFixed(2) || "1.00"}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {profile.beta > 1
-                    ? "Higher volatility than market"
-                    : profile.beta < 1
-                    ? "Lower volatility than market"
-                    : "Matches market volatility"}
-                </p>
-              </CardContent>
-            </Card>
-
-            {/* Win Rate */}
-            <Card className="bg-gradient-to-br from-purple-500/10 to-purple-500/5 border-purple-500/20 hover:shadow-lg transition-all hover:-translate-y-1">
-              <CardHeader className="pb-2">
-                <CardDescription className="text-sm font-medium">
-                  Win Rate
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="text-3xl font-bold">
-                  {profile.winRate.toFixed(1)}%
-                </div>
-                <div className="w-full bg-muted rounded-full h-2 mt-2">
-                  <div
-                    className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all"
-                    style={{ width: `${profile.winRate}%` }}
-                  />
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Total Return */}
-            <Card
-              className={`bg-gradient-to-br ${
-                profile.totalReturn >= 0
-                  ? "from-green-500/10 to-green-500/5 border-green-500/20"
-                  : "from-red-500/10 to-red-500/5 border-red-500/20"
-              } hover:shadow-lg transition-all hover:-translate-y-1`}
-            >
-              <CardHeader className="pb-2">
-                <CardDescription className="text-sm font-medium flex items-center gap-2">
-                  <DollarSign className="w-4 h-4" />
-                  Total Return
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div
-                  className={`text-3xl font-bold ${
-                    profile.totalReturn >= 0 ? "text-green-600" : "text-red-600"
-                  }`}
-                >
-                  {profile.totalReturn >= 0 ? "+" : ""}$
-                  {profile.totalReturn.toLocaleString()}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {profile.averageReturn >= 0 ? "+" : ""}
-                  {profile.averageReturn.toFixed(2)}% average per trade
-                </p>
-              </CardContent>
-            </Card>
-          </div>
         </div>
 
         {/* Additional Metrics */}
@@ -340,19 +224,6 @@ function Profile() {
               </div>
             </CardContent>
           </Card>
-
-          <Card className="bg-card/50 backdrop-blur border-border">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm text-muted-foreground font-medium">
-                Max Drawdown
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-600">
-                -{Math.abs(profile.maxDrawdown || 0).toFixed(2)}%
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Risk/Reward Metrics */}
@@ -370,47 +241,11 @@ function Profile() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div>
                 <div className="text-sm text-muted-foreground mb-1">
-                  Sharpe Ratio
-                </div>
-                <div
-                  className={`text-2xl font-bold ${
-                    (profile.sharpeRatio || 0) >= 1
-                      ? "text-green-600"
-                      : (profile.sharpeRatio || 0) >= 0
-                      ? "text-yellow-600"
-                      : "text-red-600"
-                  }`}
-                >
-                  {(profile.sharpeRatio || 0).toFixed(2)}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  {profile.sharpeRatio && profile.sharpeRatio >= 1
-                    ? "Good risk-adjusted returns"
-                    : profile.sharpeRatio && profile.sharpeRatio >= 0
-                    ? "Moderate risk-adjusted returns"
-                    : "Poor risk-adjusted returns"}
-                </p>
-              </div>
-
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">
                   Total Trades
                 </div>
                 <div className="text-2xl font-bold">{profile.totalTrades}</div>
                 <p className="text-xs text-muted-foreground mt-1">
                   {profile.activeTrades} currently active
-                </p>
-              </div>
-
-              <div>
-                <div className="text-sm text-muted-foreground mb-1">
-                  Win/Loss Ratio
-                </div>
-                <div className="text-2xl font-bold">
-                  {profile.winLossRatio?.toFixed(2) || "0.00"}
-                </div>
-                <p className="text-xs text-muted-foreground mt-1">
-                  Average win / Average loss
                 </p>
               </div>
             </div>
@@ -425,7 +260,8 @@ function Profile() {
               Trading Performance Over Time
             </CardTitle>
             <CardDescription>
-              Visual representation of trading performance and cumulative returns
+              Visual representation of trading performance and cumulative
+              returns
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -449,12 +285,30 @@ function Profile() {
                     ]}
                   >
                     <defs>
-                      <linearGradient id="colorPerformance" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--color-primary)" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="var(--color-primary)" stopOpacity={0} />
+                      <linearGradient
+                        id="colorPerformance"
+                        x1="0"
+                        y1="0"
+                        x2="0"
+                        y2="1"
+                      >
+                        <stop
+                          offset="5%"
+                          stopColor="var(--color-primary)"
+                          stopOpacity={0.3}
+                        />
+                        <stop
+                          offset="95%"
+                          stopColor="var(--color-primary)"
+                          stopOpacity={0}
+                        />
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" strokeOpacity={0.2} />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      stroke="var(--color-border)"
+                      strokeOpacity={0.2}
+                    />
                     <XAxis
                       dataKey="name"
                       stroke="var(--color-muted-foreground)"
@@ -474,7 +328,9 @@ function Profile() {
                         if (active && payload && payload.length) {
                           return (
                             <div className="bg-popover/95 backdrop-blur border border-border rounded-lg shadow-lg p-3">
-                              <p className="text-sm font-medium mb-1">{label}</p>
+                              <p className="text-sm font-medium mb-1">
+                                {label}
+                              </p>
                               <p className="text-lg font-bold text-primary">
                                 {payload[0].value}%
                               </p>
@@ -502,7 +358,8 @@ function Profile() {
                   No trading data yet
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-md">
-                  Start documenting your trades to see your performance chart here.
+                  Start documenting your trades to see your performance chart
+                  here.
                 </p>
               </div>
             )}
@@ -516,9 +373,7 @@ function Profile() {
               <TrendingUp className="w-5 h-5 text-primary" />
               Buy & Sell Activity
             </CardTitle>
-            <CardDescription>
-              Overview of your trading activity
-            </CardDescription>
+            <CardDescription>Overview of your trading activity</CardDescription>
           </CardHeader>
           <CardContent>
             {profile.totalTrades > 0 ? (
@@ -568,7 +423,8 @@ function Profile() {
                   No trading activity yet
                 </h3>
                 <p className="text-sm text-muted-foreground max-w-md">
-                  Start buying and selling stocks to see your trading activity here.
+                  Start buying and selling stocks to see your trading activity
+                  here.
                 </p>
               </div>
             )}
@@ -582,104 +438,15 @@ function Profile() {
               <TrendingUp className="w-6 h-6 text-primary" />
               Recent Posts
             </h2>
-            <Link to={`/profiles/${Route.useParams().id}/trades`}>
+            <Link
+              to="/profiles/$id/trades"
+              params={{ id: Route.useParams().id }}
+            >
               <Button variant="outline" size="sm">
                 View All Trades
               </Button>
             </Link>
           </div>
-
-          {profile.recentPosts && profile.recentPosts.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {profile.recentPosts.slice(0, 6).map((post) => (
-                <Card
-                  key={post.id}
-                  className="bg-card/50 backdrop-blur hover:shadow-lg transition-all hover:-translate-y-1 cursor-pointer border-border"
-                >
-                  <CardHeader className="pb-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-lg line-clamp-2">
-                        {post.title}
-                      </CardTitle>
-                      {post.type && (
-                        <Badge
-                          variant={
-                            post.type === "trade"
-                              ? "default"
-                              : post.type === "thought"
-                              ? "secondary"
-                              : "outline"
-                          }
-                          className="flex-shrink-0"
-                        >
-                          {post.type}
-                        </Badge>
-                      )}
-                    </div>
-                    <CardDescription className="flex items-center gap-2">
-                      <span>{post.publishedAt}</span>
-                      {post.symbol && <Badge variant="outline">{post.symbol}</Badge>}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                      {post.content}
-                    </p>
-
-                    {post.type === "trade" && post.performance && (
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="text-xs text-muted-foreground">Return</div>
-                          <div
-                            className={`text-lg font-bold ${
-                              post.performance.returnPercent >= 0
-                                ? "text-green-600"
-                                : "text-red-600"
-                            }`}
-                          >
-                            {post.performance.returnPercent >= 0 ? "+" : ""}
-                            {post.performance.returnPercent.toFixed(2)}%
-                          </div>
-                        </div>
-                        <Badge
-                          variant={
-                            post.performance.status === "win"
-                              ? "default"
-                              : post.performance.status === "loss"
-                              ? "destructive"
-                              : "secondary"
-                          }
-                        >
-                          {post.performance.status.toUpperCase()}
-                        </Badge>
-                      </div>
-                    )}
-
-                    <div className="flex gap-4 mt-3 pt-3 border-t text-xs text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        👁️ {post.views}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        ❤️ {post.likes}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        💬 {post.comments}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card>
-              <CardContent className="py-12 text-center text-muted-foreground">
-                <p className="text-lg mb-2">No posts yet</p>
-                <p className="text-sm">
-                  This user hasn't shared any investment posts yet.
-                </p>
-              </CardContent>
-            </Card>
-          )}
         </div>
 
         {/* Education Section */}

@@ -13,7 +13,7 @@ import {
   addCertification,
   updateCertification,
   deleteCertification,
-} from "../data-access/profiles";
+} from "../data-access/profiles.server";
 
 // Get profile by ID
 export const getProfileFn = createServerFn({ method: "GET" })

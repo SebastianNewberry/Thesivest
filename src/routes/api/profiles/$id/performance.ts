@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getUserPerformanceMetrics } from "../../../../server/data-access/profiles";
+import { getUserPerformanceMetrics } from "../../../../server/data-access/profiles.server";
 
 export const Route = createFileRoute("/api/profiles/$id/performance")({
   server: {

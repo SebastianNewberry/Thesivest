@@ -1,12 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createServerFn } from "@tanstack/react-start";
 import { FamousFunds } from "../components/FamousFunds";
 import {
-  getContributors,
-  getContributorAnalyses,
-} from "../server/features/contributors";
+  getContributorsFn,
+  getContributorAnalysesFn,
+} from "../server/fn/contributors";
 import { useLoaderData } from "@tanstack/react-router";
-import { motion, AnimatePresence } from "motion/react";
+import { motion} from "motion/react";
 import {
   Users,
   ArrowRight,
@@ -27,21 +26,8 @@ import {
 import { Button } from "../components/ui/button";
 import { Badge } from "../components/ui/badge";
 import { Link } from "@tanstack/react-router";
-import type { UserPost } from "../server/features/contributors";
+import type { UserPost } from "../server/features/contributors.server";
 import { PortfolioDeck } from "@/components/PortfolioDeck";
-
-// Server Functions calling Shared Logic
-const getContributorsFn = createServerFn({ method: "GET" }).handler(
-  async () => {
-    return getContributors();
-  }
-);
-
-const getContributorAnalysesFn = createServerFn({ method: "GET" }).handler(
-  async () => {
-    return getContributorAnalyses(6);
-  }
-);
 
 export const Route = createFileRoute("/")({
   component: Home,

@@ -4,7 +4,7 @@ import {
     searchStocks,
     getStockAnalysisBySymbol,
     getStockSnapshotsForUser
-} from "@/server/features/stocks";
+} from "@/server/features/stocks.server";
 
 export const searchStocksFn = createServerFn({ method: "POST" })
     .inputValidator(z.object({

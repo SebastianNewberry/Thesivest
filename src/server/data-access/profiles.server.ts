@@ -20,7 +20,7 @@ import { eq, desc, sql, and, gte } from "drizzle-orm";
 export interface UserProfile {
   id: string;
   name: string;
-  username?: string;
+  displayName?: string;
   email: string;
   emailVerified: boolean;
   image?: string;
@@ -268,7 +268,7 @@ export async function getUserProfile(id: string): Promise<UserProfile | null> {
   return {
     id: userData.id,
     name: userData.name,
-    username: userData.username || undefined,
+    displayName: userData.displayName || undefined,
     email: userData.email,
     emailVerified: userData.emailVerified,
     image: userData.image || undefined,
@@ -331,12 +331,12 @@ export async function getUserProfile(id: string): Promise<UserProfile | null> {
  * Get user by username
  */
 export async function getUserProfileByUsername(
-  username: string
+  displayName: string
 ): Promise<UserProfile | null> {
   const users = await db
     .select()
     .from(user)
-    .where(eq(user.username, username))
+    .where(eq(user.displayName, displayName))
     .limit(1);
 
   if (users.length === 0) return null;

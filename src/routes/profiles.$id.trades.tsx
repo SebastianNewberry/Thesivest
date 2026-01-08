@@ -1,13 +1,20 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useLoaderData } from "@tanstack/react-router";
 import { getTradeHistoryFn } from "../server/fn/profile";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 
 export const Route = createFileRoute("/profiles/$id/trades")({
   loader: async ({ params }) => {
-    const trades = await getTradeHistoryFn({ data: { userId: params.id, limit: 50 } });
+    const trades = await getTradeHistoryFn({
+      data: { userId: params.id, limit: 50 },
+    });
     return { trades };
   },
   component: ProfileTrades,
@@ -21,7 +28,7 @@ function ProfileTrades() {
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-3xl font-bold">Trade History</h1>
-          <Link to={`/profiles/${Route.useParams().id}`}>
+          <Link to="/profiles/$id/trades" params={{ id: Route.useParams().id }}>
             <Button variant="outline">Back to Profile</Button>
           </Link>
         </div>

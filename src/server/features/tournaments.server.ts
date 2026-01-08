@@ -8,7 +8,7 @@ import {
   getTournamentById as getTournamentByIdDAL,
   getTournamentsByCategory as getTournamentsByCategoryDAL,
   getActiveTournaments as getActiveTournamentsDAL
-} from "../data-access/tournaments";
+} from "../data-access/tournaments.server";
 
 export interface Tournament {
   id: string;

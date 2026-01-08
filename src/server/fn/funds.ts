@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { getFundAnalysis } from "@/server/features/funds";
+import { getFundAnalysis } from "@/server/features/funds.server";
 import { getRequest } from "@tanstack/react-start/server";
 import { auth } from "@/lib/auth";
 

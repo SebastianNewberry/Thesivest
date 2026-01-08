@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { getUserTradeHistory } from "../../../../server/data-access/profiles";
+import { getUserTradeHistory } from "../../../../server/data-access/profiles.server";
 
 export const Route = createFileRoute("/api/profiles/$id/trade-history")({
   server: {

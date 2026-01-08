@@ -275,26 +275,6 @@ export function SignUp() {
             )}
 
             <form.Subscribe
-<<<<<<< HEAD
-              selector={(state) => [
-                state.isSubmitting,
-                state.canSubmit,
-                isSubmitting,
-              ]}
-              children={([formIsSubmitting, canSubmit, submitting]) => (
-                <Button
-                  type="submit"
-                  className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]"
-                  disabled={submitting || !canSubmit}
-                >
-                  {submitting && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
-                  Sign Up
-                  {!submitting && <ArrowRight className="ml-2 h-4 w-4" />}
-                </Button>
-              )}
-=======
               selector={(state) => ({
                 isSubmitting: state.isSubmitting,
                 canSubmit: state.canSubmit,
@@ -320,7 +300,6 @@ export function SignUp() {
                   </Button>
                 );
               }}
->>>>>>> 0f360109429d29c2d8e31a4bc9eabb3c73301353
             />
           </form>
 

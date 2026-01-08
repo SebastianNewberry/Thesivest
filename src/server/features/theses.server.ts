@@ -4,7 +4,7 @@
  * Uses the data access layer to fetch data from the database.
  */
 
-import { getAllPosts, getPostsByType } from "../data-access/posts";
+import { getAllPosts, getPostsByType } from "../data-access/posts.server";
 
 export interface Thesis {
     id: string;

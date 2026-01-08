@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { createServerFn } from '@tanstack/react-start';
 import { authClient } from '../lib/auth-client';
 import { useNavigate } from '@tanstack/react-router';
-import { getTournaments, type Tournament } from '../server/features/tournaments';
+import { getTournamentsFn } from '../server/fn/tournaments';
+import { type Tournament } from '../server/features/tournaments.server';
 import { useLoaderData } from '@tanstack/react-router';
 import { motion } from 'motion/react';
 import {
@@ -22,11 +22,6 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from '../components/ui/button';
 import { Badge } from '../components/ui/badge';
 import { cn } from '../lib/utils';
-
-// Server Function
-const getTournamentsFn = createServerFn({ method: 'GET' }).handler(async () => {
-  return getTournaments();
-});
 
 export const Route = createFileRoute('/tournaments')({
   component: TournamentsPage,

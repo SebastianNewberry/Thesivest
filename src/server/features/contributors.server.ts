@@ -6,13 +6,13 @@
 import {
   getAllUsers,
   getUserById as getUserByIdDAL,
-} from "../data-access/users";
+} from "../data-access/users.server";
 import {
   getAllPosts,
   getPostById as getPostByIdDAL,
   getPostsByUserId,
   searchPosts,
-} from "../data-access/posts";
+} from "../data-access/posts.server";
 
 export interface CommunityMember {
   id: string;
