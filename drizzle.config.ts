@@ -9,6 +9,6 @@ export default defineConfig({
   schema: "./src/db/schema.ts",
   dialect: "postgresql",
   dbCredentials: {
-    url: Resource.VITE_DATABASE_URL_POOLER.value || "",
+    url: Resource.DATABASE_URL_POOLER.value || "",
   },
 });

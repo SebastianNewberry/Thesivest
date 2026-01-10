@@ -17,10 +17,135 @@ import {
   PORTFOLIOS,
   SERIES,
   TIME_RANGES,
+  STOCK_TICKERS,
+  PORTFOLIO_TICKERS,
   type TimeRange,
 } from "../lib/chartData";
 import { useMediaQuery } from "../hooks/useMediaQuery";
 import { cn } from "../lib/utils";
+
+// Helper to create chart data from real market data only (no merging)
+const createRealDataChart = (
+  realDataMap: Record<string, { date: number; close: number }[]>,
+  activeGlobalTicker?: string
+) => {
+  // If no real data, return null
+  if (!realDataMap || Object.keys(realDataMap).length === 0) {
+    return null;
+  }
+
+  // Helper to normalize a timestamp to YYYY-MM-DD string in local timezone
+  const toLocalDateString = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // Process each series with real data - each keeps its own dates
+  const processedSeries: Record<string, { date: number; value: number }[]> = {};
+  let allDates: Set<string> = new Set();
+
+  for (const [ticker, data] of Object.entries(realDataMap)) {
+    if (!data || data.length === 0) continue;
+
+    // Sort data by date
+    const sortedData = [...data].sort((a, b) => a.date - b.date);
+    const startPrice = sortedData[0].close;
+
+    // Create normalized data (starts at 100)
+    const normalizedData: { date: number; value: number }[] = [];
+
+    sortedData.forEach((d) => {
+      const dateStr = toLocalDateString(d.date);
+      allDates.add(dateStr);
+
+      // IMPORTANT: Create standardized timestamp from the string to ensure alignment
+      // mismatch between API UTC time and cached local date string time caused lookup failures.
+      const standardTimestamp = new Date(dateStr).getTime();
+
+      normalizedData.push({
+        date: standardTimestamp,
+        value: (d.close / startPrice) * 100,
+      });
+    });
+
+    // 1. Map to Stock Series (NVDA, TSLA, etc.)
+    const seriesId = Object.entries(STOCK_TICKERS).find(
+      ([, t]) => t === ticker || t === ticker.toUpperCase()
+    )?.[0];
+    if (seriesId) {
+      processedSeries[seriesId] = normalizedData;
+    }
+
+    // 2. Map to 'portfolio' (Main Area Chart) if this matches current portfolio ticker
+    if (
+      activeGlobalTicker &&
+      ticker.toUpperCase() === activeGlobalTicker.toUpperCase()
+    ) {
+      processedSeries["portfolio"] = normalizedData;
+    }
+
+    // 3. Map to 'sp500' (Benchmark Line) if this is SPY
+    if (ticker === "SPY") {
+      processedSeries["sp500"] = normalizedData;
+    }
+  }
+
+  // If no series processed, return null
+  if (Object.keys(processedSeries).length === 0) {
+    return null;
+  }
+
+  // Sort all dates chronologically
+  const sortedDates = Array.from(allDates).sort(
+    (a, b) => new Date(a).getTime() - new Date(b).getTime()
+  );
+
+  // Build unified chart data - each series only has values for its own dates
+  const chartData = sortedDates.map((dateStr) => {
+    const timestamp = new Date(dateStr).getTime();
+    const point: any = { date: timestamp };
+
+    // For each series, add value if it has data for this date
+    // If no data, leave undefined - the line will naturally stop
+    for (const [seriesId, seriesData] of Object.entries(processedSeries)) {
+      const matchingPoint = seriesData.find((d) => d.date === timestamp);
+      if (matchingPoint) {
+        point[seriesId] = matchingPoint.value;
+      } else {
+        // No direct match (weekend/holiday) - forward-fill from previous date
+        // Look back up to 5 trading days for previous value
+        let lastValue: number | null = null;
+        for (let i = 1; i <= 5; i++) {
+          const prevDate = new Date(timestamp);
+          prevDate.setDate(prevDate.getDate() - i);
+          // We must reconstruct timestamp precisely the same way
+          const prevDateStr = toLocalDateString(prevDate.getTime());
+          const prevTimestamp = new Date(prevDateStr).getTime(); // Aligned timestamp
+
+          const prevPoint = seriesData.find((d) => d.date === prevTimestamp);
+
+          if (prevPoint) {
+            lastValue = prevPoint.value;
+            break;
+          }
+        }
+
+        // If we found a previous value, use it for forward-fill
+        if (lastValue !== null) {
+          point[seriesId] = lastValue;
+        }
+        // If no previous value found (before series starts), leave undefined - line stops
+      }
+    }
+
+    return point;
+  });
+
+  return chartData;
+};
 
 const getAxisTicks = (min: number, max: number) => {
   const ticks: number[] = [];
@@ -125,6 +250,7 @@ export interface HeroChartProps {
   onClick?: () => void;
   forcedActiveSeries?: string[]; // IDs of series that MUST be shown
   data?: any[]; // Explicit data passed from parent
+  marketData?: Record<string, { date: number; close: number }[]>; // Real market data from API
 }
 
 export function HeroChart({
@@ -134,13 +260,14 @@ export function HeroChart({
   onClick,
   forcedActiveSeries,
   data,
+  marketData,
 }: HeroChartProps) {
   // Get current portfolio config
   const activePortfolio = PORTFOLIOS.find((p) => p.id === portfolioId);
   const portfolioLabel = activePortfolio?.name || "Your Portfolio";
   const portfolioColor = activePortfolio?.color || "var(--color-primary)";
   const isMobile = useMediaQuery("(max-width: 768px)");
-  const [timeRange, setTimeRange] = useState<TimeRange | null>("3Y");
+  const [timeRange, setTimeRange] = useState<TimeRange | null>("2Y");
   const [activeSeries, setActiveSeries] = useState<Set<string>>(() => {
     if (forcedActiveSeries) return new Set(forcedActiveSeries);
     return new Set(["portfolio", "sp500"]);
@@ -156,10 +283,12 @@ export function HeroChart({
   // Master Data Source
   // If explicit data provided, use it. Otherwise lookup.
   const DATA_SETS = ALL_DATA_SETS[portfolioId] || ALL_DATA_SETS["thesivest"];
-  const currentData = data || DATA_SETS["3Y"]; // Fallback to 3Y master if no data passed
+  const syntheticData = data || DATA_SETS["2Y"]; // Fallback to 2Y master if no data passed
 
   // Helper to calculate start date for ranges
   const getStartDateForRange = (range: TimeRange, endDate: number) => {
+    if (!range) return 0; // If null, return 0 to show all data
+
     const end = new Date(endDate);
     const start = new Date(endDate);
     switch (range) {
@@ -178,12 +307,36 @@ export function HeroChart({
       case "1Y":
         start.setFullYear(end.getFullYear() - 1);
         break;
-      case "3Y":
-        start.setFullYear(end.getFullYear() - 3);
+      case "2Y":
+        start.setFullYear(end.getFullYear() - 2);
         break;
     }
     return start.getTime();
   };
+
+  // Get active ticker for this portfolio
+  const activeTicker = PORTFOLIO_TICKERS[portfolioId];
+
+  // Debug Log
+  if (marketData) {
+    const keys = Object.keys(marketData);
+    const hasActive = activeTicker ? keys.includes(activeTicker) : false;
+  }
+
+  // Create real data chart if market data is available
+  // Otherwise use synthetic data
+  const realDataChart = useMemo(
+    () => (marketData ? createRealDataChart(marketData, activeTicker) : null),
+    [marketData, activeTicker]
+  );
+
+  // Use real data if available, otherwise synthetic
+  // We DO NOT filter by timeRange here anymore.
+  // We pass the full dataset to the chart and control visibility via XAxis domain (left/right).
+  // This allows the user to scroll back (arrows) into historical data.
+  const currentData = useMemo(() => {
+    return realDataChart || syntheticData;
+  }, [realDataChart, syntheticData]);
 
   // Zoom State - Initialize to 3Y view
   const [left, setLeft] = useState<string | number>("dataMin");
@@ -197,7 +350,7 @@ export function HeroChart({
   const [preZoomState, setPreZoomState] = useState<{
     left: string | number;
     right: string | number;
-    timeRange: TimeRange | null;
+    timeRange: TimeRange;
   } | null>(null);
   const [isNavigating, setIsNavigating] = useState(false);
 
@@ -352,7 +505,7 @@ export function HeroChart({
 
       setLeft(start);
       setRight(end);
-      setTimeRange(null);
+      setTimeRange(null); // Clear time range selection (custom zoom)
     }
   };
 
@@ -366,12 +519,12 @@ export function HeroChart({
     if (preZoomState) {
       setLeft(preZoomState.left);
       setRight(preZoomState.right);
-      setTimeRange(preZoomState.timeRange);
+      setTimeRange(preZoomState.timeRange || "2Y");
       setPreZoomState(null);
     } else {
       setLeft("dataMin");
       setRight("dataMax");
-      setTimeRange("3Y");
+      setTimeRange("2Y");
     }
   };
 
@@ -418,7 +571,7 @@ export function HeroChart({
               <span className="text-xs md:text-sm text-foreground/60 font-medium">
                 {timeRange === null
                   ? "Zoomed"
-                  : `${timeRange === "3Y" ? "3Y" : timeRange}`}
+                  : `${timeRange === "2Y" ? "2Y" : timeRange}`}
               </span>
               {timeRange === null && (
                 <button
@@ -463,19 +616,24 @@ export function HeroChart({
       )}
 
       {/* Main Chart Area */}
-      <div className="flex-1 w-full relative z-10 min-h-0 pb-2 md:pb-4 flex items-center gap-4 md:gap-6 px-2 md:px-4">
+      <div
+        className={cn(
+          "flex-1 w-full relative z-10 min-h-0 flex items-center",
+          minimal ? "p-0 gap-0" : "pb-2 md:pb-4 gap-4 md:gap-6 px-2 md:px-4"
+        )}
+      >
         {/* Left Navigation Button */}
-        {!isMobile && (
+        {!isMobile && !minimal && (
           <button
             onClick={() => moveTimePeriod("back")}
             disabled={
-              timeRange === "3Y" ||
+              timeRange === "2Y" ||
               left === "dataMin" ||
               (typeof left === "number" && left <= currentData[0].date)
             }
             className={cn(
               "p-2 rounded-full hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-all shrink-0 z-20 focus:outline-none focus:ring-1 focus:ring-ring",
-              timeRange === "3Y" ||
+              timeRange === "2Y" ||
                 left === "dataMin" ||
                 (typeof left === "number" && left <= currentData[0].date)
                 ? "opacity-0 pointer-events-none"
@@ -492,12 +650,16 @@ export function HeroChart({
             {currentData.length > 0 && (
               <AreaChart
                 data={currentData}
-                margin={{
-                  top: isMobile ? 10 : 20,
-                  right: 0,
-                  left: 0,
-                  bottom: 0,
-                }}
+                margin={
+                  minimal
+                    ? { top: 0, right: 0, left: 0, bottom: 0 }
+                    : {
+                        top: isMobile ? 10 : 20,
+                        right: 0,
+                        left: 0,
+                        bottom: 0,
+                      }
+                }
                 onMouseDown={(e) => {
                   if (e && e.activeLabel) setRefAreaLeft(e.activeLabel);
                 }}
@@ -527,13 +689,16 @@ export function HeroChart({
                     />
                   </linearGradient>
                 </defs>
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  vertical={true}
-                  stroke="var(--color-border)"
-                  strokeOpacity={0.1}
-                />
+                {!minimal && (
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    vertical={true}
+                    stroke="var(--color-border)"
+                    strokeOpacity={0.1}
+                  />
+                )}
                 <XAxis
+                  hide={minimal}
                   dataKey="date"
                   type="number"
                   domain={[left, right]}
@@ -588,7 +753,9 @@ export function HeroChart({
                 <YAxis
                   hide
                   domain={yDomain}
-                  padding={{ top: 20, bottom: 20 }}
+                  padding={
+                    minimal ? { top: 0, bottom: 0 } : { top: 20, bottom: 20 }
+                  }
                   allowDataOverflow
                   type="number"
                 />
@@ -708,7 +875,7 @@ export function HeroChart({
                     return (
                       <Area
                         key={s.id}
-                        type="monotone"
+                        type="natural"
                         dataKey={s.id}
                         stroke={color}
                         strokeWidth={isMobile ? 2 : 3}
@@ -718,7 +885,7 @@ export function HeroChart({
                         strokeOpacity={opacity}
                         style={{ opacity }}
                         isAnimationActive={isNavigating}
-                        animationDuration={isNavigating ? 300 : 0}
+                        animationDuration={300}
                       />
                     );
                   }
@@ -726,7 +893,7 @@ export function HeroChart({
                   return (
                     <Line
                       key={s.id}
-                      type="monotone"
+                      type="natural"
                       dataKey={s.id}
                       stroke={color}
                       strokeWidth={isMobile ? 1.5 : s.isBenchmark ? 2 : 2}
@@ -736,7 +903,7 @@ export function HeroChart({
                       strokeOpacity={opacity}
                       style={{ transition: "opacity 0.3s" }}
                       isAnimationActive={isNavigating}
-                      animationDuration={isNavigating ? 300 : 0}
+                      animationDuration={300}
                     />
                   );
                 })}
@@ -757,18 +924,18 @@ export function HeroChart({
         </div>
 
         {/* Right Navigation Button */}
-        {!isMobile && (
+        {!isMobile && !minimal && (
           <button
             onClick={() => moveTimePeriod("forward")}
             disabled={
-              timeRange === "3Y" ||
+              timeRange === "2Y" ||
               right === "dataMax" ||
               (typeof right === "number" &&
                 right >= currentData[currentData.length - 1].date)
             }
             className={cn(
               "p-2 rounded-full hover:bg-accent/50 text-muted-foreground hover:text-foreground transition-all shrink-0 z-20 focus:outline-none focus:ring-1 focus:ring-ring",
-              timeRange === "3Y" ||
+              timeRange === "2Y" ||
                 right === "dataMax" ||
                 (typeof right === "number" &&
                   right >= currentData[currentData.length - 1].date)
@@ -783,46 +950,50 @@ export function HeroChart({
       </div>
 
       {/* Legend / Toggles */}
-      <div className="p-2 md:p-4 bg-card/30 border-t border-border/50 z-20 overflow-x-auto">
-        <div className="flex items-center gap-2 md:gap-3">
-          {SERIES.map((s) => {
-            const isActive = activeSeries.has(s.id);
-            const isThesivest = s.id === "portfolio";
-            const label = isThesivest ? portfolioLabel : s.label;
-            const color = isThesivest ? portfolioColor : s.color;
+      {!minimal && (
+        <div className="p-2 md:p-4 bg-card/30 border-t border-border/50 z-20 overflow-x-auto">
+          <div className="flex items-center gap-2 md:gap-3">
+            {SERIES.map((s) => {
+              const isActive = activeSeries.has(s.id);
+              const isThesivest = s.id === "portfolio";
+              const label = isThesivest ? portfolioLabel : s.label;
+              const color = isThesivest ? portfolioColor : s.color;
 
-            return (
-              <button
-                key={s.id}
-                onClick={() => toggleSeries(s.id)}
-                className={cn(
-                  "flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs font-medium border transition-all duration-200 whitespace-nowrap",
-                  isActive
-                    ? "bg-background shadow-sm border-border text-foreground"
-                    : "bg-muted/50 border-transparent text-muted-foreground opacity-60 hover:opacity-100"
-                )}
-              >
-                <div
+              return (
+                <button
+                  key={s.id}
+                  onClick={() => toggleSeries(s.id)}
                   className={cn(
-                    "w-1.5 md:w-2 h-1.5 md:h-2 rounded-full transition-transform duration-200",
-                    isActive ? "scale-100" : "scale-75"
+                    "flex items-center gap-1.5 md:gap-2 px-2 md:px-3 py-1 md:py-1.5 rounded-full text-[10px] md:text-xs font-medium border transition-all duration-200 whitespace-nowrap",
+                    isActive
+                      ? "bg-background shadow-sm border-border text-foreground"
+                      : "bg-muted/50 border-transparent text-muted-foreground opacity-60 hover:opacity-100"
                   )}
-                  style={{
-                    backgroundColor: isActive
-                      ? color
-                      : "var(--color-muted-foreground)",
-                  }}
-                />
-                <span className="hidden sm:inline">{label}</span>
-                <span className="inline sm:hidden">{label.split(" ")[0]}</span>
-                {isActive && (
-                  <Check className="w-2.5 h-2.5 md:w-3 md:h-3 text-muted-foreground" />
-                )}
-              </button>
-            );
-          })}
+                >
+                  <div
+                    className={cn(
+                      "w-1.5 md:w-2 h-1.5 md:h-2 rounded-full transition-transform duration-200",
+                      isActive ? "scale-100" : "scale-75"
+                    )}
+                    style={{
+                      backgroundColor: isActive
+                        ? color
+                        : "var(--color-muted-foreground)",
+                    }}
+                  />
+                  <span className="hidden sm:inline">{label}</span>
+                  <span className="inline sm:hidden">
+                    {label.split(" ")[0]}
+                  </span>
+                  {isActive && (
+                    <Check className="w-2.5 h-2.5 md:w-3 md:h-3 text-muted-foreground" />
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
     </Card>
   );
 }

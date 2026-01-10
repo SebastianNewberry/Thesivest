@@ -1,27 +1,23 @@
 import "dotenv/config";
-import { drizzle } from "drizzle-orm/node-postgres";
+import { drizzle } from "drizzle-orm/neon-http";
+import { neon } from "@neondatabase/serverless";
 import { Resource } from "sst";
-
 import * as schema from "./schema.ts";
 
-// Debug: Check what Resource looks like
-console.log("Resource:", Resource);
-console.log("VITE_DATABASE_URL_POOLER:", Resource.VITE_DATABASE_URL_POOLER);
-
 // Get the database URL with optional chaining
-const dbUrl = Resource.VITE_DATABASE_URL_POOLER?.value || process.env.VITE_DATABASE_URL_POOLER || process.env.DATABASE_URL;
-
-console.log("dbUrl:", dbUrl);
+const dbUrl = Resource.DATABASE_URL_POOLER?.value;
 
 // Safe initialization
-let dbInstance: any;
+let dbInstance: ReturnType<typeof drizzle<typeof schema>> | undefined;
 
 try {
   if (!dbUrl || typeof dbUrl !== "string") {
-    console.warn("⚠️ Database URL is missing or invalid. DB operations will fail.");
+    console.warn(
+      "⚠️ Database URL is missing or invalid. DB operations will fail."
+    );
   } else {
-    dbInstance = drizzle(dbUrl, { schema });
-    console.log("✅ db initialized successfully");
+    const client = neon(dbUrl);
+    dbInstance = drizzle(client, { schema });
   }
 } catch (err) {
   console.error("❌ Error initializing db:", err);
@@ -31,10 +27,10 @@ try {
 export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
   get: (_target, prop) => {
     if (!dbInstance) {
-      throw new Error(`Database not initialized. check VITE_DATABASE_URL_POOLER. URL: ${dbUrl}`);
+      throw new Error(
+        `Database not initialized. check VITE_DATABASE_URL_POOLER. URL: ${dbUrl}`
+      );
     }
     return (dbInstance as any)[prop];
   },
 });
-
-console.log("db initialized successfully");

@@ -28,14 +28,17 @@ import { Badge } from "../components/ui/badge";
 import { Link } from "@tanstack/react-router";
 import type { UserPost } from "../server/features/contributors.server";
 import { PortfolioDeck } from "@/components/PortfolioDeck";
+import { useSuspenseQuery } from "@tanstack/react-query";
+import { marketDataQueryOptions } from "../lib/queries";
 
 export const Route = createFileRoute("/")({
   component: Home,
-  loader: async () => {
+  loader: async ({ context }) => {
     try {
       const [contributors, analyses] = await Promise.all([
         getContributorsFn(),
         getContributorAnalysesFn(),
+        context.queryClient.ensureQueryData(marketDataQueryOptions()),
       ]);
       return { contributors, analyses };
     } catch (e) {
@@ -47,6 +50,7 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { contributors, analyses } = useLoaderData({ from: "/" });
+  const { data: marketData } = useSuspenseQuery(marketDataQueryOptions());
 
   // Save scroll position on scroll (only if navigation will be to a post)
   useEffect(() => {
@@ -237,7 +241,7 @@ function Home() {
                 transition={{ delay: 1.8, duration: 0.6 }}
                 className="flex items-center justify-center w-full relative z-20"
               >
-                <PortfolioDeck isFanned={isDeckFanned} />
+                <PortfolioDeck isFanned={isDeckFanned} marketData={marketData} />
               </motion.div>
             </div>
           </div>
