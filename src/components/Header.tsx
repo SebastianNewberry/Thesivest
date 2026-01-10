@@ -78,7 +78,7 @@ export default function Header() {
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to={`/profiles/${session.user.id}`}>
+              <Link to={"/profiles/$id"} params={{ id: session.user.id }}>
                 <User className="mr-2 h-4 w-4" />
                 Profile
               </Link>
