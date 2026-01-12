@@ -52,6 +52,9 @@ function Home() {
   const { contributors, analyses } = useLoaderData({ from: "/" });
   const { data: marketData } = useSuspenseQuery(marketDataQueryOptions());
 
+  // Debug: Log all market data to browser console
+  console.log("[MarketData] Full market data from API:", marketData);
+
   // Save scroll position on scroll (only if navigation will be to a post)
   useEffect(() => {
     const handleScroll = () => {
@@ -114,8 +117,8 @@ function Home() {
       status === "win"
         ? "text-green-600"
         : status === "loss"
-        ? "text-red-600"
-        : "text-muted-foreground";
+          ? "text-red-600"
+          : "text-muted-foreground";
     return (
       <span className={color}>
         {sign}
@@ -508,8 +511,8 @@ function Home() {
                           {post.type === "trade"
                             ? "Trade"
                             : post.type === "thought"
-                            ? "Thought"
-                            : "Update"}
+                              ? "Thought"
+                              : "Update"}
                         </Badge>
                         <span className="text-xs text-muted-foreground">
                           {post.publishedAt}

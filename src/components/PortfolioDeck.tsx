@@ -44,85 +44,6 @@ export function PortfolioDeck({
     exit: { opacity: 0, transition: { duration: 0.35, ease: "easeOut" } },
   };
 
-  // Helper to merge real market data into the synthetic portfolio data
-  const getMergedData = useMemo(() => {
-    return (portfolioId: string) => {
-      const syntheticData = ALL_DATA_SETS[portfolioId]["2Y"];
-
-      // Get the ticker symbol for this portfolio
-      const ticker = PORTFOLIO_TICKERS[portfolioId];
-      const tickerData = ticker && marketData ? marketData[ticker] : null;
-
-      // If no real data for this ticker, return synthetic
-      if (!tickerData || tickerData.length === 0) {
-        console.warn(
-          `Deck: Using synthetic data for ${portfolioId} because real market data is missing/empty`
-        );
-        return syntheticData;
-      }
-
-      // Validate and sort real data to ensure chronological order
-      const sortedTickerData = [...tickerData].sort((a, b) => a.date - b.date);
-
-      // Log some sample data for debugging
-
-      // Rebase Real Data to 100
-      const startPrice = sortedTickerData[0].close;
-
-      // Helper to normalize a timestamp to YYYY-MM-DD string in local timezone
-      // This ensures consistent date matching regardless of timezone offsets
-      const toLocalDateString = (timestamp: number) => {
-        const date = new Date(timestamp);
-        const year = date.getFullYear();
-        const month = String(date.getMonth() + 1).padStart(2, "0");
-        const day = String(date.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-      };
-
-      // Map: dateStr -> normalizedValue
-      // We use local date string YYYY-MM-DD for consistent matching
-      const realDataMap = new Map<string, number>();
-      sortedTickerData.forEach((d) => {
-        const dateStr = toLocalDateString(d.date);
-        realDataMap.set(dateStr, (d.close / startPrice) * 100);
-      });
-
-      // Forward-fill: track the last real value and carry it forward to fill gaps
-      let lastRealVal: number | null = null;
-
-      return syntheticData.map((point) => {
-        const dateStr = toLocalDateString(point.date);
-        let realVal = realDataMap.get(dateStr);
-
-        // If we have a real value for this date, use it and remember it
-        if (realVal !== undefined) {
-          lastRealVal = realVal;
-          return {
-            ...point,
-            sp500: realVal, // Merged into the sp500 field for the chart
-          };
-        }
-
-        // If no real value for this date (weekend, holiday), use the last known real value
-        // This creates a smooth continuous line without spikes
-        if (lastRealVal !== null) {
-          return {
-            ...point,
-            sp500: lastRealVal,
-          };
-        }
-
-        // If we haven't encountered any real data yet (before inception),
-        // and this is a real-data scenario, don't fallback to synthetic.
-        // Return undefined for the value so the chart doesn't draw a line here.
-        return {
-          ...point,
-          sp500: undefined, // undefined tells Recharts there's no data
-        };
-      });
-    };
-  }, [marketData]);
-
   return (
     <div className="relative w-full h-[400px] md:h-[500px] flex items-center justify-center perspective-1000">
       <AnimatePresence>
@@ -176,11 +97,11 @@ export function PortfolioDeck({
                 isHero
                   ? "rounded-xl bg-background/50 backdrop-blur border-border"
                   : cn(
-                      "rounded-xl cursor-pointer hover:ring-2 hover:ring-primary z-50 transition-shadow",
-                      portfolio.id === "thesivest"
-                        ? "border-secondary ring-1 ring-secondary shadow-secondary/20"
-                        : "border-border"
-                    )
+                    "rounded-xl cursor-pointer hover:ring-2 hover:ring-primary z-50 transition-shadow",
+                    portfolio.id === "thesivest"
+                      ? "border-secondary ring-1 ring-secondary shadow-secondary/20"
+                      : "border-border"
+                  )
               )}
               style={{
                 zIndex: isHero ? 100 : showFan ? 50 - index : 10 - index,
@@ -206,8 +127,8 @@ export function PortfolioDeck({
                 delay: isExitingHero
                   ? 0
                   : isMobile
-                  ? Math.min(delay as number, 0.05)
-                  : delay,
+                    ? Math.min(delay as number, 0.05)
+                    : delay,
               }}
               onClick={(e) => {
                 if (isHero) return;

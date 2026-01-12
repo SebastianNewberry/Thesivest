@@ -6,6 +6,7 @@ interface MiniChartProps {
 }
 
 export function MiniChart({ portfolioId, marketData }: MiniChartProps) {
+
   return (
     <div className="w-full h-full select-none pointer-events-none">
       <HeroChart
@@ -13,8 +14,8 @@ export function MiniChart({ portfolioId, marketData }: MiniChartProps) {
         marketData={marketData}
         minimal={true}
         forcedActiveSeries={["portfolio", "sp500"]}
-        // Force specific series if we want only portfolio + benchmark,
-        // but HeroChart defaults to that anyway.
+      // Force specific series if we want only portfolio + benchmark,
+      // but HeroChart defaults to that anyway.
       />
     </div>
   );

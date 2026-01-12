@@ -97,6 +97,11 @@ export const getMarketDataFn = createServerFn({ method: "GET" }).handler(
         groupedData[symbol].sort((a, b) => a.date - b.date);
       });
 
+      console.log(`[MarketStack] Final grouped data summary:`);
+      Object.entries(groupedData).forEach(([symbol, data]) => {
+        console.log(`  ${symbol}: ${data.length} data points, first: ${new Date(data[0]?.date).toISOString().split('T')[0]}, last: ${new Date(data[data.length - 1]?.date).toISOString().split('T')[0]}`);
+      });
+
       return groupedData;
     } catch (error) {
       console.error("Failed to fetch market data:", error);

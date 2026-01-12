@@ -33,26 +33,15 @@ export const user = pgTable("user", {
   isClub: boolean("is_club").default(false),
   clubName: text("club_name"),
   verified: boolean("verified").default(false),
-  seekingEmployment: boolean("seeking_employment").default(false),
   availableForHire: boolean("available_for_hire").default(false),
+  // Corporate Fields
+  isCompany: boolean("is_company").default(false),
+  companyName: text("company_name"),
+  companyDescription: text("company_description"),
+  companyWebsite: text("company_website"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
 });
-
-export const userRelations = relations(user, ({ many }) => ({
-  posts: many(post),
-  followers: many(follow, {
-    relationName: "followers",
-  }),
-  following: many(follow, {
-    relationName: "following",
-  }),
-  postLikes: many(postLike),
-  comments: many(comment),
-  tournamentParticipants: many(tournamentParticipant),
-  educations: many(education),
-  certifications: many(certification),
-}));
 
 export const session = pgTable("session", {
   id: text("id").primaryKey(),
@@ -102,10 +91,14 @@ export const post = pgTable("post", {
   userId: text("user_id")
     .notNull()
     .references(() => user.id),
-  type: text("type").notNull(), // 'trade', 'thought', 'update'
+  type: text("type").notNull(), // 'trade', 'thought', 'update', 'market_outlook', 'quarterly_letter'
   symbol: text("symbol"), // Required for trades
   title: text("title").notNull(),
+  subtitle: text("subtitle"),
+  slug: text("slug").unique(),
+  coverImage: text("cover_image"),
   content: text("content").notNull(),
+  published: boolean("published").default(false),
   buyPrice: numeric("buy_price"),
   buyDate: timestamp("buy_date"),
   sellPrice: numeric("sell_price"),
@@ -115,7 +108,7 @@ export const post = pgTable("post", {
   stopLoss: numeric("stop_loss"),
   entryThoughts: text("entry_thoughts"),
   exitThoughts: text("exit_thoughts"),
-  publishedAt: timestamp("published_at").notNull().defaultNow(),
+  publishedAt: timestamp("published_at"),
   updatedAt: timestamp("updated_at")
     .defaultNow()
     .notNull()
@@ -131,10 +124,31 @@ export const postRelations = relations(post, ({ one, many }) => ({
     references: [user.id],
   }),
   tags: many(postTag),
-  performance: many(tradePerformance),
   likes: many(postLike),
   comments: many(comment),
+  attachments: many(postAttachment),
   tournamentParticipants: many(tournamentParticipant),
+}));
+
+export const postAttachment = pgTable("post_attachment", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  postId: text("post_id")
+    .notNull()
+    .references(() => post.id, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+  type: text("type").notNull(), // 'image' | 'pdf' | 'other'
+  filename: text("filename").notNull(),
+  size: integer("size").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const postAttachmentRelations = relations(postAttachment, ({ one }) => ({
+  post: one(post, {
+    fields: [postAttachment.postId],
+    references: [post.id],
+  }),
 }));
 
 // Tags
@@ -168,41 +182,6 @@ export const postTagRelations = relations(postTag, ({ one }) => ({
     references: [tag.id],
   }),
 }));
-
-// Trade Performance
-export const tradePerformance = pgTable("trade_performance", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  postId: text("post_id")
-    .notNull()
-    .references(() => post.id),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id),
-  currentPrice: numeric("current_price").notNull(),
-  returnPercent: numeric("return_percent").notNull(),
-  returnAmount: numeric("return_amount"),
-  status: text("status").notNull(), // 'active', 'win', 'loss', 'breakeven'
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
-
-export const tradePerformanceRelations = relations(
-  tradePerformance,
-  ({ one }) => ({
-    post: one(post, {
-      fields: [tradePerformance.postId],
-      references: [post.id],
-    }),
-    user: one(user, {
-      fields: [tradePerformance.userId],
-      references: [user.id],
-    }),
-  })
-);
 
 // Follow System
 export const follow = pgTable("follow", {
@@ -388,72 +367,24 @@ export const certificationRelations = relations(certification, ({ one }) => ({
   }),
 }));
 
-// Portfolio System
-export const portfolio = pgTable("portfolio", {
+// AI Analysis History
+export const aiAnalysis = pgTable("ai_analysis", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   userId: text("user_id")
     .notNull()
     .references(() => user.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  description: text("description"),
-  isPublic: boolean("is_public").default(false),
+  type: text("type").notNull(), // 'stock' | 'fund'
+  query: text("query").notNull(),
+  result: text("result"), // JSON string or text summary
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
 });
 
-export const portfolioRelations = relations(portfolio, ({ one, many }) => ({
+export const aiAnalysisRelations = relations(aiAnalysis, ({ one }) => ({
   user: one(user, {
-    fields: [portfolio.userId],
+    fields: [aiAnalysis.userId],
     references: [user.id],
-  }),
-  holdings: many(portfolioHolding),
-  snapshots: many(portfolioSnapshot),
-}));
-
-export const portfolioHolding = pgTable("portfolio_holding", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  portfolioId: text("portfolio_id")
-    .notNull()
-    .references(() => portfolio.id, { onDelete: "cascade" }),
-  symbol: text("symbol").notNull(),
-  shares: numeric("shares").notNull(),
-  averageCost: numeric("average_cost").notNull(),
-  createdAt: timestamp("created_at").notNull().defaultNow(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .notNull()
-    .$onUpdate(() => new Date()),
-});
-
-export const portfolioHoldingRelations = relations(portfolioHolding, ({ one }) => ({
-  portfolio: one(portfolio, {
-    fields: [portfolioHolding.portfolioId],
-    references: [portfolio.id],
-  }),
-}));
-
-export const portfolioSnapshot = pgTable("portfolio_snapshot", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  portfolioId: text("portfolio_id")
-    .notNull()
-    .references(() => portfolio.id, { onDelete: "cascade" }),
-  date: timestamp("date").notNull().defaultNow(),
-  totalValue: numeric("total_value").notNull(),
-});
-
-export const portfolioSnapshotRelations = relations(portfolioSnapshot, ({ one }) => ({
-  portfolio: one(portfolio, {
-    fields: [portfolioSnapshot.portfolioId],
-    references: [portfolio.id],
   }),
 }));
 
@@ -537,6 +468,52 @@ export const fundAnalysisRelations = relations(fundAnalysis, ({ one }) => ({
   }),
 }));
 
+// Job Posting System (external job links)
+export const jobPosting = pgTable("job_posting", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  companyId: text("company_id")
+    .notNull()
+    .references(() => user.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description").notNull(),
+  location: text("location").notNull(),
+  type: text("type").notNull(), // 'Full-time', 'Contract', 'Internship'
+  salaryRange: text("salary_range"),
+  externalUrl: text("external_url"), // Link to external application
+  tags: text("tags").array(), // Array of strings
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .notNull()
+    .$onUpdate(() => new Date()),
+});
 
+export const jobPostingRelations = relations(jobPosting, ({ one }) => ({
+  company: one(user, {
+    fields: [jobPosting.companyId],
+    references: [user.id],
+  }),
+}));
 
-
+// User Relations (consolidated)
+export const userRelations = relations(user, ({ many }) => ({
+  posts: many(post),
+  followers: many(follow, {
+    relationName: "followers",
+  }),
+  following: many(follow, {
+    relationName: "following",
+  }),
+  postLikes: many(postLike),
+  comments: many(comment),
+  tournamentParticipants: many(tournamentParticipant),
+  educations: many(education),
+  certifications: many(certification),
+  aiAnalyses: many(aiAnalysis),
+  stockAnalyses: many(stockAnalysis),
+  fundAnalyses: many(fundAnalysis),
+  jobPostings: many(jobPosting),
+}));
